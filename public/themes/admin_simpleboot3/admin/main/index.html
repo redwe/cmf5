@@ -1,0 +1,31 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <div class="grid-item col-md-12" id="thinkcmf-notices-grid">
+        <div class="dashboard-box">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">欢迎光临！</h3>
+                </div>
+                <div class="panel-body home-info">
+                    <ul id="thinkcmf-notices" class="list-unstyled">
+                        <li>
+                            今天是：{:date("Y-m-d h:i:s",time())}<br>
+                            欢迎光临奥创百科管理后台！
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="home-grid">
+        <!-- width of .grid-sizer used for columnWidth -->
+        <div class="grid-sizer"></div>
+
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
