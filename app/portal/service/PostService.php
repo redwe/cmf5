@@ -40,12 +40,17 @@ class PostService
         $field = 'a.*,u.user_login,u.user_nickname,u.user_email';
 
         $category = empty($filter['category']) ? 0 : intval($filter['category']);
+
         if (!empty($category)) {
             $where['b.category_id'] = ['eq', $category];
             array_push($join, [
                 '__PORTAL_CATEGORY_POST__ b', 'a.id = b.post_id'
-            ]);
+            ]);/*
+            array_push($join, [
+                '__PORTAL_CATEGORY__ c', 'b.category_id = c.id'
+            ]);*/
             $field = 'a.*,b.id AS post_category_id,b.list_order,b.category_id,u.user_login,u.user_nickname,u.user_email';
+
         }
 
         $startTime = empty($filter['start_time']) ? 0 : strtotime($filter['start_time']);

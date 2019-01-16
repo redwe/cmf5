@@ -106,6 +106,7 @@ class PortalCategoryModel extends Model
             $tpl = $tpl."<td style='padding-left:20px;'>\$spacer \$name(\$id)</td>
                         <td>\$year</td>
                         <td>\$description</td>
+                        <td>\$teacher</td>
                         <td>\$status_text</td>
                         <td>\$str_action</td>
                     </tr>";

@@ -1032,7 +1032,7 @@ function openIframeLayer(url, title, options) {
         shade: [0.001, '#000000'],
         shadeClose: true,
         area: ['95%', '90%'],
-        move: false,
+        move: true,
         content: url,
         yes: function (index, layero) {
             //do something

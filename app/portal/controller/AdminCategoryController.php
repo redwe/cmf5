@@ -206,7 +206,7 @@ class AdminCategoryController extends AdminBaseController
             $this->error('保存失败!');
         }
 
-        $this->success('保存成功!');
+        $this->success('保存成功!','portal/admin_category/index');
     }
 
     /**
@@ -227,7 +227,7 @@ class AdminCategoryController extends AdminBaseController
         $ids                 = $this->request->param('ids');
         $selectedIds         = explode(',', $ids);
         $portalCategoryModel = new PortalCategoryModel();
-
+        //<td>\$spacer <a href='\$url' target='_blank'>\$name</a></td>
         $tpl = <<<tpl
 <tr class='data-item-tr'>
     <td>
@@ -235,10 +235,11 @@ class AdminCategoryController extends AdminBaseController
                value='\$id' data-name='\$name' \$checked>
     </td>
     <td>\$id</td>
-    <td>\$spacer <a href='\$url' target='_blank'>\$name</a></td>
+    <td>\$spacer \$name</td>
+    <td>\$year</td>
+    <td>\$description</td>
 </tr>
 tpl;
-
         $categoryTree = $portalCategoryModel->adminCategoryTableTree($selectedIds, $tpl);
 
         $where      = ['delete_time' => 0];

@@ -3,6 +3,7 @@
     .pic-list li {
         margin-bottom: 5px;
     }
+    .catenames .btn{ margin-right: 10px; background-color: #abbac3; color: #fff}
 </style>
 <script type="text/html" id="photos-item-tpl">
     <li id="saved-image{id}">
@@ -29,15 +30,15 @@
 <body>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li><a href="{:url('AdminArticle/index')}">文章管理</a></li>
-        <li class="active"><a href="{:url('AdminArticle/add')}">添加文章</a></li>
+        <li><a href="{:url('AdminArticle/index')}">课程管理</a></li>
+        <li class="active"><a href="{:url('AdminArticle/add')}">添加课程</a></li>
     </ul>
     <form action="{:url('AdminArticle/addPost')}" method="post" class="form-horizontal js-ajax-form margin-top-20">
         <div class="row">
             <div class="col-md-9">
                 <table class="table table-bordered">
                     <tr>
-                        <th width="100">分类<span class="form-required">*</span></th>
+                        <th width="20%">选择班次</th>
                         <td>
                             <input class="form-control" type="text" style="width:400px;" required value=""
                                    placeholder="请选择分类" onclick="doSelectCategory();" id="js-categories-name-input"
@@ -47,12 +48,51 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>标题<span class="form-required">*</span></th>
+                        <th>选择的班次</th>
                         <td>
-                            <input class="form-control" type="text" name="post[post_title]"
-                                   id="title" required value="" placeholder="请输入标题"/>
+                            <div class="col-sm-9 catenames"></div>
                         </td>
                     </tr>
+                    <tr>
+                        <th>课程名称</th>
+                        <td>
+                            <input class="form-control" type="text" name="post[post_title]"
+                                   id="title" required value="" placeholder="请输入课程名称"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>市场价</th>
+                        <td><input class="form-control" type="text" name="post[market_price]" id="market_price" value=""
+                                   placeholder="请输入市场价"></td>
+                    </tr>
+                    <tr>
+                        <th>售价</th>
+                        <td><input class="form-control" type="text" name="post[selling_price]" id="selling_price" value=""
+                                   placeholder="请输入售价"></td>
+                    </tr>
+                    <tr>
+                        <th>一年课程金额</th>
+                        <td><input class="form-control" type="text" name="post[year_price1]" id="year_price1" value=""
+                                   placeholder="请输入一年课程金额"></td>
+                    </tr>
+                    <tr>
+                        <th>二年课程金额</th>
+                        <td><input class="form-control" type="text" name="post[year_price2]" id="year_price2" value=""
+                                   placeholder="请输入市场价"></td>
+                    </tr>
+                    <tr>
+                        <th>三年课程金额</th>
+                        <td><input class="form-control" type="text" name="post[year_price3]" id="year_price3" value=""
+                                   placeholder="请输入市场价"></td>
+                    </tr>
+                    <tr>
+                        <th>课程描述</th>
+                        <td>
+                            <textarea class="form-control" name="post[post_excerpt]" style="height: 100px;"
+                                      placeholder="请填写课程描述"></textarea>
+                        </td>
+                    </tr>
+                    <!--
                     <tr>
                         <th>关键词</th>
                         <td>
@@ -73,6 +113,7 @@
                                       placeholder="请填写摘要"></textarea>
                         </td>
                     </tr>
+
                     <tr>
                         <th>内容</th>
                         <td>
@@ -121,6 +162,7 @@
                             <a href="javascript:uploadOne('文件上传','#file-video','video');">上传</a>
                         </td>
                     </tr>
+                    -->
                 </table>
                 <hook name="portal_admin_article_edit_view_main"/>
                 <div class="form-group">
@@ -157,7 +199,7 @@
                                    value="{:date('Y-m-d H:i:s',time())}">
                         </td>
                     </tr>
-
+<!--
                     <tr>
                         <th>文章模板</th>
                     </tr>
@@ -172,6 +214,7 @@
                             </select>
                         </td>
                     </tr>
+                    -->
                 </table>
 
                 <hook name="portal_admin_article_edit_view_right_sidebar"/>
@@ -206,8 +249,8 @@
     function doSelectCategory() {
         var selectedCategoriesId = $('#js-categories-id-input').val();
         openIframeLayer("{:url('AdminCategory/select')}?ids=" + selectedCategoriesId, '请选择分类', {
-            area: ['700px', '400px'],
             btn: ['确定', '取消'],
+            move: true,
             yes: function (index, layero) {
                 //do something
 
@@ -217,8 +260,25 @@
                     layer.msg('请选择分类');
                     return;
                 }
+                //<button class="btn">直播特训班</button>
                 $('#js-categories-id-input').val(selectedCategories.selectedCategoriesId.join(','));
-                $('#js-categories-name-input').val(selectedCategories.selectedCategoriesName.join(' '));
+                $('#js-categories-name-input').val(selectedCategories.selectedCategoriesName.join('、'));
+
+                var selectNames = selectedCategories.selectedCategoriesName.join(',');
+                //console.log(selectNames);
+                var selectstr = '';
+                //alert(selectNames.indexOf(",") != -1);
+                if(selectNames.indexOf(",") != -1){
+                    var selectArray = selectNames.split(",");
+                    for(var i=0;i<selectArray.length;i++){
+                        selectstr += '<button type="button" class="btn">'+selectArray[i]+'</button>';
+                    }
+                }
+                else
+                {
+                    selectstr = '<button type="button" class="btn">'+selectNames+'</button>';
+                }
+                $(".catenames").html(selectstr);
                 //console.log(layer.getFrameIndex(index));
                 layer.close(index); //如果设定了yes回调，需进行手工关闭
             }

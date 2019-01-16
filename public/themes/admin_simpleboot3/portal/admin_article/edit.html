@@ -3,6 +3,7 @@
     .pic-list li {
         margin-bottom: 5px;
     }
+    .catenames .btn{ margin-right: 10px; background-color: #abbac3; color: #fff}
 </style>
 <script type="text/html" id="photos-item-tpl">
     <li id="saved-image{id}">
@@ -29,22 +30,22 @@
 <body>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li><a href="{:url('AdminArticle/index')}">文章管理</a></li>
+        <li><a href="{:url('AdminArticle/index')}">课程管理</a></li>
         <li>
-            <a href="{:url('AdminArticle/add')}">添加文章</a>
+            <a href="{:url('AdminArticle/add')}">添加课程</a>
         </li>
-        <li class="active"><a href="#">编辑文章</a></li>
+        <li class="active"><a href="#">编辑课程</a></li>
     </ul>
-    <form action="{:url('AdminArticle/editPost')}" method="post" class="form-horizontal js-ajax-form margin-top-20">
+    <form action="{:url('AdminArticle/editPost')}" method="post" class="form-horizontal margin-top-20">
         <div class="row">
             <div class="col-md-9">
                 <table class="table table-bordered">
                     <tr>
-                        <th width="100">分类<span class="form-required">*</span></th>
+                        <th width="20%">选择班次</th>
                         <td>
                             <input class="form-control" type="text" style="width:400px;" required
                                    value="{:implode(' ',$post_categories)}"
-                                   placeholder="请选择分类" onclick="doSelectCategory();" id="js-categories-name-input"
+                                   placeholder="请选择课程分类" onclick="doSelectCategory();" id="js-categories-name-input"
                                    readonly/>
                             <input class="form-control" type="hidden" value="{$post_category_ids}"
                                    name="post[categories]"
@@ -52,18 +53,61 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>标题<span class="form-required">*</span></th>
+                        <th>选择的班次</th>
                         <td>
-                            <input id="post-id" type="hidden" name="post[id]" value="{$post.id}">
-                            <input class="form-control" type="text" name="post[post_title]"
-                                   required value="{$post.post_title}" placeholder="请输入标题"/>
+                            <div class="col-sm-9 catenames">
+                                <foreach name="post_categories" item="vo">
+                                    <button type="button" class="btn">{$vo}</button>
+                                </foreach>
+                            </div>
                         </td>
                     </tr>
                     <tr>
+                        <th>课程名称</th>
+                        <td>
+                            <input id="post-id" type="hidden" name="post[id]" value="{$post.id}">
+                            <input class="form-control" type="text" name="post[post_title]"
+                                   required value="{$post.post_title}" placeholder="请输入课程名称"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>市场价</th>
+                        <td><input class="form-control" type="text" name="post[market_price]" id="market_price" value="{$post.market_price}"
+                                   placeholder="请输入市场价"></td>
+                    </tr>
+                    <tr>
+                        <th>售价</th>
+                        <td><input class="form-control" type="text" name="post[selling_price]" id="selling_price" value="{$post.selling_price}"
+                                   placeholder="请输入售价"></td>
+                    </tr>
+                    <tr>
+                        <th>一年课程金额</th>
+                        <td><input class="form-control" type="text" name="post[year_price1]" id="year_price1" value="{$post.year_price1}"
+                                   placeholder="请输入一年课程金额"></td>
+                    </tr>
+                    <tr>
+                        <th>二年课程金额</th>
+                        <td><input class="form-control" type="text" name="post[year_price2]" id="year_price2" value="{$post.year_price2}"
+                                   placeholder="请输入市场价"></td>
+                    </tr>
+                    <tr>
+                        <th>三年课程金额</th>
+                        <td><input class="form-control" type="text" name="post[year_price3]" id="year_price3" value="{$post.year_price3}"
+                                   placeholder="请输入市场价"></td>
+                    </tr>
+                    <tr>
+                        <th>课程描述</th>
+                        <td>
+                            <textarea class="form-control" name="post[post_excerpt]" style="height: 100px;"
+                                      placeholder="请填写摘要">{$post.post_excerpt}</textarea>
+                            <input type="hidden" name="post[post_keywords]" value="{$post['post_keywords']}">
+                        </td>
+                    </tr>
+                    <!--
+                    <tr>
                         <th>关键词</th>
                         <td>
-                            <input class="form-control" type="text" name="post[post_keywords]"
-                                   value="{$post['post_keywords']}" placeholder="请输入关键字">
+                            <input class="form-control" type="text" name="post[post_keywords]" value="{$post['post_keywords']}" placeholder="请输入关键字">
                             <p class="help-block">多关键词之间用英文逗号隔开</p>
                         </td>
                     </tr>
@@ -72,13 +116,6 @@
                         <td>
                             <input class="form-control" type="text" name="post[post_source]"
                                    value="{$post['post_source']}" placeholder="请输入文章来源">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>摘要</th>
-                        <td>
-                            <textarea class="form-control" name="post[post_excerpt]" style="height: 50px;"
-                                      placeholder="请填写摘要">{$post.post_excerpt}</textarea>
                         </td>
                     </tr>
                     <tr>
@@ -162,7 +199,7 @@
                             </notempty>
                             <a href="javascript:uploadOne('文件上传','#file-video','video');">上传</a>
                         </td>
-                    </tr>
+                    </tr>-->
                 </table>
 
                 <hook name="portal_admin_article_edit_view_main"/>
@@ -212,6 +249,7 @@
                         </td>
                     </tr>
                     -->
+                    <!--
                     <tr>
                         <th>状态</th>
                         <php>
@@ -265,6 +303,7 @@
                             </select>
                         </td>
                     </tr>
+                    -->
                 </table>
 
                 <hook name="portal_admin_article_edit_view_right_sidebar"/>
@@ -306,7 +345,7 @@
     function doSelectCategory() {
         var selectedCategoriesId = $('#js-categories-id-input').val();
         openIframeLayer("{:url('AdminCategory/select')}?ids=" + selectedCategoriesId, '请选择分类', {
-            area: ['700px', '400px'],
+            //area: ['700px', '400px'],
             btn: ['确定', '取消'],
             yes: function (index, layero) {
                 //do something
@@ -318,7 +357,23 @@
                     return;
                 }
                 $('#js-categories-id-input').val(selectedCategories.selectedCategoriesId.join(','));
-                $('#js-categories-name-input').val(selectedCategories.selectedCategoriesName.join(' '));
+                $('#js-categories-name-input').val(selectedCategories.selectedCategoriesName.join('、'));
+
+                var selectNames = selectedCategories.selectedCategoriesName.join(',');
+                //console.log(selectNames);
+                var selectstr = '';
+                //alert(selectNames.indexOf(",") != -1);
+                if(selectNames.indexOf(",") != -1){
+                    var selectArray = selectNames.split(",");
+                    for(var i=0;i<selectArray.length;i++){
+                        selectstr += '<button type="button" class="btn">'+selectArray[i]+'</button>';
+                    }
+                }
+                else
+                {
+                    selectstr = '<button type="button" class="btn">'+selectNames+'</button>';
+                }
+                $(".catenames").html(selectstr);
                 //console.log(layer.getFrameIndex(index));
                 layer.close(index); //如果设定了yes回调，需进行手工关闭
             }
