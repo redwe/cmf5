@@ -86,10 +86,20 @@
                                    placeholder="请输入市场价"></td>
                     </tr>
                     <tr>
+                        <th>课程状态</th>
+                        <td>
+                            <select class="form-control" id="post-status-checkbox" name="post[post_status]">
+                                <option value="1">上架</option>
+                                <option value="0">下架</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
                         <th>课程描述</th>
                         <td>
                             <textarea class="form-control" name="post[post_excerpt]" style="height: 100px;"
                                       placeholder="请填写课程描述"></textarea>
+                            <input type="hidden" name="post[post_keywords]" id="keywords" value="">
                         </td>
                     </tr>
                     <!--

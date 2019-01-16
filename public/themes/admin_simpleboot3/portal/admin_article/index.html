@@ -74,11 +74,13 @@
                 </notempty>
                 <th width="50">ID</th>
                 <th>课程名称</th>
-                <th>班次</th>
+                <!--<th>班次</th>-->
                 <th width="100">市场价</th>
                 <th width="100">售价</th>
                 <!--<th width="160">关键字/来源<br>摘要/缩略图</th>-->
-                <th>课程类型</th>
+                <!--<th>课程类型</th>
+                <th>年份</th>-->
+                <th width="80">状态</th>
                 <th width="130">发布时间</th>
                 <th width="190">操作</th>
             </tr>
@@ -107,13 +109,13 @@
                         </notempty>
                         -->
                     </td>
-                    <td>
+                   <!-- <td>
                         <foreach name="vo.categories" item="voo">
                             <span class="label label-default">
                              {$voo.name}
                             </span>&nbsp;
                         </foreach>
-                    </td>
+                    </td>-->
                     <td>{$vo.market_price}</td>
                     <td>{$vo.selling_price}</td>
                    <!-- <td>
@@ -141,10 +143,22 @@
                             <i class="fa fa-close fa-fw"></i>
                         </notempty>
                     </td>-->
-                    <td>
+                    <!--<td>
                         <foreach name="vo.categories" item="voo">
                                {$voo.description}、
                         </foreach>
+                    </td>
+                    <td>
+                        <foreach name="vo.categories" item="voo">
+                            {$voo.year}、
+                        </foreach>
+                    </td>-->
+                    <td>
+                        <notempty name="vo.post_status">
+                            上架
+                            <else/>
+                            下架
+                        </notempty>
                     </td>
                     <td>
                         <empty name="vo.published_time">
@@ -186,11 +200,13 @@
                 </notempty>
                 <th width="50">ID</th>
                 <th>课程名称</th>
-                <th>班次</th>
+                <!--<th>班次</th>-->
                 <th width="100">市场价</th>
                 <th width="100">售价</th>
                 <!--<th width="160">关键字/来源<br>摘要/缩略图</th>-->
-                <th>课程类型</th>
+                <!--<th>课程类型</th>
+                <th>年份</th>-->
+                <th>状态</th>
                 <th width="130">发布时间</th>
                 <th width="190">操作</th>
             </tr>

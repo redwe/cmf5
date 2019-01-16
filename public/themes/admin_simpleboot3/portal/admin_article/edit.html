@@ -96,6 +96,15 @@
                                    placeholder="请输入市场价"></td>
                     </tr>
                     <tr>
+                        <th>课程状态</th>
+                        <td>
+                            <select class="form-control" id="post-status-checkbox" name="post[post_status]">
+                                <option <php>if($post['post_status']==1){ echo ' selected ';}</php> value="1">上架</option>
+                                <option <php>if($post['post_status']==0){ echo ' selected ';}</php> value="0">下架</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
                         <th>课程描述</th>
                         <td>
                             <textarea class="form-control" name="post[post_excerpt]" style="height: 100px;"

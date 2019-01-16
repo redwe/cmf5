@@ -213,7 +213,7 @@ class AdminArticleController extends AdminBaseController
             $data = $this->request->param();
 
             //需要抹除发布、置顶、推荐的修改。
-            unset($data['post']['post_status']);
+            //unset($data['post']['post_status']);
             unset($data['post']['is_top']);
             unset($data['post']['recommended']);
 
