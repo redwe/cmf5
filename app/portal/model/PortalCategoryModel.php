@@ -83,17 +83,36 @@ class PortalCategoryModel extends Model
 
         $newCategories = [];
         foreach ($categories as $item) {
+            $actions = '';
+            $paths = $item['path'];
+            $pathsArray = explode("-",$paths);
+            $pathNum = count($pathsArray);
             $item['parent_id_node'] = ($item['parent_id']) ? ' class="child-of-node-' . $item['parent_id'] . '"' : '';
             $item['style']          = empty($item['parent_id']) ? '' : 'display:none;';
             $item['status_text']    = empty($item['status'])?'隐藏':'显示';
             $item['checked']        = in_array($item['id'], $currentIds) ? "checked" : "";
             $item['url']            = cmf_url('portal/List/index', ['id' => $item['id']]);
-            $item['str_action']     = '<a href="' . url("AdminCategory/add", ["parent" => $item['id']]) . '">添加子分类</a>  <a href="' . url("AdminCategory/edit", ["id" => $item['id']]) . '">' . lang('EDIT') . '</a>  <a class="js-ajax-delete" href="' . url("AdminCategory/delete", ["id" => $item['id']]) . '">' . lang('DELETE') . '</a> ';
+
+            if($pathNum<4){
+                $actions    = '<a href="' . url("AdminCategory/add", ["parent" => $item['id']]) . '">添加子分类</a>';
+            }
+            else
+            {
+                $actions    = '<a class="blue" href="' . url("AdminCategory/add_class", ["id" => $item['id']]) . '">添加课时</a>
+                                <a class="blue" href="' . url("AdminCategory/import_class", ["id" => $item['id']]) . '">导入课时</a>';
+            }
+            $actions .= ' <a href="' . url
+                ("AdminCategory/edit", ["id" => $item['id']]) . '">' . lang('EDIT') . '</a>  <a class="js-ajax-delete" href="' . url("AdminCategory/delete", ["id" => $item['id']]) . '">' . lang('DELETE') . '</a> ';
+
+
+            $item['str_action'] = $actions;
+/*
             if ($item['status']) {
                 $item['str_action'] .= '<a class="js-ajax-dialog-btn" data-msg="您确定隐藏此分类吗" href="' . url('AdminCategory/toggle', ['ids' => $item['id'], 'hide' => 1]) . '">隐藏</a>';
             } else {
                 $item['str_action'] .= '<a class="js-ajax-dialog-btn" data-msg="您确定显示此分类吗" href="' . url('AdminCategory/toggle', ['ids' => $item['id'], 'display' => 1]) . '">显示</a>';
             }
+*/
             array_push($newCategories, $item);
         }
 

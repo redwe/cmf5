@@ -181,12 +181,14 @@ class AdminArticleController extends AdminBaseController
         $portalPostModel = new PortalPostModel();
         $post            = $portalPostModel->where('id', $id)->find();
         $postCategories  = $post->categories()->alias('a')->column('a.name', 'a.id');
-        $postCategoryIds = implode(',', array_keys($postCategories));
+        $post_categories0 = array_keys($postCategories);
+        $postCategoryIds = implode(',', $post_categories0);
 
         $themeModel        = new ThemeModel();
         $articleThemeFiles = $themeModel->getActionThemeFiles('portal/Article/index');
         $this->assign('article_theme_files', $articleThemeFiles);
         $this->assign('post', $post);
+        //$this->assign('post_categories0', $post_categories0);
         $this->assign('post_categories', $postCategories);
         $this->assign('post_category_ids', $postCategoryIds);
 

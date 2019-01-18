@@ -1,0 +1,97 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('AdminCategory/index')}">分类管理</a></li>
+        <li class="active"><a href="{:url('AdminCategory/add')}">添加分类</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <div class="col-md-9">
+            <form  action="{:url('AdminCategory/add_class')}" method="post">
+
+                <div class="formData">
+                <input type="hidden" id="id" name="id" value="{$id}">
+                <div class="form-group">
+                    <label for="classname"><span class="form-required">*</span>所属分类</label>
+                    <div>
+                        <input type="text"  name="classname" readonly value="{$data.name}" id="classname"  class="form-control" />
+                    </div>
+                </div>
+
+                <if condition="$ks_num gt 1">
+                    <foreach name="ks_data" item="kd">
+                        <div class="form-group kss{$key}">
+                            <label for="classname">课时{$key+1}名称</label>
+                            <div>
+                                <input type="text"  name="ks[{$key+1}]" value="{$kd.lession_name}" placeholder="课时{$key+1}名称" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="form-group kss{$key}">
+                            <label for="classname">课时{$key+1}地址</label>
+                            <div>
+                                <input type="text"  name="ksd[{$key+1}]" value="{$kd.lession_url}" placeholder="课时{$key+1}地址" class="form-control" />
+                            </div>
+                        </div>
+                    </foreach>
+                </if>
+                </div>
+                  <div class="form-group">
+                        <label class="col-sm-3 control-label no-padding-right" for="classname"></label>
+                        <div class="col-sm-9">
+                            <button class="btn btn-success addBtn">添加一条</button>
+                            <button class="btn btn-danger delBtn" >删除一条</button>
+                        </div>
+                    </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary js-ajax-submit"> 保 存 </button>
+                    <a class="btn btn-default" href="{:url('AdminCategory/index')}">{:lang('BACK')}</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+<script>
+
+    $(function () {
+        var c_num = '{$ks_num}';
+        $('.addBtn').click(function () {
+            var html = createInput(c_num);
+            $('.formData').append(html);
+            c_num++;
+            return false;
+        });
+
+        $('.delBtn').click(function () {
+            if(c_num == 1){
+                alert('没有删除的课时！请先添加一条');
+                return false;
+            }
+            $('.kss'+(c_num-1)).remove();
+            c_num--;
+            return false;
+        });
+    });
+
+    function createInput(num) {
+        var html = '<div class="form-group kss'+num+'">'+
+                '<label>课时'+num+'名称</label>'+
+                '<div>'+
+                '<input type="text"  name="ks['+num+']" placeholder="请输入课时'+num+'名称" class="form-control" />'+
+                '</div>'+
+                '</div>'+
+                '<div class="form-group kss'+num+'">'+
+                '<label>课时'+num+'地址</label>'+
+                '<div>'+
+                '<input type="text"  name="ksd['+num+']" placeholder="请输入课时'+num+'地址" class="form-control" />'+
+                '</div>'+
+                '</div>';
+        return html;
+    }
+
+</script>
+</body>
+</html>

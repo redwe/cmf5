@@ -57,7 +57,7 @@
                         <td>
                             <div class="col-sm-9 catenames">
                                 <foreach name="post_categories" item="vo">
-                                    <button type="button" class="btn">{$vo}</button>
+                                    <button type="button" data-id="{$key}" class="btn">{$vo}</button>
                                 </foreach>
                             </div>
                         </td>
@@ -369,18 +369,19 @@
                 $('#js-categories-name-input').val(selectedCategories.selectedCategoriesName.join('、'));
 
                 var selectNames = selectedCategories.selectedCategoriesName.join(',');
+                var selectIds = selectedCategories.selectedCategoriesId;
                 //console.log(selectNames);
                 var selectstr = '';
                 //alert(selectNames.indexOf(",") != -1);
                 if(selectNames.indexOf(",") != -1){
                     var selectArray = selectNames.split(",");
                     for(var i=0;i<selectArray.length;i++){
-                        selectstr += '<button type="button" class="btn">'+selectArray[i]+'</button>';
+                        selectstr += '<button type="button" data-id="'+selectIds[i]+'" class="btn">'+selectArray[i]+'</button>';
                     }
                 }
                 else
                 {
-                    selectstr = '<button type="button" class="btn">'+selectNames+'</button>';
+                    selectstr = '<button type="button" data-id="'+selectIds[i]+'" class="btn">'+selectNames+'</button>';
                 }
                 $(".catenames").html(selectstr);
                 //console.log(layer.getFrameIndex(index));

@@ -259,6 +259,7 @@
     function doSelectCategory() {
         var selectedCategoriesId = $('#js-categories-id-input').val();
         openIframeLayer("{:url('AdminCategory/select')}?ids=" + selectedCategoriesId, '请选择分类', {
+            area: ['80%', '80%'],
             btn: ['确定', '取消'],
             move: true,
             yes: function (index, layero) {
@@ -275,18 +276,19 @@
                 $('#js-categories-name-input').val(selectedCategories.selectedCategoriesName.join('、'));
 
                 var selectNames = selectedCategories.selectedCategoriesName.join(',');
+                var selectIds = selectedCategories.selectedCategoriesId;
                 //console.log(selectNames);
                 var selectstr = '';
                 //alert(selectNames.indexOf(",") != -1);
                 if(selectNames.indexOf(",") != -1){
                     var selectArray = selectNames.split(",");
                     for(var i=0;i<selectArray.length;i++){
-                        selectstr += '<button type="button" class="btn">'+selectArray[i]+'</button>';
+                        selectstr += '<button type="button" data-id="'+selectIds[i]+'" class="btn">'+selectArray[i]+'</button>';
                     }
                 }
                 else
                 {
-                    selectstr = '<button type="button" class="btn">'+selectNames+'</button>';
+                    selectstr = '<button type="button" data-id="'+selectIds+'" class="btn">'+selectNames+'</button>';
                 }
                 $(".catenames").html(selectstr);
                 //console.log(layer.getFrameIndex(index));

@@ -15,6 +15,7 @@ use cmf\controller\AdminBaseController;
 use app\portal\model\PortalCategoryModel;
 use think\Db;
 use app\admin\model\ThemeModel;
+use PHPExcel;
 
 
 class AdminCategoryController extends AdminBaseController
@@ -127,6 +128,156 @@ class AdminCategoryController extends AdminBaseController
 
     }
 
+    public function add_class(){
+        $id = $this->request->param('id');
+
+        if(empty($id)){
+            $this->error('参数错误');
+        }
+        $data = Db::name("portal_category")->where(array("id"=>$id))->find();
+        if(empty($data)){
+            $this->error('分类错误');
+        }
+
+        if($this->request->isPost()){
+
+            $save_data = [];
+            $ks = $_POST['ks'];
+            $ksd = $_POST['ksd'];
+            $path = $data['path'];
+            $tm = time();
+            $s = 0;
+            //先删除原来的课时数据
+            Db::name("post_lession")->where(array('typeid'=>$id))->delete();
+
+            for ($i=0;$i<count($ks);$i++){
+                $save_data[$i] = array(
+                    'typeid'=>$id,
+                    'typestr'=>$path,
+                    'status'=>1,
+                    'created_time'=>$tm,
+
+                );
+                $save_data[$i]['lession_name'] = $ks[$i+1];
+                $save_data[$i]['lession_url'] = $ksd[$i+1];
+                $s = Db::name("post_lession")->insert($save_data[$i]);
+            }
+            //$s = Db::name("post_lession")->insert($save_data);
+
+            if($s){
+                $this->success('添加课时成功',url("portal/admin_category/add_class",array("id"=>$id)));
+            }else{
+                $this->error('添加课时失败',url("portal/admin_category/add_class",array("id"=>$id)));
+            }
+
+            exit();
+        }
+
+        $ks_num = 1;
+        //查询改分类下面是否存在课时
+        $ks_data = Db::name("post_lession")->where(array('typeid'=>$id))->order('id asc')->select();
+        if($ks_data){
+            $ks_num = count($ks_data)+1;
+        }
+        $this->assign('ks_data',$ks_data);
+        $this->assign('ks_num',$ks_num);
+
+        $this->assign('data', $data);
+        $this->assign('id', $id);
+        return $this->fetch();
+    }
+
+
+    public function import_class(){
+        $id = $this->request->param('id');
+
+        if(empty($id)){
+            $this->error('参数错误');
+        }
+        $data = Db::name("portal_category")->where(array("id"=>$id))->find();
+        if(empty($data)){
+            $this->error('分类错误');
+        }
+
+        if($this->request->isPost()){
+            // exl格式，否则重新上传
+            // if($files['type'] !='application/vnd.ms-excel'){
+            //     $this->error('不是Excel文件，请重新上传');
+            // }
+            // 上传
+            $s = 0;
+            $typestr = $data['path'];
+            $file = request()->file('exl');
+            $rootUrl = $_SERVER['DOCUMENT_ROOT'];
+            if($file){
+                $savePath = ROOT_PATH . 'public' . DS . 'upload/excel/';
+                $info = $file->move($savePath);
+                if($info){
+                    // 成功上传后 获取上传信息
+                    // 输出 jpg
+                    $exts = $info->getExtension();
+                    // 输出 20160820/42a79759f284b767dfcb2a0197904287.jpg
+                    $file_path = $info->getSaveName();
+                    // 输出 42a79759f284b767dfcb2a0197904287.jpg
+                    $file_name = $info->getFilename();
+
+                    $objPHPExcel = new \PHPExcel();
+                    $path = $savePath.$file_path;
+                    //文件的扩展名
+                    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                    if ($ext == 'xlsx') {
+                        $objReader = \PHPExcel_IOFactory::createReader('Excel2007');
+                        $objPHPExcel = $objReader->load($path, 'utf-8');
+                    } elseif ($ext == 'xls') {
+                        $objReader = \PHPExcel_IOFactory::createReader('Excel5');
+                        $objPHPExcel = $objReader->load($path, 'utf-8');
+                    }
+
+                    $sheet = $objPHPExcel->getSheet(0);
+                    $highestRow = $sheet->getHighestRow(); // 取得总行数
+                    $highestColumn = $sheet->getHighestColumn(); // 取得总列数
+                    $ar = array();
+                    $i = 0;
+                    $importRows = 0;
+
+                    //先删除原来的课时数据
+                    Db::name("post_lession")->where(array('typeid'=>$id))->delete();
+
+                    $datas['typeid'] = $id;   //需要导入的分类id
+                    $datas['status'] = 1;
+                    $datas['created_time'] = time();
+                    $datas['typestr'] = $typestr;
+
+                    for ($j = 2; $j <= $highestRow; $j++) {
+                        $importRows++;
+
+                        $datas['lession_name'] = (string)$objPHPExcel->getActiveSheet()->getCell("A$j")->getValue();   //需要导入的媒体名称
+                        $datas['lession_url'] = (string)$objPHPExcel->getActiveSheet()->getCell("B$j")->getValue();   //需要导入的媒体地址
+                        $datas['mediaid'] = (string)$objPHPExcel->getActiveSheet()->getCell("C$j")->getValue();   //需要导入的媒体ID
+                        $datas['timelength'] = (string)$objPHPExcel->getActiveSheet()->getCell("D$j")->getValue();//需要导入的媒体时长
+
+                        $s = Db::name("post_lession")->insert($datas);
+                    }
+                }else{
+                    // 上传失败获取错误信息
+                    $msg = $file->getError();
+                }
+            }
+
+            if($s){
+                $this->success('添加课时成功');
+            }else{
+                $this->error('添加课时失败');
+            }
+            exit();
+        }
+
+        $this->assign('data', $data);
+        $this->assign('id', $id);
+        return $this->fetch();
+    }
+
+
     /**
      * 编辑文章分类
      * @adminMenu(
@@ -229,19 +380,17 @@ class AdminCategoryController extends AdminBaseController
         $portalCategoryModel = new PortalCategoryModel();
         //<td>\$spacer <a href='\$url' target='_blank'>\$name</a></td>
         $tpl = <<<tpl
-<tr class='data-item-tr'>
-    <td>
+<tr id='node-\$id' \$parent_id_node style='\$style' data-parent_id='\$parent_id' data-id='\$id'>
+    <td style='padding-left:20px;'>\$spacer \$name(\$id)</td>
+    <td>\$year</td>
+    <td>\$description</td>
+     <td>
         <input type='checkbox' class='js-check' data-yid='js-check-y' data-xid='js-check-x' name='ids[]'
                value='\$id' data-name='\$name' \$checked>
     </td>
-    <td>\$id</td>
-    <td>\$spacer \$name</td>
-    <td>\$year</td>
-    <td>\$description</td>
 </tr>
 tpl;
         $categoryTree = $portalCategoryModel->adminCategoryTableTree($selectedIds, $tpl);
-
         $where      = ['delete_time' => 0];
         $categories = $portalCategoryModel->where($where)->select();
 

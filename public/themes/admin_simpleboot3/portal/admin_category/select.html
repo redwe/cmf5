@@ -6,15 +6,14 @@
         <table class="table table-hover table-bordered table-list" id="menus-table">
             <thead>
             <tr>
+                <th>分类名称</th>
+                <th>年份</th>
+                <th>课程类型</th>
                 <th width="16">
                     <label>
                         <input type="checkbox" class="js-check-all" data-direction="x" data-checklist="js-check-x">
                     </label>
                 </th>
-                <th width="50">ID</th>
-                <th>分类名称</th>
-                <th>年份</th>
-                <th>课程类型</th>
             </tr>
             </thead>
             <tbody>
@@ -44,7 +43,7 @@
         Wind.use('treeTable', function () {
             $("#menus-table").treeTable({
                 indent: 20,
-                initialState: 'expanded'
+                initialState: 'collapsed'        //展开：expanded，关闭：collapsed
             });
         });
     });

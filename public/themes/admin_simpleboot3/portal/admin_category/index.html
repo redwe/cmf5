@@ -1,4 +1,10 @@
 <include file="public@header"/>
+<style>
+    a{ text-decoration: none}
+    .blue{ color: #336699}
+    .red{ color: #996633}
+    .green{ color: #339966}
+</style>
 </head>
 <body>
 <div class="wrap js-check-wrap">
@@ -6,13 +12,13 @@
         <li class="active"><a href="{:url('AdminCategory/index')}">分类管理</a></li>
         <li><a href="{:url('AdminCategory/add')}">添加分类</a></li>
     </ul>
-    <form class="well form-inline margin-top-20" method="post" action="{:url('AdminCategory/index')}">
-        分类名称:
-        <input type="text" class="form-control" name="keyword" style="width: 200px;"
-               value="{$keyword|default=''}" placeholder="请输入分类名称">
-        <input type="submit" class="btn btn-primary" value="搜索"/>
-        <a class="btn btn-danger" href="{:url('AdminCategory/index')}">清空</a>
-    </form>
+    <!---- <form class="well form-inline margin-top-20" method="post" action="{:url('AdminCategory/index')}">
+         分类名称:
+         <input type="text" class="form-control" name="keyword" style="width: 200px;"
+                value="{$keyword|default=''}" placeholder="请输入分类名称">
+         <input type="submit" class="btn btn-primary" value="搜索"/>
+         <a class="btn btn-danger" href="{:url('AdminCategory/index')}">清空</a>
+    </form>-->
 
     <form method="post" class="js-ajax-form" action="{:url('AdminCategory/listOrder')}">
         <div class="table-actions">
@@ -41,7 +47,7 @@
                     <th>描述</th>
                     <th>主讲老师</th>
                     <th>状态</th>
-                    <th width="200">操作</th>
+                    <th width="300">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -59,7 +65,7 @@
                     <th>描述</th>
                     <th>主讲老师</th>
                     <th>状态</th>
-                    <th width="200">操作</th>
+                    <th width="300">操作</th>
                 </tr>
                 </tfoot>
             </table>
@@ -67,29 +73,26 @@
             <table class="table table-hover table-bordered table-list">
                 <thead>
                 <tr>
-                    <th width="16"><label><input type="checkbox" class="js-check-all"
-                                                 data-direction="x"
-                                                 data-checklist="js-check-x"></label></th>
-                    <th width="50">排序</th>
-                    <th width="50">ID</th>
+                    <!--<th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
+                                                                            data-direction="x"
+                                                                            data-checklist="js-check-x"></label></th>
+                    <!--<th width="50">排序</th>-->
+                    <!--<th width="50">ID</th>-->
                     <th>分类名称</th>
+                    <th>年份</th>
                     <th>描述</th>
+                    <th>主讲老师</th>
                     <th>状态</th>
-                    <th width="200">操作</th>
+                    <th width="300">操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 <foreach name="categories" item="vo">
                     <tr>
-                        <td><input
-                                type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x"
-                                name="ids[]" value="{$vo.id}"></td>
-                        <td><input name="list_orders[{$vo.id}]" type="text" size="3" value="{$vo.list_order}"
-                                   class="input-order"></td>
-                        <td>{$vo.id}</td>
-                        <td><a href="{cmf_url('portal/List/index', ['id' => $vo['id']])}" target="_blank">{$vo.name}</a>
-                        </td>
+                        <td>{$vo.name}({$vo.id})</td>
+                        <td>{$vo.year}</td>
                         <td>{$vo.description}</td>
+                        <td>{$vo.teacher}</td>
                         <td>{$vo.status?'显示':'隐藏'}</td>
                         <td>
                             <a href="{:url('AdminCategory/add', ['parent' => $vo.id])}">添加子分类</a>
@@ -108,15 +111,17 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <th width="16"><label><input type="checkbox" class="js-check-all"
-                                                 data-direction="x"
-                                                 data-checklist="js-check-x"></label></th>
-                    <th width="50">排序</th>
-                    <th width="50">ID</th>
-                    <th>分类名称</th>
+                    <!--<th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
+                                                                            data-direction="x"
+                                                                            data-checklist="js-check-x"></label></th>
+                    <!--<th width="50">排序</th>-->
+                    <!--<th width="50">ID</th>-->
+                    <th><span style="padding-left: 20px" class="expander"></span>分类名称</th>
+                    <th>年份</th>
                     <th>描述</th>
+                    <th>主讲老师</th>
                     <th>状态</th>
-                    <th width="200">操作</th>
+                    <th width="300">操作</th>
                 </tr>
                 </tfoot>
             </table>
