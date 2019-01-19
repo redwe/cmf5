@@ -16,6 +16,7 @@ use app\portal\model\PortalCategoryModel;
 use think\Db;
 use app\admin\model\ThemeModel;
 use PHPExcel;
+use think\Request;
 
 
 class AdminCategoryController extends AdminBaseController
@@ -128,6 +129,7 @@ class AdminCategoryController extends AdminBaseController
 
     }
 
+    //添加课时
     public function add_class(){
         $id = $this->request->param('id');
 
@@ -187,7 +189,7 @@ class AdminCategoryController extends AdminBaseController
         return $this->fetch();
     }
 
-
+//导入课时
     public function import_class(){
         $id = $this->request->param('id');
 
@@ -208,7 +210,7 @@ class AdminCategoryController extends AdminBaseController
             $s = 0;
             $typestr = $data['path'];
             $file = request()->file('exl');
-            $rootUrl = $_SERVER['DOCUMENT_ROOT'];
+            //$rootUrl = $_SERVER['DOCUMENT_ROOT'];
             if($file){
                 $savePath = ROOT_PATH . 'public' . DS . 'upload/excel/';
                 $info = $file->move($savePath);
@@ -278,6 +280,77 @@ class AdminCategoryController extends AdminBaseController
     }
 
 
+    //添加讲义
+    public function addjy(){
+
+        $id = $this->request->param('id');
+
+        if(empty($id)){
+            $this->error('参数错误');
+        }
+        $data = Db::name("portal_category")->where(array("id"=>$id))->find();
+        if(empty($data)){
+            $this->error('分类错误');
+        }
+
+        if($this->request->isPost()) {
+            $s = 0;
+            $ks = [];
+            $old = '';
+            $k1 = 0;
+            $k2 = 0;
+            if (isset($_POST['ks'])) {
+                $ks = $_POST['ks'];
+                $k1 = count($ks);
+            }
+            if (isset($_POST['old'])) {
+                $old = $_POST['old'];
+                $k2 = count($old);
+            }
+            Db::name('jylist')->where(array('tid' => $id))->delete();
+            for ($i = 0; $i < $k1; $i++) {
+                    $save_data[$i] = array(
+                        'tid' => $id,
+                        'create_time' => date('Y-m-d H:i:s'),
+                    );
+                    $save_data[$i]['name'] = $ks[$i + 1];
+
+                    $file = request()->file('ksd' . ($i + 1));
+                    if ($file) {
+                        $savePath = ROOT_PATH . 'public' . DS . '/upload/jianyi/';
+                        $info = $file->move($savePath);
+                        $fileurl = $info->getSaveName();
+                        $fileurl = str_replace("\\","/",$fileurl);
+                        $save_data[$i]['url'] = 'jianyi/' . $fileurl;
+                    }
+                    else
+                    {
+                        $save_data[$i]['url'] = $old[$i + 1];
+                    }
+                    //先删除原来的课时数据
+                    $s = Db::name('jylist')->insert($save_data[$i]);
+              }
+                if ($s)
+                {
+                    $this->success('添加讲义成功');
+                }
+                else
+                {
+                    $this->error('添加讲义失败');
+                }
+            exit();
+        }
+        $ks_num = 1;
+        //查询改分类下面是否存在课时
+        $ks_data = Db::name('jylist')->where(array('tid'=>$id))->order('id asc')->select();
+        if($ks_data){
+            $ks_num = count($ks_data)+1;
+        }
+        $this->assign('ks_data',$ks_data);
+        $this->assign('ks_num',$ks_num);
+        $this->assign('data',$data);
+        return $this->fetch();
+    }
     /**
      * 编辑文章分类
      * @adminMenu(

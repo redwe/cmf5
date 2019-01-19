@@ -99,7 +99,8 @@ class PortalCategoryModel extends Model
             else
             {
                 $actions    = '<a class="blue" href="' . url("AdminCategory/add_class", ["id" => $item['id']]) . '">添加课时</a>
-                                <a class="blue" href="' . url("AdminCategory/import_class", ["id" => $item['id']]) . '">导入课时</a>';
+                                <a class="blue" href="' . url("AdminCategory/import_class", ["id" => $item['id']]) . '">导入课时</a>
+                                <a class="blue" href="' . url("AdminCategory/addjy", ["id" => $item['id']]) . '">添加讲义</a>';
             }
             $actions .= ' <a href="' . url
                 ("AdminCategory/edit", ["id" => $item['id']]) . '">' . lang('EDIT') . '</a>  <a class="js-ajax-delete" href="' . url("AdminCategory/delete", ["id" => $item['id']]) . '">' . lang('DELETE') . '</a> ';
