@@ -166,19 +166,19 @@ class SettingController extends AdminBaseController
 
             $userId = cmf_get_current_admin_id();
 
-            $admin = Db::name('user')->where(["id" => $userId])->find();
+            $admin = Db::name('admin')->where(["id" => $userId])->find();
 
             $oldPassword = $data['old_password'];
             $password    = $data['password'];
             $rePassword  = $data['re_password'];
 
-            if (cmf_compare_password($oldPassword, $admin['user_pass'])) {
+            if (cmf_compare_password($oldPassword, $admin['password'])) {
                 if ($password == $rePassword) {
 
-                    if (cmf_compare_password($password, $admin['user_pass'])) {
+                    if (cmf_compare_password($password, $admin['password'])) {
                         $this->error("新密码不能和原始密码相同！");
                     } else {
-                        Db::name('user')->where('id', $userId)->update(['user_pass' => cmf_password($password)]);
+                        Db::name('user')->where('id', $userId)->update(['password' => cmf_password($password)]);
                         $this->success("密码修改成功！");
                     }
                 } else {

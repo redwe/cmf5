@@ -1,0 +1,46 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+        <div class="btn-group" id="menuToolbar" role="group" style="margin-bottom: 5px;">
+            <a data-toggle="modal" href="{:url('admin/add_ment')}"  class="btn btn-outline btn-default addBtn">
+                <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>添加部门
+            </a>
+        </div>
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>部门名称</th>
+                <th>部门负责人</th>
+                <th>联系方式</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <volist name="departs" id="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.department}</td>
+                    <td>{$vo.username}</td>
+                    <td>{$vo.phone}</td>
+                    <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                            <a class="green" href="{:url('admin/edit_ment',array('id'=>$vo['id']))}" title="编辑">
+                                编辑
+                            </a>
+                            <a class="red" href="{:url('admin/del_ment',array('id'=>$vo['id']))}" title="删除">
+                                删除
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </volist>
+            </tbody>
+        </table>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

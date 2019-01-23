@@ -1,0 +1,53 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:url('admin/department')}">部门管理</a></li>
+			<li class="active"><a href="{:url('admin/edit_ment')}">编辑部门</a></li>
+		</ul>
+        <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('admin/edit_ment')}">
+            <input type="hidden" name="id" value="{$departs.id}">
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" >部门名称</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" name="department" id="department" placeholder="请输入部门名称" value="{$departs.department}"
+                           class="form-control"  />
+                </div>
+            </div>
+            <div class="space-4"></div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" >联系人</label>
+                <div class="col-sm-6">
+                    <input type="text" name="username" id="username" placeholder="请输入部门联系人" value="{$departs.username}"
+                           class="form-control"  />
+                </div>
+            </div>
+
+            <div class="space-4"></div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" >联系电话</label>
+                <div class="col-sm-6">
+                    <input type="text" name="phone" id="phone" placeholder="请输入联系电话" value="{$departs.phone}"
+                           class="form-control"   />
+                </div>
+            </div>
+            <div class="space-4"></div>
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    &nbsp; &nbsp; &nbsp;
+                    <button class="btn" type="reset">
+                        <i class="icon-undo bigger-110"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

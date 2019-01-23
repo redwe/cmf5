@@ -2,9 +2,18 @@
 </head>
 <body>
 <div class="wrap js-check-wrap">
+    <php>
+        if($type==1){
+            $strname = '讲义';
+        }
+        else
+        {
+            $strname = '真题';
+        }
+    </php>
     <ul class="nav nav-tabs">
         <li><a href="{:url('AdminCategory/index')}">分类管理</a></li>
-        <li class="active"><a href="#">添加讲义</a></li>
+        <li class="active"><a href="#">添加{$strname}</a></li>
     </ul>
     <div class="row margin-top-20">
         <div class="col-md-9">
@@ -12,7 +21,7 @@
             <form class="form-horizontal"  role="form" method="POST" id="add_customer" enctype="multipart/form-data" >
                 <div class="form-group formData">
                     <input type="hidden" name="id" value="{$data.id}">
-
+                    <input type="hidden" name="type" value="{$type}">
                         <label class="col-sm-3 control-label no-padding-right" for="classname"><span class="form-required">*</span>所属分类</label>
                     <div class="col-sm-9">
                             <input type="text"  name="classname" readonly value="{$data.name}" id="classname"  class="form-control" />
@@ -21,19 +30,19 @@
                     <if condition="$ks_num gt 1">
                         <foreach name="ks_data" item="kd">
                             <div class="form-group kss{$key+1}">
-                                <label class="col-sm-3 control-label no-padding-right" for="classname">讲义{$key+1}名称</label>
+                                <label class="col-sm-3 control-label no-padding-right" for="classname">{$strname}{$key+1}名称</label>
                                 <div class="col-sm-9">
                                     <input type="text"  name="ks[{$key+1}]" value="{$kd.name}" placeholder="课时{$key+1}名称" class="form-control"  />
                                 </div>
                             </div>
                             <div class="form-group kss{$key+1}">
-                                <label class="col-sm-3 control-label no-padding-right" for="classname">讲义{$key+1}地址</label>
+                                <label class="col-sm-3 control-label no-padding-right" for="classname">{$strname}{$key+1}地址</label>
                                 <div class="col-sm-9">
                                     <input type="text"  readonly name="old[{$key+1}]" value="{$kd.url}" placeholder="课时{$key+1}地址" class="form-control"  />
                                 </div>
                             </div>
                             <div class="form-group kss{$key+1}">
-                                <label class="col-sm-3 control-label no-padding-right" for="classname">更新讲义{$key+1}地址</label>
+                                <label class="col-sm-3 control-label no-padding-right" for="classname">更新{$strname}{$key+1}地址</label>
                                 <div class="col-sm-9">
                                     <input type="file"  name="ksd{$key+1}" value="{$kd.url}" placeholder="课时{$key+1}地址" />
                                 </div>
@@ -63,6 +72,7 @@
 </div>
 <script type="text/javascript" src="__STATIC__/js/admin.js"></script>
 <script>
+    var strname = '{$strname}';
     $(function () {
         var c_num = '{$ks_num}';
         $('.addBtn').click(function () {
@@ -73,7 +83,7 @@
         });
         $('.delBtn').click(function () {
             if(c_num == 1){
-                alert('没有删除的讲义！请先添加一条');
+                alert('没有删除的'+strname+'！请先添加一条');
                 return false;
             }
             $('.kss'+(c_num-1)).next('hr').remove();
@@ -84,15 +94,15 @@
     });
     function createInput(num) {
         var html = '<div class="form-group kss'+num+'">'+
-                '<label class="col-sm-3 control-label no-padding-right" >讲义'+num+'名称</label>'+
+                '<label class="col-sm-3 control-label no-padding-right" >'+strname+num+'名称</label>'+
                 '<div class="col-sm-9">'+
-                '<input type="text"  name="ks['+num+']" placeholder="请输入讲义'+num+'名称" class="form-control" />'+
+                '<input type="text"  name="ks['+num+']" placeholder="请输入'+strname+num+'名称" class="form-control" />'+
                 '</div>'+
                 '</div>'+
                 '<div class="form-group kss'+num+'">'+
-                '<label class="col-sm-3 control-label no-padding-right">讲义'+num+'地址</label>'+
+                '<label class="col-sm-3 control-label no-padding-right">'+strname+num+'地址</label>'+
                 '<div class="col-sm-9">'+
-                '<input type="file"  name="ksd'+num+'" placeholder="请输入讲义'+num+'地址" />'+
+                '<input type="file"  name="ksd'+num+'" placeholder="请输入'+strname+num+'地址" />'+
                 '</div>'+
                 '</div><hr>';
         return html;

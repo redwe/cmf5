@@ -81,16 +81,11 @@ class PublicController extends AdminBaseController
         if (empty($pass)) {
             $this->error(lang('PASSWORD_REQUIRED'));
         }
-        if (strpos($name, "@") > 0) {//邮箱登陆
-            $where['user_email'] = $name;
-        } else {
-            $where['user_login'] = $name;
-        }
+        $where['nickname'] = $name;
+        $result = Db::name('admin')->where($where)->find();
 
-        $result = Db::name('user')->where($where)->find();
-
-        if (!empty($result) && $result['user_type'] == 1) {
-            if (cmf_compare_password($pass, $result['user_pass'])) {
+        if (!empty($result)) {
+            if (cmf_compare_password($pass, $result['password'])) {
                 $groups = Db::name('RoleUser')
                     ->alias("a")
                     ->join('__ROLE__ b', 'a.role_id =b.id')
@@ -101,14 +96,14 @@ class PublicController extends AdminBaseController
                 }
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
-                session('name', $result["user_login"]);
-                $result['last_login_ip']   = get_client_ip(0, true);
-                $result['last_login_time'] = time();
+                session('name', $result["username"]);
+                $result['loginip']   = get_client_ip(0, true);
+                $result['logintime'] = time();
                 $token                     = cmf_generate_user_token($result["id"], 'web');
                 if (!empty($token)) {
                     session('token', $token);
                 }
-                Db::name('user')->update($result);
+                Db::name('admin')->update($result);
                 cookie("admin_username", $name, 3600 * 24 * 30);
                 session("__LOGIN_BY_CMF_ADMIN_PW__", null);
                 $this->success(lang('LOGIN_SUCCESS'), url("admin/Index/index"));

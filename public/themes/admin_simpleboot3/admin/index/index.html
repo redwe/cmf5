@@ -223,9 +223,9 @@
                                 <a href="javascript:openapp('{:url('setting/site')}','index_site','{:lang('ADMIN_SETTING_SITE')}');"><i
                                         class="fa fa-cog"></i> {:lang('ADMIN_SETTING_SITE')}</a></li>
                         </if>
-                        <if condition="cmf_auth_check(cmf_get_current_admin_id(),'admin/user/userinfo')">
+                        <if condition="cmf_auth_check(cmf_get_current_admin_id(),'admin/admin/userinfo')">
                             <li>
-                                <a href="javascript:openapp('{:url('user/userinfo')}','index_userinfo','{:lang('ADMIN_USER_USERINFO')}');"><i
+                                <a href="javascript:openapp('{:url('admin/userinfo')}','index_userinfo','{:lang('ADMIN_USER_USERINFO')}');"><i
                                         class="fa fa-user"></i> {:lang('ADMIN_USER_USERINFO')}</a></li>
                         </if>
                         <if condition="cmf_auth_check(cmf_get_current_admin_id(),'admin/Setting/password')">

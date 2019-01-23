@@ -95,12 +95,16 @@ class PortalCategoryModel extends Model
 
             if($pathNum<4){
                 $actions    = '<a href="' . url("AdminCategory/add", ["parent" => $item['id']]) . '">添加子分类</a>';
+                if($pathNum==3){
+                    $actions    = '<a href="' . url("AdminCategory/add", ["parent" => $item['id']]) . '">添加子分类</a>
+                                    <a class="blue" href="' . url("AdminCategory/addjy", ["id" => $item['id'],"type"=>2]) . '">添加真题</a>';
+                }
             }
             else
             {
                 $actions    = '<a class="blue" href="' . url("AdminCategory/add_class", ["id" => $item['id']]) . '">添加课时</a>
                                 <a class="blue" href="' . url("AdminCategory/import_class", ["id" => $item['id']]) . '">导入课时</a>
-                                <a class="blue" href="' . url("AdminCategory/addjy", ["id" => $item['id']]) . '">添加讲义</a>';
+                                <a class="blue" href="' . url("AdminCategory/addjy", ["id" => $item['id'],"type"=>1]) . '">添加讲义</a>';
             }
             $actions .= ' <a href="' . url
                 ("AdminCategory/edit", ["id" => $item['id']]) . '">' . lang('EDIT') . '</a>  <a class="js-ajax-delete" href="' . url("AdminCategory/delete", ["id" => $item['id']]) . '">' . lang('DELETE') . '</a> ';
@@ -226,7 +230,6 @@ class PortalCategoryModel extends Model
 
             $routeModel->getRoutes(true);
         }
-
 
         return $result;
     }

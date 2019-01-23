@@ -284,6 +284,11 @@ class AdminCategoryController extends AdminBaseController
     public function addjy(){
 
         $id = $this->request->param('id');
+        $type = $this->request->param('type');
+
+        if(empty($type)){
+            $type = 1;
+        }
 
         if(empty($id)){
             $this->error('参数错误');
@@ -311,6 +316,7 @@ class AdminCategoryController extends AdminBaseController
             for ($i = 0; $i < $k1; $i++) {
                     $save_data[$i] = array(
                         'tid' => $id,
+                        'type' => $type,
                         'create_time' => date('Y-m-d H:i:s'),
                     );
                     $save_data[$i]['name'] = $ks[$i + 1];
@@ -332,11 +338,11 @@ class AdminCategoryController extends AdminBaseController
               }
                 if ($s)
                 {
-                    $this->success('添加讲义成功');
+                    $this->success('添加成功');
                 }
                 else
                 {
-                    $this->error('添加讲义失败');
+                    $this->error('添加失败');
                 }
             exit();
         }
@@ -346,11 +352,13 @@ class AdminCategoryController extends AdminBaseController
         if($ks_data){
             $ks_num = count($ks_data)+1;
         }
+        $this->assign('type',$type);
         $this->assign('ks_data',$ks_data);
         $this->assign('ks_num',$ks_num);
         $this->assign('data',$data);
         return $this->fetch();
     }
+
     /**
      * 编辑文章分类
      * @adminMenu(
