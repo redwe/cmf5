@@ -97,6 +97,9 @@ class PublicController extends AdminBaseController
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
                 session('name', $result["username"]);
+                session('group_id', $result["group_id"]);
+                session('department', $result["department"]);
+
                 $result['loginip']   = get_client_ip(0, true);
                 $result['logintime'] = time();
                 $token                     = cmf_generate_user_token($result["id"], 'web');

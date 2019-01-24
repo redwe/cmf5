@@ -43,10 +43,10 @@ class AdminController extends AdminBaseController
      *     'param'  => ''
      * )
      */
-    public function index()
+    /*public function index()
     {
         $where = ["u.checkadmin" => true];
-        /**搜索条件**/
+        //搜索条件
         $userLogin = $this->request->param('username');
         $nickname = trim($this->request->param('nickname'));
 
@@ -79,6 +79,98 @@ class AdminController extends AdminBaseController
         $this->assign("roles", $roles);
         $this->assign("users", $users);
         return $this->fetch();
+    }*/
+
+    public function index()
+    {
+        $group_id = Session::get("group_id");
+        $where["a.checkadmin"] = true;
+
+        $join = [
+            ["department d","a.department=d.id","left"],
+            ["role o","o.id=a.group_id","left"]
+        ];
+        $field = 'a.*,d.department as bumen,o.name as groupname';
+        // 搜索条件
+
+        if($group_id == 5){
+            $groupData = array(["id" => "5","groupname" => "总监"]);
+            $pid = cmf_get_current_admin_id();
+            $where["a.id"] = $pid;
+            $grouplist = Db::name('admin')->alias("a")->join($join)->field($field)->where($where)->find();
+            $adminlist = Db::name('admin')->alias("a")->join($join)->field($field)->where($where)->select();
+            $adminlist = json_decode($adminlist,true);
+            foreach($adminlist as $k=>$v){
+                $adminlist[$k]['groupname']= "销售员";
+                $adminlist["groupname"] = "总监";
+            }
+            $grouplist["salers"] = $adminlist;
+            $groupData[0]["groups"] = [$grouplist];
+        }
+        else
+        {
+            $pid = 1;
+            $where2 = "id<>5 and id<>6";
+            $groupData = Db::name('role')->where($where2)->select();
+            $groupData = json_decode($groupData,true);
+            foreach($groupData as $key=>$vo){
+                $groupid = $vo['id'];
+                $where3["a.group_id"] = $groupid;
+                $where3["a.checkadmin"] = true;
+                $adminlist = Db::name("admin")->alias("a")->join($join)->field($field)->where($where3)->select();
+                $adminlist = json_decode($adminlist,true);
+                $groupData[$key]["groups"] = $adminlist;
+            }
+            $salerlist = $this->getSalers($pid,5);
+            array_push($groupData,array("id"=>5,"groupname"=>"总监","groups"=>$salerlist));
+        }
+        //$sql = Db::name("admin")->getLastSql();
+        //dump($sql);
+        $this->assign("groupid",$group_id);
+        $this->assign('groupData',$groupData);
+        return $this->fetch();
+    }
+
+    //管理员列表
+    public function getSalers($pid=1,$group_id=5){
+
+        $admindata = [];
+        $where = array(
+            "a.pid"=>$pid,
+            "a.group_id"=>$group_id
+        );
+        $join = [
+            ["department d","a.department=d.id","left"],
+            ["role_user r","r.user_id=A.id","left"],
+            ["role o","o.id=r.role_id","left"]
+        ];
+        $field = 'a.*,d.department as bumen,o.name as groupname';
+        $admingroup = Db::name("admin")
+            ->alias("a")
+            ->join($join)
+            ->field($field)
+            ->where($where)
+            ->select();
+        $admingroup = json_decode($admingroup,true);
+        foreach($admingroup as $key=>$vo){
+            $groupid = $vo["id"];
+            $role = Db::name("admin")->alias("a")->join($join)->field($field)
+                ->where(array("a.pid"=>$groupid,"a.checkadmin"=>true))
+                ->select();
+            $role = json_decode($role,true);
+            foreach($role as $key2=>$vo2){
+                $adminid = $vo2['id'];
+                $res = Db::name("admin")->alias("a")->join($join)->field($field)
+                    ->where(array("a.pid"=>$adminid,"a.checkadmin"=>true))
+                    ->select();
+                //$grouplist = Db::name("role")->where(array("id"=>6))->find();
+                $role[$key2]["groupname"] = "销售员"; //$grouplist['name'];
+                $role[$key2]["members"] = $res;
+            }
+            $admingroup[$key]["salers"] = $role;
+            $admingroup[$key]["groupname"] = "总监";
+        }
+        return $admingroup;
     }
 
     /**
