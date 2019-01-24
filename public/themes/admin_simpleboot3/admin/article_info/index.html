@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="{$Think.__STATIC__}assets/css/news.css">
+</head>
+<body>
+<div style="text-align:center">
+    <img src="{$Think.__STATIC__}assets/css/img/bg_tupian.jpg" alt="">
+</div>
+<div class="contents">
+    <div class="tab_left">
+        <div class="title">公告通知</div>
+        <ul class="tabnav">
+            <volist name="dataList" id="vo">
+                <li><a <php>if($vo['id']==$id){</php> class="cuttor" <php>}</php> href="{:U('Articles/index',array('id'=>$vo['id'],'type'=>$type))}"> {$vo.department} </a></li>
+           </volist>
+        </ul>
+    </div>
+    <div class="content">
+        <div class="r_title">
+            <ul>
+                <li>
+                    <a <php>if(empty($type)){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'type'=>0))}" >全部</a>
+                </li>
+                <li>
+                    <a <php>if($type==1){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'type'=>1))}" >综合</a>
+                </li>
+                <li>
+                    <a <php>if($type==2){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'type'=>2))}">课程类</a>
+                </li>
+            </ul>
+        </div>
+         <!-- 技术部 -->
+        <div class="newlist">
+            <ul>
+                <foreach name="result" item="vo">
+                <li>
+                    <a href="{:U('Articles/article',array('id'=>$id,'types'=>$vo['types'],'aid'=>$vo['id']))}">
+                        <span class="jisu">[{$vo.department}]</span>
+                        {$vo.title}
+                        <span class="mate">{$vo.datetime|date="Y-m-d",###}</span>
+                    </a>
+                </li>
+                </foreach>
+            </ul>
+        </div>
+        <div class="pages">{$page}</div>
+    </div>
+</div>
+</body>
+</html>

@@ -15,8 +15,9 @@ use app\portal\model\PortalCategoryModel;
 use app\portal\service\PostService;
 use app\portal\model\PortalPostModel;
 use think\Db;
+use think\Session;
 
-class ArticleController extends HomeBaseController
+class ArticleInfoController extends HomeBaseController
 {
     public function index()
     {
@@ -89,6 +90,30 @@ class ArticleController extends HomeBaseController
         } else {
             $this->error("您已赞过啦！");
         }
+    }
+
+    public function lists(){
+        //dump(date("Y-m-d h:i:s",1558848904));
+        $where["a.status"] = 1;
+        $join = [
+            ["department d","d.id=a.department"],
+            ["admin m","m.id=a.admin_id"]
+        ];
+        $field = "a.*,d.department,m.username";
+        $departid = Session::get('department');
+        $group_id = Session::get('group_id');
+        if($group_id > 1){
+            $where["a.department"] = $departid;
+        }
+        $result = Db::name('articles')
+            ->alias("a")->join($join)->field($field)
+            ->where($where)->order("a.id desc")
+            ->paginate(10);
+        //$sql = M('articles')->getLastSql();
+        //dump($sql);
+        $this->assign("result",$result);
+        $this->assign('page', $result->render());
+        return $this->fetch();
     }
 
 }
