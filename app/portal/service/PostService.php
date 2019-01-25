@@ -82,7 +82,7 @@ class PostService
             ->join($join)
             ->where($where)
             ->order('update_time', 'DESC')
-            ->paginate(10);
+            ->paginate(20);
 
         return $articles;
 

@@ -3,7 +3,8 @@
 <body>
 <div class="wrap">
     <ul class="nav nav-tabs">
-        <li class="active"><a>{:lang('USER_INDEXADMIN_INDEX')}</a></li>
+        <li class="active"><a>会员列表</a></li>
+        <li><a href="{:url('user/adminIndex/add')}">添加用户</a></li>
     </ul>
     <form class="well js-ajax-form form-inline margin-top-20" method="post" action="{:url('user/adminIndex/index')}">
         用户ID：
@@ -40,13 +41,15 @@
                     <td>{$vo.id}</td>
                     <td>{$vo['username']}</td>
                     <td>{$vo['group']}</td>
-                    <td>{$vo.e_mail}</td>
+                    <td>{$vo.email}</td>
                     <td>{$vo.phone}</td>
                     <td>{:date('Y-m-d H:i:s',$vo['regtime'])}</td>
                     <td>{:date('Y-m-d H:i:s',$vo['logintime'])}</td>
                     <td>{$vo.loginip}</td>
                     <td>{$user_statuses[$vo['status']]}</td>
                     <td>
+                        <a href="{:url('adminIndex/edit',array('id'=>$vo['id']))}">编辑</a>
+                        <a href="{:url('adminIndex/del',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="确定删除用户吗？">删除</a>
                         <neq name="vo.id" value="1">
                             <empty name="vo.status">
                                 <a href="{:url('adminIndex/cancelban',array('id'=>$vo['id']))}"

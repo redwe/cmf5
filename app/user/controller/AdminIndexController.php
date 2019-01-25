@@ -107,6 +107,135 @@ class AdminIndexController extends AdminBaseController
         return $this->fetch();
     }
 
+
+    public function add(){
+        if ($this->request->isPost()) {
+            $username = $this->request->param('username');
+            $password = $this->request->param('password');
+            $repassword = $this->request->param('repassword');
+            $phone = $this->request->param('phone');
+            $email = $this->request->param('email');
+            $expval = $this->request->param('expval');
+            if(empty($username)){
+                $this->error('账户不能为空');
+            }
+            if(empty($password)){
+                $this->error('密码不能为空');
+            }
+            if(empty($repassword)){
+                $this->error('确认密码不能为空');
+            }
+            if(empty($phone)){
+                $this->error('手机号不能为空');
+            }
+            if($password != $repassword){
+                $this->error('两次密码不一致');
+            }
+            if(!isPhone($phone)){
+                $this->error('请输入正确的手机号');
+            }
+            //查询用户是否重复  用户名+手机号验证
+            $data = Db::name("member")->where(array('username'=>$username))->whereOr(array('phone'=>$phone))->find();
+            if($data){
+                $this->error('用户已存在');
+            }
+            $save_data = array(
+                'username'=>$username,
+                'password'=>md5(md5($password)),
+                'phone'=>$phone,
+                'email'=>$email,
+                'expval'=>$expval,
+                'regip'=>get_client_ip(),
+                'regtime'=>time(),
+                'status' => 1
+            );
+            if(Db::name("member")->insert($save_data)){
+                $this->success('添加成功');
+            }else{
+                $this->error('添加失败');
+            }
+            exit();
+        }
+        return $this->fetch();
+    }
+
+    public function edit(){
+        $id = $this->request->param('id');
+        if(empty($id)){
+            $this->error('参数错误');
+        }
+        $data = Db::name("member")->where(array("id"=>$id))->find($id);
+        if(empty($data)){
+            $this->error('暂无数据');
+        }
+        if ($this->request->isPost()) {
+            $username = $this->request->param('username');
+            $password = $this->request->param('password');
+            $repassword = $this->request->param('repassword');
+            $phone = $this->request->param('phone');
+            $email = $this->request->param('email');
+            $expval = $this->request->param('expval');
+
+            if(empty($username)){
+                $this->error('账户不能为空');
+            }
+            if(empty($phone)){
+                $this->error('手机号不能为空');
+            }
+            if(!isPhone($phone)){
+                $this->error('请输入正确的手机号');
+            }
+            $where2="id!=:id and (phone=:phone or username=:username)";
+            //查询用户是否重复  用户名+手机号验证
+            $data = Db::name("member")->where($where2)->bind(array('id'=>$id,"phone"=>$phone,"username"=>$username))->find();
+            if($data){
+                $this->error('用户已存在');
+            }
+
+            $save_data = array(
+                'username'=>$username,
+                'phone'=>$phone,
+                'email'=>$email,
+                'expval'=>$expval
+            );
+            if(!empty($password)){
+                if(empty($repassword)){
+                    $this->error('确认密码不能为空');
+                }
+                if($password != $repassword){
+                    $this->error('两次密码不一致');
+                }
+                $save_data['password'] = md5(md5($password));
+            }
+            if(Db::name("member")->where(array("id"=>$id))->update($save_data)){
+                $this->success('编辑成功');
+            }else{
+                $this->error('编辑失败');
+            }
+            exit();
+        }
+        $this->assign('data',$data);
+        return $this->fetch();
+    }
+
+
+
+    public function del(){
+        $id = $this->request->param('id');
+        if(empty($id)){
+            $this->error('参数错误');
+        }
+        $data = Db::name("member")->where(array("id"=>$id))->select();
+        if(empty($data)){
+            $this->error('暂无数据');
+        }
+        if(Db::name("member")->where(array("id"=>$id))->delete()){
+            $this->success('删除成功');
+        }else{
+            $this->error('删除失败');
+        }
+    }
+
     /**
      * 本站用户拉黑
      * @adminMenu(

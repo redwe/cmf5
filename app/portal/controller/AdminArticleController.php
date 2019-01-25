@@ -34,12 +34,6 @@ class AdminArticleController extends AdminBaseController
      */
     public function index()
     {
-        $content = hook_one('portal_admin_article_index_view');
-
-        if (!empty($content)) {
-            return $content;
-        }
-
         $param = $this->request->param();
 
         $categoryId = $this->request->param('category', 0, 'intval');
@@ -52,7 +46,7 @@ class AdminArticleController extends AdminBaseController
         $portalCategoryModel = new PortalCategoryModel();
         $categoryTree        = $portalCategoryModel->adminCategoryTree($categoryId);
 
-        //dump($categoryId);
+        //dump($data->items());
         $this->assign('start_time', isset($param['start_time']) ? $param['start_time'] : '');
         $this->assign('end_time', isset($param['end_time']) ? $param['end_time'] : '');
         $this->assign('keyword', isset($param['keyword']) ? $param['keyword'] : '');
@@ -79,12 +73,6 @@ class AdminArticleController extends AdminBaseController
      */
     public function add()
     {
-        $content = hook_one('portal_admin_article_add_view');
-
-        if (!empty($content)) {
-            return $content;
-        }
-
         $themeModel        = new ThemeModel();
         $articleThemeFiles = $themeModel->getActionThemeFiles('portal/Article/index');
         $this->assign('article_theme_files', $articleThemeFiles);
@@ -149,10 +137,65 @@ class AdminArticleController extends AdminBaseController
             ];
             hook('portal_admin_after_save_article', $hookParam);
 
-
             $this->success('添加成功!', url('AdminArticle/edit', ['id' => $portalPostModel->id]));
         }
 
+    }
+
+//goods数据表导入portal_post
+    public function savePostData(){
+        $loopData = Db::name("goods")->select();
+/*
+        foreach($loopData as $key=>$vo){
+            $datas = [
+                "id" => $vo['id'],
+                "parent_id"=>0,
+                "post_type"=>1,
+                "post_format"=>1,
+                "user_id"=>1,
+                "post_status"=>1,
+                "comment_status"=>1,
+                "is_top"=>0,
+                "recommended"=>0,
+                "post_hits"=>0,
+                "post_favorites"=>0,
+                "post_like"=>0,
+                "comment_count"=>0,
+                "create_time" => $vo["posttime"],
+                "update_time" => $vo["posttime"],
+                "published_time" => $vo["posttime"],
+                "delete_time" => 0,
+                "post_title" => $vo["title"],
+                "post_keywords" => '',
+                "post_excerpt" => '',
+                "post_source" => '',
+                "thumbnail" => $vo["picurl"],
+                "post_content" => $vo["content"],
+                "post_content_filtered" => '',
+                "more" => '',
+                "market_price" => $vo["marketprice"],
+                "selling_price" => $vo["salesprice"],
+                "year_price1"=>$vo["kc1_price"],
+                "year_price2"=>$vo["kc2_price"],
+                "year_price3"=>$vo["kc3_price"],
+                "kclabel" =>$vo["kclabel"],
+            ];
+            $lids = $vo["lids"];
+            $ids = explode(",",$lids);
+            foreach($ids as $k1=>$v1){
+                $data1 = [
+                  "post_id" => $vo['id'],
+                  "category_id" => $v1,
+                  "list_order" => 10000,
+                  "status" => 1
+                ];
+                Db::name("portal_category_post")->insert($data1);
+            }
+            Db::name("portal_post")->insert($datas);
+        }
+*/
+        dump($loopData);
+        dump("OK!");
     }
 
     /**
@@ -170,12 +213,6 @@ class AdminArticleController extends AdminBaseController
      */
     public function edit()
     {
-        $content = hook_one('portal_admin_article_edit_view');
-
-        if (!empty($content)) {
-            return $content;
-        }
-
         $id = $this->request->param('id', 0, 'intval');
 
         $portalPostModel = new PortalPostModel();
@@ -191,7 +228,7 @@ class AdminArticleController extends AdminBaseController
         //$this->assign('post_categories0', $post_categories0);
         $this->assign('post_categories', $postCategories);
         $this->assign('post_category_ids', $postCategoryIds);
-
+        //dump($postCategories);
         return $this->fetch();
     }
 
