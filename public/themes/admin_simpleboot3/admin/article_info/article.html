@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <link rel="stylesheet" href="{$Think.__STATIC__}assets/css/news.css">
+    <link rel="stylesheet" href="__STATIC__/css/news.css">
 </head>
 
 <body>
 <div style="text-align:center">
-    <img src="{$Think.__STATIC__}assets/css/img/bg_tupian.jpg" alt="">
+    <img src="__STATIC__/images/bg_tupian.jpg" alt="">
 </div>
 <php>
     if(empty($id)){
@@ -26,24 +26,25 @@
         <div class="title">公告通知</div>
         <ul class="tabnav">
             <volist name="dataList" id="vo">
-                <li> <a <php>if($vo['id']==$id){</php> class="cuttor" <php>}</php> href="{:U('Articles/index',array('id'=>$vo['id'],'types'=>$type))}">
+                <li> <a <php>if($vo['id']==$id){</php> class="cuttor" <php>}</php> href="{:url('article_info/index',array('id'=>$vo['id'],'types'=>$type))}">
                 {$vo.department}
-            </a></li>
+                </a></li>
             </volist>
         </ul>
     </div>
 
     <div class="content">
+        <div class="position">首页 -> <a href="{:url('article_info/index',array('id'=>$id,'types'=>0))}"> 公告列表 </a></div>
         <div class="r_title">
             <ul>
                 <li>
-                    <a <php>if(empty($type)){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'types'=>0))}" >全部</a>
+                    <a <php>if(empty($type)){</php> class="current" <php>}</php> href="{:url('article_info/index',array('id'=>$id,'types'=>0))}" >全部</a>
                 </li>
                 <li>
-                    <a <php>if($type==1){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'types'=>1))}" >综合</a>
+                    <a <php>if($type==1){</php> class="current" <php>}</php> href="{:url('article_info/index',array('id'=>$id,'types'=>1))}" >综合</a>
                 </li>
                 <li>
-                    <a <php>if($type==2){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'types'=>2))}">课程类</a>
+                    <a <php>if($type==2){</php> class="current" <php>}</php> href="{:url('article_info/index',array('id'=>$id,'types'=>2))}">课程类</a>
                 </li>
             </ul>
         </div>

@@ -13,6 +13,7 @@ namespace app\user\controller;
 
 use cmf\controller\AdminBaseController;
 use think\Db;
+use app\user\model\UserModel;
 
 /**
  * Class AdminIndexController
@@ -54,14 +55,8 @@ class AdminIndexController extends AdminBaseController
      *     'param'  => ''
      * )
      */
-    public function index()
+    /*public function index()
     {
-        $content = hook_one('user_admin_index_view');
-
-        if (!empty($content)) {
-            return $content;
-        }
-
         $where   = [];
         $request = input('request.');
 
@@ -75,7 +70,7 @@ class AdminIndexController extends AdminBaseController
 
             $keywordComplex['user_login|user_nickname|user_email|mobile']    = ['like', "%$keyword%"];
         }
-        $usersQuery = Db::name('user');
+        $usersQuery = Db::name('member');
 
         $list = $usersQuery->whereOr($keywordComplex)->where($where)->order("create_time DESC")->paginate(10);
         // 获取分页显示
@@ -83,6 +78,32 @@ class AdminIndexController extends AdminBaseController
         $this->assign('list', $list);
         $this->assign('page', $page);
         // 渲染模板输出
+        return $this->fetch();
+    }*/
+
+    public function index(){
+        $where['status'] = array("gt",-1);
+        $request = input('request.');
+        if (!empty($request['uid'])) {
+            $where['id'] = intval($request['uid']);
+        }
+        $keywordComplex = [];
+        if (!empty($request['keyword'])) {
+            $keyword = $request['keyword'];
+            $keywordComplex['username|phone|e_mail']    = ['like', "%$keyword%"];
+        }
+        $userObj = new UserModel();
+        $list = Db::name('member')->whereOr($keywordComplex)->where($where)->order("id DESC")->paginate(20);
+        //$list = json_decode($list,true);
+        $datalist = [];
+        foreach ($list as $k=>$v){
+            $v['group'] = $userObj->getGroupByExp($v['expval']);
+            array_push($datalist,$v);
+        }
+
+        $page = $list->render();
+        $this->assign('list', $datalist);
+        $this->assign('page', $page);
         return $this->fetch();
     }
 
@@ -103,7 +124,7 @@ class AdminIndexController extends AdminBaseController
     {
         $id = input('param.id', 0, 'intval');
         if ($id) {
-            $result = Db::name("user")->where(["id" => $id, "user_type" => 2])->setField('user_status', 0);
+            $result = Db::name("member")->where(["id" => $id])->setField('status', 0);
             if ($result) {
                 $this->success("会员拉黑成功！", "adminIndex/index");
             } else {
@@ -131,7 +152,7 @@ class AdminIndexController extends AdminBaseController
     {
         $id = input('param.id', 0, 'intval');
         if ($id) {
-            Db::name("user")->where(["id" => $id, "user_type" => 2])->setField('user_status', 1);
+            Db::name("member")->where(["id" => $id])->setField('status', 1);
             $this->success("会员启用成功！", '');
         } else {
             $this->error('数据传入失败！');

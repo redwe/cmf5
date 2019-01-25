@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <link rel="stylesheet" href="{$Think.__STATIC__}assets/css/news.css">
+    <link rel="stylesheet" href="__STATIC__/css/news.css">
 </head>
 <body>
 <div style="text-align:center">
-    <img src="{$Think.__STATIC__}assets/css/img/bg_tupian.jpg" alt="">
+    <img src="__STATIC__/images/bg_tupian.jpg" alt="">
 </div>
 <div class="contents">
     <div class="tab_left">
         <div class="title">公告通知</div>
         <ul class="tabnav">
             <volist name="dataList" id="vo">
-                <li><a <php>if($vo['id']==$id){</php> class="cuttor" <php>}</php> href="{:U('Articles/index',array('id'=>$vo['id'],'type'=>$type))}"> {$vo.department} </a></li>
+                <li><a <php>if($vo['id']==$id){</php> class="cuttor" <php>}</php> href="{:url('article_info/index',array('id'=>$vo['id'],'types'=>$type))}">
+                    {$vo.department} </a></li>
            </volist>
         </ul>
     </div>
@@ -24,13 +25,13 @@
         <div class="r_title">
             <ul>
                 <li>
-                    <a <php>if(empty($type)){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'type'=>0))}" >全部</a>
+                    <a <php>if(empty($type)){</php> class="current" <php>}</php> href="{:url('article_info/index',array('id'=>$id,'types'=>0))}" >全部</a>
                 </li>
                 <li>
-                    <a <php>if($type==1){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'type'=>1))}" >综合</a>
+                    <a <php>if($type==1){</php> class="current" <php>}</php> href="{:url('article_info/index',array('id'=>$id,'types'=>1))}" >综合</a>
                 </li>
                 <li>
-                    <a <php>if($type==2){</php> class="current" <php>}</php> href="{:U('Articles/index',array('id'=>$id,'type'=>2))}">课程类</a>
+                    <a <php>if($type==2){</php> class="current" <php>}</php> href="{:url('article_info/index',array('id'=>$id,'types'=>2))}">课程类</a>
                 </li>
             </ul>
         </div>
@@ -38,10 +39,22 @@
         <div class="newlist">
             <ul>
                 <foreach name="result" item="vo">
+                    <php>
+                        $zero1=time(); //当前时间
+                        $zero2=$vo['datetime'];  //发布时间
+                        $newtime=ceil(($zero2-$zero1)/86400); //60s*60min*24h
+                        if($newtime<5){
+                            $newimg = '<img src="__STATIC__/images/new.gif">';
+                        }
+                        else
+                        {
+                            $newimg = '';
+                        }
+                    </php>
                 <li>
-                    <a href="{:U('Articles/article',array('id'=>$id,'types'=>$vo['types'],'aid'=>$vo['id']))}">
+                    <a href="{:url('article_info/article',array('id'=>$id,'types'=>$vo['types'],'aid'=>$vo['id']))}">
                         <span class="jisu">[{$vo.department}]</span>
-                        {$vo.title}
+                        {$vo.title} {$newimg}
                         <span class="mate">{$vo.datetime|date="Y-m-d",###}</span>
                     </a>
                 </li>

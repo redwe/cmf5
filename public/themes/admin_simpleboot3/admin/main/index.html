@@ -11,10 +11,25 @@
                 <div class="panel-body home-info">
                     <ul id="thinkcmf-notices" class="list-unstyled">
                         <li>
-                            今天是：{:date("Y-m-d h:i:s",time())}<br>
-                            欢迎光临奥创百科管理后台！
+                            今天是：{:date("Y-m-d h:i:s",time())}                            欢迎光临奥创百科管理后台！
                         </li>
                     </ul>
+                    <iframe frameborder="0" onload="setIframeHeight(this)" width="100%" src="{:url('article_info/index')}"></iframe>
+                    <script>
+                        // document.domain = "caibaojian.com";
+                        function setIframeHeight(iframe) {
+                            if (iframe) {
+                                var iframeWin = iframe.contentWindow || iframe.contentDocument.parentWindow;
+                                if (iframeWin.document.body) {
+                                    iframe.height = iframeWin.document.documentElement.scrollHeight || iframeWin.document.body.scrollHeight;
+                                }
+                            }
+                        };
+
+                        window.onload = function () {
+                            setIframeHeight(document.getElementById('external-frame'));
+                        };
+                    </script>
                 </div>
             </div>
         </div>

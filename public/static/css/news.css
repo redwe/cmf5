@@ -1,0 +1,144 @@
+li{
+	list-style: none;
+}
+a{text-decoration:none; color: #333;}
+
+.contents{ width:1200px; margin:auto; position:relative;}
+
+.content {
+    width: 1200px;
+    margin:auto;
+    padding-left:70px;
+    opacity: 1;
+}
+
+/* 综合类 */
+.r_title{
+	margin-left: 120px;
+    padding-left: 300px;
+    padding-bottom: 20px;
+    height: 40px;
+    border-bottom: 1px solid #bebebe;
+}
+
+.r_title a{
+	float: left;
+    width: 90px;
+	height: 35px;
+    margin-right: 60px;
+    line-height: 35px;
+    border-radius: 4px;
+	text-align: center;	
+    border: 1px solid #142dac;
+}
+
+
+.r_title .current{
+    text-align: center;
+    color: white !important;
+    background-color: #3377e9;
+}
+
+
+.rtsd li{
+    float: right;
+    width: 50px;
+    height: 22px;
+    margin-left: 15px;
+}
+
+.jisu{
+	color: #142dac;
+	padding-right:10px;
+}
+
+.newlist{
+	padding-top:0px;
+    margin-left: 80px;
+	color: #333333;
+}
+.newlist ul li{ padding-top:10px; padding-bottom:10px;}
+.newlist ul li a:link{ color:#333;}
+
+.mate{
+	color: #666666;
+	float:right;
+}
+
+.cuttor {
+	border-bottom: 2px solid #3377e9;
+	color: #142dac;
+}
+
+.pages{ text-align:center;}
+
+.tab_left{
+	width: 200px;
+	position:absolute;
+    left: -80px;
+    text-align: center;
+}
+
+.title{
+	margin-top: -50px;
+    margin-left: 1px;
+    background-color: #142dac;
+    color: white;
+    height: 60px;
+    line-height: 60px;
+	border-top: 5px solid #ff9600;
+}
+
+.tabnav {
+    padding-left: 10px;
+    margin-top: -10px;
+    padding-bottom: 30px !important;
+    overflow: hidden;
+    color: #333;
+    /* border: 1px solid red; */
+    background-color: #ececec;
+}
+
+.tabnav li {
+    border-bottom: 1px solid #bebebe;
+    list-style: none;
+    margin-right: 5px;
+    height: 50px;
+    line-height: 50px;
+    cursor: pointer;
+}
+
+.fod{
+	padding-top:20px;
+	margin-top: 80px;
+    background-color: #434343;
+    height: 138px;
+    color: #ffffff;
+    text-align: center;
+	line-height:40px;
+    letter-spacing: 3px;
+}
+
+.h1_title {
+    text-align: center;
+    color: #333333;
+    font-size: 24px;
+}
+.time {
+    margin-top: 14px;
+    text-align: center;
+}
+
+.time span {
+    margin-right: 38px;
+    color: #666666;
+}
+
+.cont{
+	margin-top: 15px;
+    padding-left: 50px;
+	color: #333333;
+	letter-spacing: 3px;
+}
+.cont a{ color: #0005d9; text-decoration: underline}
+.position{ width: 200px; position: absolute; left: 200px;}

@@ -17,6 +17,83 @@ use app\admin\model\Upload;
 
 class ArticleInfoController extends AdminBaseController
 {
+
+    public function index(){
+        $id = $this->request->param("id");
+        $type = $this->request->param("types");
+        if(!empty($id)){
+            $where["a.department"] = $id;
+        }
+        else
+        {
+            $id = 0;
+        }
+        if(!empty($type)){
+            $where["a.types"] = $type;
+        }
+        else
+        {
+            $type = 0;
+        }
+        $where["a.status"] = 1;
+        $join = [
+            ["department d","d.id=a.department"],
+            ["admin m","m.id=a.admin_id"]
+        ];
+        $field = "a.*,d.department,m.username";
+        $result = Db::name('articles')->alias("a")
+            ->join($join)->field($field)->where($where)
+            ->order("a.id desc")
+            ->paginate(10);
+
+        $dataList = Db::name("department")->where(array("status"=>1))->select();
+        $this->assign("dataList",$dataList);
+        $this->assign("id",$id);
+        $this->assign("type",$type);
+        $this->assign("result",$result);
+        $this->assign('page', $result->render());
+        return $this->fetch();
+    }
+
+
+    public function article(){
+
+        $id = $this->request->param("id");
+        $type = $this->request->param("types");
+        $aid = $this->request->param("aid");
+        if(!empty($aid)){
+            $where["a.id"] = $aid;
+        }
+        else
+        {
+            $this->error('参数错误！');
+            exit();
+        }
+        $where["a.status"] = 1;
+        $join = [
+                ["department d","d.id=a.department"],
+                ["admin m","m.id=a.admin_id"]
+            ];
+        //$field = "a.*,d.department,m.username";
+
+        $result = Db::name('articles')->alias("a")
+            ->join($join)
+            //->field($field)
+            ->where($where)
+            ->find();
+//$sql = Db::name('articles')->getLastSql();
+//dump($sql);
+//exit();
+        $dataList = Db::name("department")->where(array("status"=>1))->select();
+        $this->assign("dataList",$dataList);
+        $this->assign("id",$id);
+
+        $this->assign("type",$type);
+        $this->assign("result",$result);
+        return $this->fetch();
+    }
+
+
     public function add_article(){
 
         if ($this->request->isPost()) {

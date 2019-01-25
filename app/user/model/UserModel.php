@@ -308,4 +308,16 @@ class UserModel extends Model
         cmf_update_current_user($userInfo);
         return 0;
     }
+
+    public function getGroupByExp($exp){
+        $data = Db::name("user_group")->select();
+        $group_name = '普通等级';
+        foreach ($data as $k=>$v){
+            if($v['expvala'] < $exp && $v['expvalb'] > $exp){
+                $group_name = $v['groupname'];
+                break;
+            }
+        }
+        return $group_name;
+    }
 }
