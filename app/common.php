@@ -33,3 +33,19 @@ function isEmail($email){
         return false;
     }
 }
+
+function jsonOut($code,$data){
+    return json(array("code"=>$code,'data'=>$data));
+}
+
+//随机数字符
+function randomStr(){
+    $arr = array_merge(range(0,9),range('A','Z'));
+    $str = '';
+    $arr_len = count($arr);
+    for($i = 0;$i < 8;$i++){
+        $rand = mt_rand(0,$arr_len-1);
+        $str.=$arr[$rand];
+    }
+    return $str;
+}

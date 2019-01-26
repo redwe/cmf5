@@ -115,7 +115,6 @@ class ArticleInfoController extends AdminBaseController
                 $param['datetime'] = time();
                 $param['admin_id'] = cmf_get_current_admin_id();
                 //上传文件
-
                 $updata = new Upload();
                 $url = '/upload/news/';
                 $array = ["jpg","gif","png"];

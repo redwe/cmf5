@@ -184,8 +184,8 @@ class AdminArticleController extends AdminBaseController
             $ids = explode(",",$lids);
             foreach($ids as $k1=>$v1){
                 $data1 = [
-                  "post_id" => $vo['id'],
-                  "category_id" => $v1,
+                  "post_id" => $v1,
+                  "category_id" => $vo['id'],
                   "list_order" => 10000,
                   "status" => 1
                 ];
