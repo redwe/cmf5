@@ -8,9 +8,17 @@ use think\Session;
 class Upload extends Model
 {
     //获取省份、分部、身份、岗位
-    public function uploadpic($filename,$url,$array){
+    public function uploadpic($filename,$url='',$array=''){
         $rootUrl = $_SERVER['DOCUMENT_ROOT'];
         $file = $_FILES[$filename];
+
+        if(empty($url)){
+            $url = '/upload/images/';
+        }
+        if(empty($array)) {
+            $array = ["jpg", "gif", "png"];
+        }
+
         if (!empty($file['name'])) {
             $fileName = $file['name'];    //得到文件全名
             $dotArray = explode('.', $fileName);    //把文件名安.区分，拆分成数组
@@ -35,7 +43,17 @@ class Upload extends Model
             $path = $rootUrl.$uploaddir; //产生随机文件名
             //$path = "images/".$fileName; //客户端上传的文件名；
             //下面必须是tmp_name 因为是从临时文件夹中移动
-            move_uploaded_file($file['tmp_name'], $path); //从服务器临时文件拷贝到相应的文件夹下
+            //sleep(1);
+            //dump($file['tmp_name']);
+            if($file['tmp_name']){
+                move_uploaded_file($file['tmp_name'], $path); //从服务器临时文件拷贝到相应的文件夹下
+            }
+            else
+            {
+                $ret['res'] = "0";
+                $ret['msg'] = "上传文件丢失!" . $file['error'];
+                $ret['data'] = '';
+            }
             //$file_path = $path;
 
             if($type=='jpg' || $type=="jpeg" || $type=="png"){

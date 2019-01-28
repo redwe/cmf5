@@ -19,124 +19,38 @@
 <div class="wrap">
     <ul class="nav nav-tabs">
         <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
-        <li class="active"><a href="#">添加新课程</a></li>
+        <li><a href="{:url('orders/add')}">添加新课程</a></li>
+        <li class="active"><a href="#">编辑课程</a></li>
     </ul>
     <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer" enctype="multipart/form-data">
-        <input type="hidden" name="applicant" id="applicant" value="{$applicant}">
-        <div class="space-4"></div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">手机号</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="phone" id="phone" placeholder="请输入学员手机号" class="form-control" />
-            </div>
-        </div>
-        <div class="space-4"></div>
-
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">用户名</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="username" id="username" placeholder="请输入学员用户名" class="form-control" />
-                <span id="check_user" style="display: none" class="red">*该用户还没注册</span>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">用户姓名</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="name" id="name" placeholder="请输入用户姓名" class="form-control" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">身份证号</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="cardno" id="cardno" placeholder="请输入身份证号" class="form-control" />
-            </div>
-        </div>
-        <div class="space-4"></div>
-
-        <div class="form-group">
-          <label class="col-sm-3 control-label no-padding-right">上传身份证图片</label>
-          <div class="col-sm-6">
-            <div class="col-sm-5 text-center">
-                <div class="text-center"><img width="120" id="card_face_img" onclick="$('#card_face').click()" src="__STATIC__/images/default.png">
-                <input type="file" style="display: none" id="card_face" onchange="setdeafultpic(this,'card_face')" name="card_face"  /></div>
-                <div class="text-center margin-top-10">身份证正面照片</div>
-            </div>
-            <div class="col-sm-5">
-                <div class="text-center"><img width="120" id="card_back_img" onclick="$('#card_back').click()" src="__STATIC__/images/default.png">
-                <input type="file" id="card_back" style="display: none" onchange="setdeafultpic(this,'card_back')" name="card_back" /></div>
-                <div class="text-center margin-top-10">身份证反面照片</div>
-            </div>
-           </div>
-        </div>
-        <div class="space-4"></div>
-
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">考 区</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="province" id="province" placeholder="请输入考区" class="form-control" />
-            </div>
-        </div>
-        <div class="space-4"></div>
-
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">地 址</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="address" id="address" placeholder="请输入地 址" class="form-control" />
-            </div>
-        </div>
-        <div class="space-4"></div>
-
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">工作单位</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="company" id="company" placeholder="请输入工作单位" class="form-control" />
-            </div>
-        </div>
-        <div class="space-4"></div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label no-padding-right">学员邮箱</label>
-
-            <div class="col-sm-6">
-                <input type="text" name="email" id="email" class="form-control" />
-            </div>
-        </div>
-
-        <div class="space-4"></div>
-
+        <input type="hidden" name="id" id="id" value="{$id}">
+        <input type="hidden" name="oid" id="oid" value="{$oid}">
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">课程ID</label>
             <div class="col-sm-6">
                 <input style="width: 160px;" readonly data-toggle="modal" data-target="#myModal" name="goods_id" id="goods_id" placeholder="请输入要开课程的ID" class="form-control" />
             </div>
         </div>
-
         <div class="Hz"></div>
-
         <div class="space-4"></div>
         <div class="form-group owe_time">
             <label class="col-sm-3 control-label no-padding-right">欠款补交时间</label>
             <div class="col-sm-6">
                 <input type="text" name="owe_time" placeholder="" class="form-control js-bootstrap-datetime"
-                       value="{$start_time|default=''}" autocomplete="off" />
+                       value="{$data.owe_time|date='Y-m-d',###}" autocomplete="off" />
             </div>
         </div>
         <div class="space-4"></div>
 
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">转账方式</label>
+
             <div class="col-sm-6">
                 <select name="pay_way" class="form-control">
-                    <option value="微信">微信</option>
-                    <option value="支付宝">支付宝</option>
-                    <option value="银行卡">银行卡</option>
-                    <option value="刷卡">刷卡</option>
+                    <option <php>if($data['payment']=='微信'){ echo 'selected';}</php> value="微信">微信</option>
+                    <option <php>if($data['payment']=='支付宝'){ echo 'selected';}</php> value="支付宝">支付宝</option>
+                    <option <php>if($data['payment']=='银行卡'){ echo 'selected';}</php> value="银行卡">银行卡</option>
+                    <option <php>if($data['payment']=='刷卡'){ echo 'selected';}</php> value="刷卡">刷卡</option>
                 </select>
             </div>
         </div>
@@ -144,43 +58,41 @@
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">转账截图</label>
             <div class="col-sm-6">
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="pay_pic1_img" onclick="$('#pay_pic1').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="pay_pic1"  style="display: none" id="pay_pic1" onchange="setdeafultpic(this,'pay_pic1')" />
-                </div>
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="pay_pic2_img" onclick="$('#pay_pic2').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="pay_pic2"  style="display: none" id="pay_pic2" onchange="setdeafultpic(this,'pay_pic2')" />
-                </div>
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="pay_pic3_img" onclick="$('#pay_pic3').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="pay_pic3"  style="display: none" id="pay_pic3" onchange="setdeafultpic(this,'pay_pic3')" />
-                </div>
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="pay_pic4_img" onclick="$('#pay_pic4').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="pay_pic4"  style="display: none" id="pay_pic4" onchange="setdeafultpic(this,'pay_pic4')" />
-                </div>
+                <php>
+                    $pay_pic = unserialize($data['pay_pic']);
+                    $count = count($pay_pic);
+                    $count2 = 4-$count;
+                    for($i=0;$i<$count2;$i++){
+                    array_push($pay_pic,"__STATIC__/images/default.png");
+                    }
+                </php>
+                <volist name="pay_pic" key="key" id="vo">
+                    <div class="col-sm-3 text-center">
+                        <img width="120" id="pay_pic{$key}_img" onclick="$('#pay_pic{$key}').click()" src="{$vo}">
+                        <input name="pay_pic_{$key}" type="hidden" value="{$vo}">
+                        <input type="file" name="pay_pic{$key}" style="display: none" id="pay_pic{$key}" onchange="setdeafultpic(this,'pay_pic{$key}')" />
+                    </div>
+                </volist>
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">协议（图片）</label>
             <div class="col-sm-6">
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="agreement1_img" onclick="$('#agreement1').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="agreement1" style="display: none" id="agreement1" onchange="setdeafultpic(this,'agreement1')" />
-                </div>
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="agreement2_img" onclick="$('#agreement2').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="agreement2" style="display: none" id="agreement2" onchange="setdeafultpic(this,'agreement2')" />
-                </div>
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="agreement3_img" onclick="$('#agreement3').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="agreement3" style="display: none" id="agreement3" onchange="setdeafultpic(this,'agreement3')" />
-                </div>
-                <div class="col-sm-3 text-center">
-                    <img width="120" id="agreement4_img" onclick="$('#agreement4').click()" src="__STATIC__/images/default.png">
-                    <input type="file" name="agreement4" style="display: none" id="agreement4" onchange="setdeafultpic(this,'agreement4')" />
-                </div>
+                <php>
+                    $agreement = unserialize($data['agreement']);
+                    $count = count($agreement);
+                    $count2 = 4-$count;
+                    for($i=0;$i<$count2;$i++){
+                        array_push($agreement,"__STATIC__/images/default.png");
+                    }
+                </php>
+                <volist name="agreement" key="key" id="vo2">
+                    <div class="col-sm-3 text-center">
+                        <img width="120" id="agreement{$key}_img" onclick="$('#agreement{$key}').click()" src="{$vo2}">
+                        <input name="agreement_{$key}" type="hidden" value="{$vo2}">
+                        <input type="file" name="agreement{$key}" style="display: none" id="agreement{$key}" onchange="setdeafultpic(this,'agreement{$key}')" />
+                    </div>
+                </volist>
             </div>
         </div>
         <div class="space-4"></div>
@@ -188,6 +100,7 @@
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">协议（word文档）</label>
             <div class="col-sm-6">
+                {$data.upload_file}
                 <input type="file" name="agreement" id="agreement" />
             </div>
         </div>
@@ -197,7 +110,7 @@
             <label class="col-sm-3 control-label no-padding-right">备注</label>
 
             <div class="col-sm-6">
-                <textarea class="form-control" rows="5" name="remarks" id="content"></textarea>
+                <textarea class="form-control" rows="5" name="remarks" id="content">{$data.remarks}</textarea>
             </div>
         </div>
 
@@ -264,6 +177,7 @@
             <!-- /.modal-content -->
         </div>
         <!-- /.modal -->
+
 
 </div><!-- /.col -->
 <script src="__STATIC__/js/admin.js"></script>
@@ -464,6 +378,7 @@
                 }
             });
         }
+
     });
 </script>
 </body>

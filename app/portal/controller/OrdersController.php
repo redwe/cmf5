@@ -81,9 +81,7 @@ class OrdersController extends AdminBaseController
 
             //上传文件身份证正面
             $updata = new Upload();
-            $url = '/upload/orders/';
-            $member_url = '/upload/member/';
-            $img_array = ["jpg","gif","png"];
+            $file_path = '/upload/files/';
             $file_array = ["doc","docx","pdf","xlsx"];
 
             $member = Db::name('member')->where(array('phone' => $_POST['phone']))->find();
@@ -100,14 +98,14 @@ class OrdersController extends AdminBaseController
                 $user['email'] = $_POST['email'];
 
                 if(request()->file('card_face')){
-                    $uploads = $updata->uploadpic('card_face',$url,$img_array);
+                    $uploads = $updata->uploadpic('card_face');
                     if ($uploads['res']) {
                         $user['card_face'] = $uploads['data'];
                     }
                 }
                 //上传文件身份证反面
                 if(request()->file('card_back')) {
-                    $uploads = $updata->uploadpic('card_back', $url, $img_array);
+                    $uploads = $updata->uploadpic('card_back');
                     if ($uploads['res']) {
                         $user['card_back'] = $uploads['data'];
                     }
@@ -130,14 +128,14 @@ class OrdersController extends AdminBaseController
                 $user['email'] = $_POST['email'];
 
                 if(request()->file('card_face')){
-                    $uploads = $updata->uploadpic('card_face',$member_url,$img_array);
+                    $uploads = $updata->uploadpic('card_face');
                     if ($uploads['res']) {
                         $user['card_face'] = $uploads['data'];
                     }
                 }
                 //上传文件身份证反面
                 if(request()->file('card_back')) {
-                    $uploads = $updata->uploadpic('card_back', $member_url, $img_array);
+                    $uploads = $updata->uploadpic('card_back');
                     if ($uploads['res']) {
                         $user['card_back'] = $uploads['data'];
                     }
@@ -257,39 +255,25 @@ class OrdersController extends AdminBaseController
             $datas['remarks'] = $_POST['remarks'];
             $pay_pics = array();
             //转款截图上传1
-            if(request()->file('pay_pic')) {
-                $uploads = $updata->uploadpic('pay_pic', $url, $img_array);
-                if ($uploads['res']) {
-                    //$datas['pay_pic'] = $uploads['data'];
-                    array_push($pay_pics,$uploads['data']);
-                }
-            }
-            //转款截图上传2
-            if(request()->file('pay_pic1')) {
-                $uploads = $updata->uploadpic('pay_pic1', $url, $img_array);
-                if ($uploads['res']) {
-                    array_push($pay_pics,$uploads['data']);
-                }
-            }
-            //转款截图上传3
-            if(request()->file('pay_pic2')) {
-                $uploads = $updata->uploadpic('pay_pic2', $url, $img_array);
-                if ($uploads['res']) {
-                    array_push($pay_pics,$uploads['data']);
-                }
-            }
-            //转款截图上传4
-            if(request()->file('pay_pic3')) {
-                $uploads = $updata->uploadpic('pay_pic3', $url, $img_array);
-                if ($uploads['res']) {
-                    array_push($pay_pics,$uploads['data']);
+            for($i=1;$i<5;$i++)
+            {
+                if(request()->file('pay_pic'.$i)) {
+                    $uploads = $updata->uploadpic('pay_pic'.$i);
+                    if ($uploads['res']) {
+                        //$datas['pay_pic'] = $uploads['data'];
+                        array_push($pay_pics,$uploads['data']);
+                    }
+                    else
+                    {
+                        array_push($pay_pics,'');
+                    }
                 }
             }
             $datas['pay_pic'] = serialize($pay_pics);
 
             //协议文件上传
             if(request()->file('agreement')) {
-                $uploads = $updata->uploadpic('agreement', $url, $file_array);
+                $uploads = $updata->uploadpic('agreement', $file_path, $file_array);
                 if ($uploads['res']) {
                     $datas['upload_file'] = $uploads['data'];
                 }
@@ -297,35 +281,18 @@ class OrdersController extends AdminBaseController
 
             $agreements = array();
             //协议图片上传1
-            if(request()->file('agreement1')) {
-                $uploads = $updata->uploadpic('agreement1', $url, $img_array);
-                if ($uploads['res']) {
-                    //$datas['pay_pic'] = $uploads['data'];
-                    array_push($agreements,$uploads['data']);
-                }
+            for($i=1;$i<5;$i++) {
+                  if (request()->file('agreement'.$i)) {
+                      $uploads = $updata->uploadpic('agreement'.$i);
+                      if ($uploads['res']) {
+                          //$datas['pay_pic'] = $uploads['data'];
+                          array_push($agreements, $uploads['data']);
+                      } else {
+                          array_push($agreements, '');
+                      }
+                  }
             }
-            //转款截图上传2
-            if(request()->file('agreement2')) {
-                $uploads = $updata->uploadpic('agreement2', $url, $img_array);
-                if ($uploads['res']) {
-                    array_push($agreements,$uploads['data']);
-                }
-            }
-            //转款截图上传3
-            if(request()->file('agreement3')) {
-                $uploads = $updata->uploadpic('agreement3', $url, $img_array);
-                if ($uploads['res']) {
-                    array_push($agreements,$uploads['data']);
-                }
-            }
-            //转款截图上传4
-            if(request()->file('agreement4')) {
-                $uploads = $updata->uploadpic('agreement4', $url, $img_array);
-                if ($uploads['res']) {
-                    array_push($agreements,$uploads['data']);
-                }
-            }
-            $datas['agreement'] = serialize($pay_pics);
+            $datas['agreement'] = serialize($agreements);
 
             //dump($datas);
             //exit();
@@ -405,6 +372,115 @@ class OrdersController extends AdminBaseController
         }else{
             return jsonOut(1,$data);
         }
+    }
+
+
+    public function edit(){
+
+        $request = Request::instance();
+
+        if($request->isAjax()){
+            $page = $this->request->param("page");
+            $goods_data = $this->getGoodslist(20,$page);
+            $pages = $goods_data->render();
+            $tempstr = '';
+            foreach($goods_data as $vo){
+                $tempstr = $tempstr.'<tr><td>'.$vo["id"].'</td><td>'.$vo["post_title"].'</td><td>'.date("Y-m-d H:i:s",$vo["create_time"]).'</td><td><input name="goods_id" class="goods_id" type="checkbox" value="'.$vo['id'].'" data-name="'.$vo['post_title'].'" /></td></tr>';
+            }
+            //dump($goods_data);
+            $gogdslist['pages'] = $pages;
+            $gogdslist['goods_data'] = $tempstr;
+            return json($gogdslist);
+        }
+
+        //提交保存订单
+        if ($this->request->isPost()) {
+
+            $id = $this->request->param('id');
+            $oid = $this->request->param('oid');
+
+            //上传文件身份证正面
+            $updata = new Upload();
+            $file_path = '/upload/files/';
+            $file_array = ["doc","docx","pdf","xlsx"];
+
+            $datas['payment'] = $_POST['pay_way'];
+            $datas['remarks'] = $_POST['remarks'];
+            $pay_pics = array();
+            //转款截图上传1
+            for($i=1;$i<5;$i++) {
+                if (request()->file('pay_pic'.$i)) {
+                    $uploads = $updata->uploadpic('pay_pic'.$i);
+                    if ($uploads['res']) {
+                        //$datas['pay_pic'] = $uploads['data'];
+                        array_push($pay_pics, $uploads['data']);
+                    }
+                }
+                else
+                {
+                    $upimg = $_POST['pay_pic_'.$i];
+                    array_push($pay_pics, $upimg);
+                }
+            }
+            $datas['pay_pic'] = serialize($pay_pics);
+            //协议文件上传
+            if(request()->file('agreement')) {
+                $uploads = $updata->uploadpic('agreement', $file_path, $file_array);
+                if ($uploads['res']) {
+                    $datas['upload_file'] = $uploads['data'];
+                }
+            }
+
+            $agreements = array();
+            //协议图片上传1
+            for($i=1;$i<5;$i++) {
+                if (request()->file('agreement'.$i)) {
+                    $uploads = $updata->uploadpic('agreement'.$i);
+                    if ($uploads['res']) {
+                        //$datas['pay_pic'] = $uploads['data'];
+                        array_push($agreements, $uploads['data']);
+                    }
+                }
+                else
+                {
+                    $upimg = $_POST['agreement_'.$i];
+                    array_push($agreements, $upimg);
+                }
+            }
+            $datas['agreement'] = serialize($agreements);
+
+            //dump($datas);
+            //exit();
+            $rs = Db::name('orders')->where(array("id"=>$oid))->update($datas);
+            if ($rs) {
+                $this->success('编辑成功！',url('Orders/index'));
+            } else {
+                $this->error('系统异常，请稍后提交！',url('Orders/index'));
+            }
+
+        }
+        else
+        {
+            $id = $this->request->param('cid');
+            $goods_data = $this->getGoodslist();
+            $pages = $goods_data->render();
+            $this->assign('pages', $pages);
+            $this->assign('goods_data', $goods_data);
+
+            $where['c.id'] = $id;
+            $join = [
+              ["orders o","o.order_id = c.order_id"]
+            ];
+            $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.agreement,o.upload_file";
+            $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+
+            //dump(unserialize($data['pay_pic']));
+            $this->assign('id', $id);
+            $this->assign('oid', $data['oid']);
+            $this->assign('data', $data);
+            return $this->fetch();
+        }
+
     }
 
 }

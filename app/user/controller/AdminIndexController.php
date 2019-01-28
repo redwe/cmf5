@@ -14,6 +14,7 @@ namespace app\user\controller;
 use cmf\controller\AdminBaseController;
 use think\Db;
 use app\user\model\UserModel;
+use app\admin\model\Upload;
 
 /**
  * Class AdminIndexController
@@ -90,7 +91,7 @@ class AdminIndexController extends AdminBaseController
         $keywordComplex = [];
         if (!empty($request['keyword'])) {
             $keyword = $request['keyword'];
-            $keywordComplex['username|phone|e_mail']    = ['like', "%$keyword%"];
+            $keywordComplex['username|phone|email']    = ['like', "%$keyword%"];
         }
         $userObj = new UserModel();
         $list = Db::name('member')->whereOr($keywordComplex)->where($where)->order("id DESC")->paginate(20);
@@ -175,6 +176,10 @@ class AdminIndexController extends AdminBaseController
             $phone = $this->request->param('phone');
             $email = $this->request->param('email');
             $expval = $this->request->param('expval');
+            $cardno = $this->request->param('cardno');
+            $province = $this->request->param('province');
+            $address = $this->request->param('address');
+            $company = $this->request->param('company');
 
             if(empty($username)){
                 $this->error('账户不能为空');
@@ -196,7 +201,11 @@ class AdminIndexController extends AdminBaseController
                 'username'=>$username,
                 'phone'=>$phone,
                 'email'=>$email,
-                'expval'=>$expval
+                'cardnum' => $cardno,
+                'expval'=>$expval,
+                'province'=>$province,
+                'address'=>$address,
+                'company'=>$company
             );
             if(!empty($password)){
                 if(empty($repassword)){
@@ -205,7 +214,21 @@ class AdminIndexController extends AdminBaseController
                 if($password != $repassword){
                     $this->error('两次密码不一致');
                 }
-                $save_data['password'] = md5(md5($password));
+                $save_data['password'] = cmf_password($password);        //md5(md5($password));
+            }
+            $updata = new Upload();
+            if(request()->file('card_face')){
+                $uploads = $updata->uploadpic('card_face');
+                if ($uploads['res']) {
+                    $save_data['card_face'] = $uploads['data'];
+                }
+            }
+            //上传文件身份证反面
+            if(request()->file('card_back')) {
+                $uploads = $updata->uploadpic('card_back');
+                if ($uploads['res']) {
+                    $save_data['card_back'] = $uploads['data'];
+                }
             }
             if(Db::name("member")->where(array("id"=>$id))->update($save_data)){
                 $this->success('编辑成功');

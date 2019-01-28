@@ -44,7 +44,7 @@
                 <th>申请人</th>
                 <th>申请日期</th>
                 <th>培训课程</th>
-                <th>课程年限</th>
+                <th>年限</th>
                 <th width="100">成交金额</th>
                 <th width="100">已付金额</th>
                 <th width="80">是否欠费</th>
@@ -56,7 +56,7 @@
                 <th>类型</th>
                 <th>是否开课</th>
                 <th>审核时间</th>
-                <th width="90">操作</th>
+                <th width="160">操作</th>
             </tr>
             </thead>
             <foreach name="result" item="vo">
@@ -75,7 +75,7 @@
                     <td>{$vo.applicant}</td>
                     <td>{$vo.create_time|date="Y-m-d",###}</td>
                     <td>{$vo.post_title}</td>
-                    <td>{$vo.kc_year}</td>
+                    <td>{$vo.kc_year}年</td>
                     <td>{$vo.course_money}</td>
                     <td>{$vo.pay_money}</td>
                     <td>
@@ -109,8 +109,18 @@
                     </td>
                     <td>{$vo.check_time|date="Y-m-d",###}</td>
                     <td>
-                        <a href="{:url('AdminArticle/edit',array('cid'=>$vo['cid']))}">{:lang('EDIT')}</a>
-                        <a href="{:url('AdminArticle/delete',array('cid'=>$vo['cid']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+                        <a href="{:url('Orders/check',array('cid'=>$vo['cid']))}">审核</a>
+                        <a href="{:url('Orders/bufeilist',array('cid'=>$vo['cid']))}">补费</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">续学</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">休学</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">转课</a>
+                        <a href="{:url('Orders/increase',array('cid'=>$vo['cid']))}">新增</a>
+                        <a href="{:url('Orders/tuike',array('cid'=>$vo['cid']))}">退课</a>
+                        <a href="{:url('Orders/print',array('cid'=>$vo['cid']))}">打印</a>
+                        <a href="{:url('Orders/logs',array('cid'=>$vo['cid']))}">日志</a>
+                        <a href="{:url('Orders/previews',array('cid'=>$vo['cid']))}">预览</a>
+                        <a href="{:url('Orders/edit',array('cid'=>$vo['cid']))}">{:lang('EDIT')}</a>
+                        <a href="{:url('Orders/delete',array('cid'=>$vo['cid']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
                     </td>
                 </tr>
             </foreach>
