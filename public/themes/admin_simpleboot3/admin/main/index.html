@@ -6,13 +6,11 @@
         <div class="dashboard-box">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">欢迎光临！</h3>
+                    <h3 class="panel-title">今天是：{:date("Y-m-d",time())}   欢迎光临奥创百科管理后台！</h3>
                 </div>
                 <div class="panel-body home-info">
                     <ul id="thinkcmf-notices" class="list-unstyled">
-                        <li>
-                            今天是：{:date("Y-m-d h:i:s",time())}                            欢迎光临奥创百科管理后台！
-                        </li>
+                        <li></li>
                     </ul>
                     <iframe frameborder="0" onload="setIframeHeight(this)" width="100%" src="{:url('article_info/index')}"></iframe>
                     <script>

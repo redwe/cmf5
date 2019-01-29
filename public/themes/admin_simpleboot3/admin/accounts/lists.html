@@ -1,0 +1,56 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('accounts/index')}">用户资金余额</a></li>
+        <li class="active"><a href="{:url('accounts/lists')}">资金明细</a></li>
+        <li class="active"><a href="{:url('accounts/buy')}">购课记录</a></li>
+        <li class="active"><a href="{:url('accounts/tuike')}">退课记录</a></li>
+        <li><a href="{:url('accounts/add')}">资金充值</a></li>
+    </ul>
+    <form class="form-inline">
+        <div class="form-group">
+            <input type="text" class="form-control" id="username" placeholder="请输入管理员姓名" name="username" value="{$username}">
+        </div>
+        <div class="form-group">
+            <input type="text" name="create_time" id="create_time" placeholder="开始时间" class="form-control" value="" onClick="WdatePicker()">
+        </div>
+        <div class="form-group">
+            <input type="text" name="create_time_" id="create_time_" placeholder="结束时间" class="form-control" value="" onClick="WdatePicker()">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+        <button type="submit" name="export" value="yes" class="btn btn-default">导出</button>
+    </form>
+    <table id="sample-table-1" class="table table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>管理员</th>
+            <th>{$tt}金额</th>
+            <th>{$tt}前的金额</th>
+            <th>{$tt}后的金额</th>
+            <th>类型</th>
+            <th>时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="accounts_log" id="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.username}</td>
+                <td>{$vo.change_num}</td>
+                <td>{$vo.change_before}</td>
+                <td>{$vo.change_after}</td>
+                <td>{$type[$vo['type']]}</td>
+                <td>{$vo.time|date="Y-m-d H:i",###}</td>
+            </tr>
+        </volist>
+        </tbody>
+    </table>
+    <div class="page" style="font-size:25px;">{$page}</div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
+

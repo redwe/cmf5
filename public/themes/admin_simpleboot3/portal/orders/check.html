@@ -1,0 +1,157 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li class="active"><a href="javascript:;">审核订单</a></li>
+        <li><a href="{:url('orders/add')}">添加订单</a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20" name="check_customer" role="form" method="POST" id="add_customer" enctype="multipart/form-data">
+        <div class="space-4"></div>
+        <input type="hidden" name="checkid" id="checkid" value="{$id}">
+        <input type="hidden" name="goodsname" id="goodsname" value="{$kcdata.post_title}">
+        <input type="hidden" name="applicant" id="applicant" value="{$kcdata.applicant}">
+        <input type="hidden" name="student" id="student" value="{$kcdata.username}">
+        <input type="hidden" name="course_money" id="course_money" value="{$kcdata.course_money}">
+        <input type="hidden" name="pay_money" id="pay_money" value="{$kcdata.pay_money}">
+
+        <input id="adminname" type="hidden" name="adminname" value="{$Think.session.name}" />
+        <input id="userid" type="hidden" name="userid" value="{$Think.session.ADMIN_ID}" />
+        <input id="groupid" type="hidden" name="groupid" value="{$Think.session.group_id}" />
+        <input id="check_name" type="hidden" name="check_name" value="{$Think.session.check_name}" />
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">类别：</label>
+            <div class="col-sm-3">
+                <select id="goodstype_subject_id" name="type" class="form-control" >
+                    <option value="">--请选择--</option>
+                    <option value="1" <eq name="type" value="1">selected</eq>>--正常--</option>
+                    <option value="2" <eq name="type" value="2">selected</eq>>--非正常--</option>
+                    <option value="3" <eq name="type" value="3">selected</eq>>--内部学习--</option>
+                </select>
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">培训课程：</label>
+            <div class="col-sm-4">
+                <input class="form-control" readonly value="{$kcdata.post_title}">
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">申请日期：</label>
+            <div class="col-sm-3">
+                <input class="form-control" readonly value="{:date('Y-m-d',$kcdata['create_time'])}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">课程年限：</label>
+            <div class="col-sm-3">
+                <input class="form-control" readonly value="{$kcdata.ck_type}年">
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">审核：</label>
+            <div class="col-sm-9">
+                <input type="radio" checked name="check" value="2" />通过
+                <input type="radio" name="check" value="3" />不通过
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <php>
+            $tmnow = time();
+            $kctime = intval($kcdata['course_time']);
+            if($tmnow < $kctime){
+            $course_time = date("Y-m-d",$kcdata['course_time']);
+            }
+            else
+            {
+            $course_time = "";
+            }
+        </php>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">课程过期时间：</label>
+            <div class="col-sm-3">
+                <input autocomplete="off"  name="course_time" id="course_time" placeholder="请输入课程过期时间"
+                       class="form-control js-bootstrap-datetime"
+                       value="{$course_time}" />
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">备注：</label>
+            <div class="col-sm-6">
+                <textarea class="form-control" rows="5" name="check_note" id="content" >{$kcdata.check_note}</textarea>
+            </div>
+        </div>
+        <div class="clearfix form-actions">
+            <div class="col-md-offset-3 col-md-9">
+                <button class="btn btn-info" type="button" onclick="return checkdate()">
+                    <i class="icon-ok bigger-110"></i>确认</button>
+                &nbsp; &nbsp; &nbsp;
+                <button class="btn" type="reset"  onClick="window.history.back()">
+                    <i class="icon-undo bigger-110"></i>返回</button>
+            </div>
+        </div>
+    </form>
+    <script>
+        function wsinfo(){
+            var Socket =  io.connect(ws_url);
+            var content = $("#content").val();     //审核意见
+            var student = $("#student").val();     //学员姓名
+            var applicant = $("#applicant").val(); //申请人
+            var goodsname = $("#goodsname").val(); //课程名
+            var course_money = $("#course_money").val();   //课程费用
+            var pay_money = $("#pay_money").val();     //已支付费用
+            var check_name = $("#adminname").val();     //审核人
+            var goodstype_subject_id = $("#goodstype_subject_id").val();     //是否为正常订单
+            var group_id = $("#groupid").val();
+            //告诉服务器端有用户登录
+            // if(!isEmpty(content)){
+            //alert('ok');
+            var sendData =  {
+                student:student,
+                applicant:applicant,
+                goodsname:goodsname,
+                course_money:course_money,
+                pay_money:pay_money,
+                username:check_name,
+                content:content,
+                group_id:group_id,
+                type_id:goodstype_subject_id
+            };
+            //Socket.emit('login', {userid:'1', username:'redwe'});
+            Socket.emit('message',sendData);
+            //console.log(sendData);
+            //}
+        }
+        function checkdate(){
+            var course_time = $("#course_time").val();
+            var check = $('input[name="check"]:checked').val();
+            //alert(course_time);
+            if(!isEmpty(course_time) && check==2){
+                alert("请输入课程过期时间后再提交！");
+                return false;
+            }
+            else
+            {
+                if(check==2){
+                    wsinfo();
+                }
+            }
+            setTimeout(function(){
+                check_customer.submit();
+            },1000);
+        }
+    </script>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/common.js"></script>
+</body>
+</html>

@@ -193,6 +193,7 @@
             </div>
 
             <ul class="nav navbar-nav navbar-right simplewind-nav">
+
                 <li class="light-blue" style="border-left:none;display: none;" id="close-all-tabs-btn">
                     <a id="close-wrapper" href="javascript:void(0);" title="{:lang('CLOSE_TOP_MENU')}" style="color:#fff;font-size: 16px">
                         <i class="fa fa-times right_tool_icon"></i>
@@ -203,6 +204,64 @@
                         <i class="fa fa-refresh right_tool_icon"></i>
                     </a>
                 </li>
+
+                <if condition="$Think.session.group_id==1">
+                    <li style="padding-right: 30px; color: #fff;border-left:none;">
+                        <span id="onlinecount">当前在线：{$Think.session.name}</span>
+                    </li>
+                </if>
+
+                <!--给总监推送 审核正常订单消息-->
+                <if condition="$Think.session.group_id==5">
+                    <li class="navbar-inverse" style="border-left:none;">
+                        <a onclick="showHide('msg_content3')"  data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <i class="icon-tasks"></i>
+                            <span id="messages3" class="badge badge-grey">0</span>
+                        </a>
+                        <ul id="msg_content3" class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+                            <li class="dropdown-header">
+                                <i class="icon-warning-sign"></i>
+                                <span id="msg3">0</span>条消息
+                            </li>
+                            <li id="message3" style="text-align: left; padding: 10px;"></li>
+                        </ul>
+                    </li>
+                </if>
+
+                <!--给经理推送 审核非正常订单消息-->
+                <if condition="$Think.session.group_id==3">
+                    <li class="navbar-inverse" style="border-left:none;">
+                        <a onclick="showHide('msg_content2')"  data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <i class="icon-bell-alt icon-animated-bell"></i>
+                            <span id="messages2" class="badge badge-important">0</span>
+                        </a>
+                        <ul id="msg_content2" class="pull-right dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-close">
+                            <li class="dropdown-header">
+                                <i class="icon-warning-sign"></i>
+                                <span id="msg2">0</span>条消息
+                            </li>
+                            <li id="message2" style="text-align: left; padding: 10px;"></li>
+                        </ul>
+                    </li>
+                </if>
+                <!--给客服推送 订单审核消息-->
+                <if condition="$Think.session.group_id==7 or $Think.session.group_id==6">
+                    <li class="navbar-inverse" style="border-left:none;">
+                        <a onclick="showHide('msg_content')" data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <i class="icon-envelope icon-animated-vertical"></i>
+                            <span id="messages" class="badge badge-success">0</span>
+                        </a>
+                        <ul id="msg_content" class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+                            <li class="dropdown-header">
+                                <i class="icon-envelope-alt"></i> <span id="msg">0</span>条消息
+                            </li>
+                            <li id="message" style="text-align: left; padding: 10px;">
+
+                            </li>
+                        </ul>
+                    </li>
+                </if>
+
                 <li class="light-blue dropdown" style="border-left:none;">
                     <a data-toggle="dropdown" href="#" class="dropdown-toggle">
                         <if condition="isset($admin['avatar']) && $admin['avatar']">
@@ -318,6 +377,12 @@
     </div>
 </div>
 
+    <bgsound id="sound" loop="0" src="">
+    <input id="adminname" type="hidden" name="adminname" value="{$Think.session.name}" />
+    <input id="userid" type="hidden" name="userid" value="{$Think.session.ADMIN_ID}" />
+    <input id="groupid" type="hidden" name="groupid" value="{$Think.session.group_id}" />
+    <input id="check_name" type="hidden" name="check_name" value="{$Think.session.check_name}" />
+
 <script src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
 <script src="__STATIC__/js/wind.js"></script>
 <script src="__TMPL__/public/assets/js/bootstrap.min.js"></script>
@@ -350,10 +415,6 @@
                 }
             }
         }
-
-
-
-
     });
 
     var ismenumin = $("#sidebar").hasClass("menu-min");
@@ -391,5 +452,141 @@
     });
 
 </script>
+
+<script src="__STATIC__/js/socket.io.js"></script>
+<script>
+    var ws_url = 'ws://39.108.9.242:3000/';
+    var html = '';
+    var count = 0;
+    var userid = $("#userid").val();
+    var adminname = $("#adminname").val();
+    var groupid = $("#groupid").val();
+    var checkname = $("#check_name").val();
+    //alert(userid);
+    var socket = io.connect(ws_url);
+    socket.emit('login', {userid:userid, username:adminname,groupid:groupid});
+    socket.on('login', function(obj){
+        console.log(obj.user.username);
+        setUserlist(obj);
+    });
+
+    //监听用户退出
+    socket.on('logout', function(obj){
+        //将退出的用户从在线列表中删除
+        setUserlist(obj);
+    });
+
+    socket.on('message', function(obj){
+        var content = obj.content;  //审核内容
+        var student = obj.student;     //学员姓名
+        var applicant = obj.applicant; //申请人
+        var goodsname = obj.goodsname; //课程名
+        var course_money = obj.course_money;   //课程费用
+        var pay_money = obj.pay_money;     //已支付费用
+        var check_name = obj.username;     //审核人
+        var group_id = obj.group_id;
+        var type_id = obj.type_id;
+        //alert(obj.content);
+        if(group_id == 5 && type_id == 1) {
+            html += '<span class="msg-body">' +
+            '最新审核消息：' + '<br>' +
+            '审核人：' + check_name + '<br>' +
+            '申请人：' + applicant + '<br>' +
+            '学员姓名：' + student + '<br>' +
+            '课程名称：' + goodsname + '<br>' +
+            '课程费用：' + course_money + '<br>' +
+            '支付金额：' + pay_money + '<br>' +
+            '</span>' +
+            '<span class="msg-time">' +
+            '<i class="icon-time"></i>' +
+            '<span>1分钟以前</span>' +
+            '</span>' +
+            '</a>';
+            $("#message").html(html);
+            count++;
+            $("#msg").html(count);
+            $("#messages").html(count);
+            showHide("msg_content");
+            playSound('__STATIC__/sounds/msg1.wav','sound');
+        }
+        else if(group_id == 5 && type_id == 2){
+            html += '<span class="msg-body">' +
+            '非正常订单需要审核：'+'<br>'+
+                //'审核人：'+check_name+'<br>'+
+            '申请人：'+applicant+'<br>'+
+            '学员姓名：'+student+'<br>'+
+            '课程名称：'+goodsname+'<br>'+
+            '课程费用：'+course_money+'<br>'+
+            '支付金额：'+pay_money+'<br>'+
+            '</span>' +
+            '<span class="msg-time">' +
+            '<i class="icon-time"></i>' +
+            '<span>1分钟以前</span>' +
+            '</span>' +
+            '</a>';
+            $("#message2").html(html);
+            count++;
+            $("#msg2").html(count);
+            $("#messages2").html(count);
+            showHide("msg_content2");
+            playSound('__STATIC__/sounds/msg1.wav','sound');
+        }
+        else if(group_id == 6){
+            if(check_name == checkname){
+                html += '<span class="msg-body">' +
+                '需要审核开课订单：'+'<br>'+
+                '学员手机号：'+content+'<br>'+
+                '申请人：'+applicant+'<br>'+
+                '学员姓名：'+student+'<br>'+
+                '课程ID：'+goodsname+'<br>'+
+                    //'课程费用：'+course_money+'<br>'+
+                    //'支付金额：'+pay_money+'<br>'+
+                '</span>' +
+                '<span class="msg-time">' +
+                '<i class="icon-time"></i>' +
+                '<span>1分钟以前</span>' +
+                '</span>' +
+                '</a>';
+                $("#message3").html(html);
+                count++;
+                $("#msg3").html(count);
+                $("#messages3").html(count);
+                showHide("msg_content3");
+                playSound('__STATIC__/sounds/msg1.wav','sound');
+            }
+        }
+
+    });
+
+    function setUserlist(obj){
+        //alert(obj.user.username);
+        var onlineUsers = obj.onlineUsers;
+        //当前在线人数
+        var onlineCount = obj.onlineCount;
+        //新加入用户的信息
+        var user = obj.user;
+
+        //更新在线人数
+        var userhtml = '';
+        var separator = '';
+        for(key in onlineUsers) {
+            //alert(onlineUsers[key]);
+            if(onlineUsers.hasOwnProperty(key)){
+                userhtml += separator+onlineUsers[key];
+                separator = '、';
+            }
+        }
+        $("#onlinecount").html('当前在线 '+onlineCount+' 人：'+userhtml);
+    }
+
+    function showHide(id){
+        $("#"+id).fadeIn();
+        setTimeout(function () {
+            $("#"+id).fadeOut();
+        }, 10000);
+    }
+
+</script>
+
 </body>
 </html>

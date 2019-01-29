@@ -57,11 +57,11 @@
                                     <button class="btn btn-xs btn-danger">不可操作</button>
                                     <else/>
                                     <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                                        <a class="red" href="{:url('admin/delete',array('id'=>$vo2['id']))}" title="删除">
-                                           删除
-                                        </a> &nbsp;
                                         <a class="green" href='{:url("admin/edit",array("id"=>$vo2["id"]))}' title="编辑">
                                             编辑
+                                        </a> &nbsp;
+                                        <a class="red" href="{:url('admin/delete',array('id'=>$vo2['id']))}" title="删除">
+                                            删除
                                         </a>
                                     </div>
                                 </if>
@@ -77,12 +77,13 @@
                             <td>{$vo2.loginip}</td>
                             <td><if condition=" $vo2.logintime neq 0 ">{$vo2.logintime|date="Y-m-d H:i",###}</if></td>
                             <td>
-                                        <a class="red" href="{:url('admin/delete',array('id'=>$vo2['id']))}" title="删除">
-                                           删除
-                                        </a> &nbsp;
-                                        <a class="green" href="{:url('admin/edit',array('id'=>$vo2['id']))}" title="编辑">
-                                          编辑
-                                        </a>
+                                <a class="green" href="{:url('admin/edit',array('id'=>$vo2['id']))}" title="编辑">
+                                 编辑
+                                </a>
+                                &nbsp;
+                                <a class="red" href="{:url('admin/delete',array('id'=>$vo2['id']))}" title="删除">
+                                    删除
+                                </a>
                             </td>
                         </tr>
                     </if>
@@ -101,12 +102,13 @@
                             <td>{$vo3.loginip}</td>
                             <td><if condition=" $vo3.logintime neq 0 ">{$vo3.logintime|date="Y-m-d H:i",###}</if></td>
                             <td>
-                                         <a class="red" href="{:url('admin/delete',array('id'=>$vo3['id']))}" title="删除">
-                                           删除
-                                        </a> &nbsp;
-                                        <a class="green" href="{:url('admin/edit',array('id'=>$vo3['id']))}" title="编辑">
-                                           编辑
-                                        </a>
+                                 <a class="green" href="{:url('admin/edit',array('id'=>$vo3['id']))}" title="编辑">
+                                    编辑
+                                 </a>
+                                &nbsp;
+                                <a class="red" href="{:url('admin/delete',array('id'=>$vo3['id']))}" title="删除">
+                                    删除
+                                </a>
                             </td>
                         </tr>
                     </volist>

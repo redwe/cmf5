@@ -1,0 +1,102 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+    .goodstable td{ padding: 5px;}
+    table{width:100%;}
+    h1{ text-align: center; margin-top: 0px; font-size: 24px; font-weight: normal; font-family: 微软雅黑}
+    .table1 td{ padding: 5px;}
+    .table2 td{ padding: 2px;}
+    input{ border: 0px;}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <div style="width: 800px;">
+        <h1>收款收据</h1>
+        <table cellspacing="0" cellpadding="0" style="font-size: 14px; margin-bottom: 10px;" class="table2">
+            <tr>
+                <td>付款户名：<input name="username" value="{$data.cnname}"></td>
+                <td width="247">手机号码：<input name="phone" value="{$data.phone}"></td>
+                <td colspan="5">单据号码：<input name="ordercode" value="{$orderCode}"></td>
+            </tr>
+            <tr>
+                <td>身份证号码：<input name="cardno" value="{$data.cardnum}"></td>
+                <td>单据日期：<input name="datetime" value="{:date('Y/m/d',time())}"></td>
+                <td colspan="4">是否补费：<input name="qianfei" value=""></td>
+            </tr>
+            <tr>
+                <td colspan="4">所属单位：<input name="company" style="width: 600px;" value=""> </td>
+            </tr>
+            <tr>
+                <td colspan="4">结算方式：<input name="payment" style="width: 600px;" value="转账（实收:{$data.pay_money}）"></td>
+
+            </tr>
+            <tr>
+                <td colspan="4">摘要：<input name="remark" style="width: 600px;" value=""></td>
+
+            </tr>
+        </table>
+        <table cellspacing="0" cellpadding="0" border="1" class="table1" style="border-collapse:collapse;">
+
+            <tr>
+                <td colspan="5" width="30%">收费项目/项目名称</td>
+                <td colspan="5" width="30%">班次</td>
+                <td colspan="2" width="22%">金额</td>
+                <td width="15%">备注</td>
+            </tr>
+            <tr>
+                <td colspan="5"><input name="classname" value="{$cate.classname3}"></td>
+                <td colspan="5"><input name="catedata" value="{$cate.classname1}"></td>
+                <td colspan="2"><input name="paymoney" value="{$data.pay_money|number_format=2}"</td>
+                <td><input name="remark2" style="width: 120px;" value=""></td>
+            </tr>
+            <tr>
+                <td colspan="5"><input name="classname2" value=""></td>
+                <td colspan="5"><input name="classci2" value=""></td>
+                <td colspan="2"><input name="paymoney2" value=""></td>
+                <td><input name="remark2" style="width: 120px;" value=""></td>
+            </tr>
+            <tr>
+                <td colspan="5"><input name="classname3" value=""></td>
+                <td colspan="5"><input name="classci3" value=""></td>
+                <td colspan="2"><input name="paymoney3" value=""></td>
+                <td><input name="remark3" style="width: 120px;" value=""></td>
+            </tr>
+            <tr>
+                <td colspan="5">合计</td>
+                <td colspan="5"><input name="daxie" style="font-size: 16px;" value="{$data.pay_money|RMB_Upper}整"></td>
+                <td colspan="2"><input name="xiaoxie" value="{:number_format($data['pay_money'], 2)}"></td>
+                <td>　</td>
+            </tr>
+        </table>
+        <table cellspacing="0" cellpadding="0" style="font-size: 12px; margin-top: 10px;" class="table2">
+
+            <tr>
+                <td>课程顾问：<input name="applicant" value="{$data.applicant}"></td>
+                <td>     开票人： <input name="kaipiao" value="奥创百科"></td>
+                <td>    收款人：<input name="shoukuan" value="奥创百科"></td>
+                <td>收款单位盖章</td>
+            </tr>
+            <tr>
+                <td>白联 存根联</td>
+                <td>     红联 客户联      </td>
+                <td>    黄联    财务联</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="4">注意事项：请妥善保管收据，若有其他后续事项，需退回此收据；若收据遗失，将不办理</td>
+            </tr>
+        </table>
+    </div>
+    <input type="button" id="printor" onclick="printOrder()" style="margin-top:50px; " value="打印预览">
+    <script>
+        function printOrder(){
+            $("#printor").hide();
+            print();
+        }
+    </script>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

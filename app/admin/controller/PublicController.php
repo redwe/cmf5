@@ -94,10 +94,24 @@ class PublicController extends AdminBaseController
                 if ($result["id"] != 1 && (empty($groups) || empty($result['user_status']))) {
                     $this->error(lang('USE_DISABLED'));
                 }
+                $groupid = $result["group_id"];
+                $pid = $result["pid"];
+                $username = $result["username"];
+                $badmin = Db::name("admin")->where(array("id"=>$pid))->find();
+                //dump($badmin);
+                if($groupid == 6){
+                    $check_name = $badmin['username'];
+                }
+                else
+                {
+                    $check_name = $username;
+                }
+
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
-                session('name', $result["username"]);
-                session('group_id', $result["group_id"]);
+                session('name', $username);
+                session('check_name', $check_name);
+                session('group_id', $groupid);
                 session('department', $result["department"]);
 
                 $result['loginip']   = get_client_ip(0, true);
@@ -124,6 +138,6 @@ class PublicController extends AdminBaseController
     public function logout()
     {
         session('ADMIN_ID', null);
-        return redirect(url('/', [], false, true));
+        return redirect(url('/admin', [], false, true));
     }
 }

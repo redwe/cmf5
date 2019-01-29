@@ -1,0 +1,88 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+    .goodstable td{ padding: 5px;}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li class="active"><a href="javascript:;">开课日志</a></li>
+        <li><a href="{:url('orders/add')}">添加订单</a></li>
+    </ul>
+    <form class="js-ajax-form" action="" method="post">
+        <h1 style="text-align: center">报单预览</h1>
+        <!-- PAGE CONTENT BEGINS -->
+        <table class="goodstable" width="60%" border="1" align="center">
+            <tr>
+                <td width="50%">招生老师：</td>
+                <td>{$data.teacher}</td>
+            </tr>
+            <tr>
+                <td>姓    名：</td>
+                <td>{$data.cnname}</td>
+            </tr>
+            <tr>
+                <td>电    话：</td>
+                <td>{$data.phone}</td>
+            </tr>
+            <tr>
+                <td>考    区：</td>
+                <td>{$data.province}</td>
+            </tr>
+            <tr>
+                <td>身份证号：</td>
+                <td>{$data.cardnum}</td>
+            </tr>
+            <tr>
+                <td>电子邮箱：</td>
+                <td>{$data.email}</td>
+            </tr>
+            <tr>
+                <td>项    目：</td>
+                <td>{$data.classname}</td>
+            </tr>
+            <tr>
+                <td>专    业：</td>
+                <td>{$data.classname2}</td>
+            </tr>
+            <tr>
+                <td>付款方式：</td>
+                <td>{$data.payment}</td>
+            </tr>
+            <tr>
+                <td>总费用额：</td>
+                <td>{$data.course_money}元</td>
+            </tr>
+            <tr>
+                <td>已交费用：</td>
+                <td>{$data.pay_money}元</td>
+            </tr>
+            <tr>
+                <td>欠费金额：</td>
+                <td>{$data['course_money'] - $data['pay_money']}元</td>
+            </tr>
+            <tr>
+                <td>班次及服务年限：</td>
+                <td>{$data.kc_year}年</td>
+            </tr>
+            <tr>
+                <td>工作单位：</td>
+                <td>{$data.company}</td>
+            </tr>
+            <tr>
+                <td>地  址：</td>
+                <td>{$data.address}</td>
+            </tr>
+            <tr>
+                <td>备注：</td>
+                <td>{$data.remarks}</td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

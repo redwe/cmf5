@@ -1,0 +1,52 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('accounts/index')}">用户资金余额</a></li>
+        <li class="active"><a href="{:url('accounts/lists')}">资金明细</a></li>
+        <li class="active"><a href="{:url('accounts/buy')}">购课记录</a></li>
+        <li class="active"><a href="{:url('accounts/tuike')}">退课记录</a></li>
+        <li><a href="{:url('accounts/add')}">资金充值</a></li>
+    </ul>
+      <form class="form-inline margin-top-20">
+            <div class="form-group">
+                <input type="text" class="form-control" id="username" placeholder="请输入用户名" name="username" value="">
+            </div>
+            <button type="submit" class="btn btn-default">搜索</button>
+            <button type="submit" name="export" value="yes" class="btn btn-default">导出</button>
+        </form>
+        <table id="sample-table-1" class="table table-striped table-bordered table-hover margin-top-20">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>管理员</th>
+                <th>资金数量</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <volist name="accounts" id="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.username}</td>
+                    <td>{$vo.accounts}</td>
+                    <td>
+                        <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                            <a class="blue" href="{:url('Accounts/look',array('id'=>$vo['uid']))}" title="查看">
+                                <i class="icon-zoom-in bigger-130"></i> 查看
+                            </a>
+                            <a class="green" href="{:url('Accounts/edit',array('id'=>$vo['id']))}" title="充值">
+                                <i class="icon-pencil bigger-130"></i> 充值
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </volist>
+            </tbody>
+        </table>
+        <div class="pa">{$page}</div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

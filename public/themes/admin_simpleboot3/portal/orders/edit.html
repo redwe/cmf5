@@ -19,28 +19,73 @@
 <div class="wrap">
     <ul class="nav nav-tabs">
         <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li><a href="{:url('orders/logs')}">开课日志</a></li>
         <li><a href="{:url('orders/add')}">添加新课程</a></li>
         <li class="active"><a href="#">编辑课程</a></li>
     </ul>
     <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer" enctype="multipart/form-data">
         <input type="hidden" name="id" id="id" value="{$id}">
         <input type="hidden" name="oid" id="oid" value="{$oid}">
+        <input type="hidden" name="order_id" id="order_id" value="{$order_id}">
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">课程ID</label>
             <div class="col-sm-6">
-                <input style="width: 160px;" readonly data-toggle="modal" data-target="#myModal" name="goods_id" id="goods_id" placeholder="请输入要开课程的ID" class="form-control" />
+                <input style="width: 160px;" readonly data-toggle="modal" data-target="#myModal" name="goods_id" id="goods_id" placeholder="请输入要开课程的ID"
+                       class="form-control" value="{$goods_id}" />
             </div>
         </div>
-        <div class="Hz"></div>
+        <div class="Hz">
+
+        <volist name="cartlist" id="vo">
+            <div class="Xk">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right">课程名称</label>
+                    <div class="col-sm-6">
+                        <span class="goods_name col-sm-5 green">{$vo.post_title}(id:{$vo.goods_id})</span>
+                        <input data-key="0" data-id="{$vo.goods_id}" type="button" value="删除" class="hkremove">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right">课程年限</label>
+                    <div class="col-sm-6">
+                        <select name="kc_type[]" data-id="0" class="kc_type">
+                            <option value="1" data-price="{$vo.year_price1}">一年</option>
+                            <option value="2" data-price="{$vo.year_price2}">二年</option>
+                            <option value="3" data-price="{$vo.year_price2}">三年</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right">课程费用</label>
+                    <div class="col-sm-6">
+                        <input type="text" readonly="true" name="kc_price[]" id="kc_price0" placeholder="请选择课程年限"
+                               class="form-control kc_price kcSelect" value="{$vo.kc_price}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right">成交金额</label>
+                    <div class="col-sm-6">
+                        <input type="text" name="course_money[]" id="total_money0" placeholder="请输入实际成交金额" class="form-control course_money" value="{$vo.course_money}" >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label no-padding-right">已交费用</label>
+                    <div class="col-sm-6">
+                        <input type="text" name="pay_money[]" data-key="0" id="pay_money0" placeholder="" class="form-control pay_money" value="{$vo.pay_money}">
+                    </div>
+                </div>
+            </div>
+        </volist>
+
+        </div>
         <div class="space-4"></div>
         <div class="form-group owe_time">
             <label class="col-sm-3 control-label no-padding-right">欠款补交时间</label>
             <div class="col-sm-6">
-                <input type="text" name="owe_time" placeholder="" class="form-control js-bootstrap-datetime"
+                <input type="text" name="owe_time" placeholder="" class="form-control form_datetime js-bootstrap-datetime"
                        value="{$data.owe_time|date='Y-m-d',###}" autocomplete="off" />
             </div>
         </div>
-        <div class="space-4"></div>
 
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">转账方式</label>

@@ -128,6 +128,7 @@ class PortalCategoryModel extends Model
                     //"<td style='padding-left:20px;'><input type='checkbox' class='js-check' data-yid='js-check-y' data-xid='js-check-x' name='ids[]' value='\$id' data-parent_id='\$parent_id' data-id='\$id'></td>";
                         //<td><input name='list_orders[\$id]' type='text' size='3' value='\$list_order' class='input-order'></td>
             $tpl = $tpl."<td style='padding-left:20px;'>\$spacer \$name(\$id)</td>
+                        <td>\$pinyin</td>
                         <td>\$year</td>
                         <td>\$description</td>
                         <td>\$teacher</td>

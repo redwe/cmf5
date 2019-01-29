@@ -1,5 +1,8 @@
 <?php
 return array (
+  'ADMIN_ACCOUNTS_DEFAULT' => '资金管理',
+  'ADMIN_ACCOUNTS_INDEX' => '用户余额',
+  'ADMIN_ACCOUNTS_LISTS' => '资金明细',
   'ADMIN_ADMIN_ADD' => '管理员添加',
   'ADMIN_ADMIN_ADDPOST' => '管理员添加提交',
   'ADMIN_ADMIN_BAN' => '停用管理员',
@@ -127,6 +130,8 @@ return array (
   'PORTAL_ADMINTAG_UPSTATUS' => '更新标签状态',
   'PORTAL_ORDERS_DEFAULT' => '开课系统',
   'PORTAL_ORDERS_INDEX' => '开课列表',
+  'PORTAL_ORDERS_LOGS' => '开课日志',
+  'PORTAL_ORDERS_PREVIEWS' => '报单预览',
   'USER_ADMINASSET_DELETE' => '删除文件',
   'USER_ADMINASSET_INDEX' => '资源管理',
   'USER_ADMININDEX_ADD' => '添加用户',

@@ -7,6 +7,7 @@
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
         <li class="active"><a href="javascript:;">所有订单</a></li>
+        <li><a href="{:url('orders/logs')}">开课日志</a></li>
         <li><a href="{:url('orders/add')}">添加订单</a></li>
     </ul>
     <form class="well form-inline margin-top-20" method="post" action="{:url('orders/index')}">
@@ -94,11 +95,11 @@
                     <td>{$vo.course_time|date="Y-m-d",###}</td>
                     <td>{$vo.check_name}</td>
                     <td>
-                        <notempty name="vo.type">
+                        <if condition="$vo.ck_type==1">
                             正常
-                            <else/>
+                         <else/>
                             非正常
-                        </notempty>
+                        </if>
                     </td>
                     <td>
                         <notempty name="vo.status">
@@ -116,11 +117,11 @@
                         <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">转课</a>
                         <a href="{:url('Orders/increase',array('cid'=>$vo['cid']))}">新增</a>
                         <a href="{:url('Orders/tuike',array('cid'=>$vo['cid']))}">退课</a>
-                        <a href="{:url('Orders/print',array('cid'=>$vo['cid']))}">打印</a>
+                        <a href="{:url('Orders/printOrder',array('cid'=>$vo['cid']))}">打印</a>
                         <a href="{:url('Orders/logs',array('cid'=>$vo['cid']))}">日志</a>
                         <a href="{:url('Orders/previews',array('cid'=>$vo['cid']))}">预览</a>
-                        <a href="{:url('Orders/edit',array('cid'=>$vo['cid']))}">{:lang('EDIT')}</a>
-                        <a href="{:url('Orders/delete',array('cid'=>$vo['cid']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+                        <a href="{:url('Orders/edit',array('cid'=>$vo['cid'],'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
+                        <a href="{:url('Orders/delete',array('cid'=>$vo['cid'],'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
                     </td>
                 </tr>
             </foreach>

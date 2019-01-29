@@ -641,6 +641,7 @@
                 language: 'zh-CN',
                 format: 'yyyy-mm-dd hh:ii',
                 todayBtn: 1,
+                minView: "month",//设置只显示到月份
                 autoclose: true
             });
         });

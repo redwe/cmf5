@@ -34,19 +34,20 @@ class OrdersController extends AdminBaseController
 
     public function index(){
 
-        $where['c.status']=1;
+        $where['c.isdel'] = 0;
         $join = [
             ["carts c","c.order_id = o.order_id","left"],
             ["portal_post g","c.goods_id = g.id"],
             ["member m","m.id = o.member_id"],
         ];
         $field = 'o.*,c.id as cid,g.post_title,c.kc_year,c.check_time,c.is_owe,c.course_money,c.pay_money,c.course_time,c.check_name,m.username,m.phone,c
-        .create_time';
+        .create_time,c.ck_type';
         $result = Db::name("orders")->alias("o")
             ->join($join)->field($field)
-            //->where($where)
+            ->where($where)
             ->order("o.id DESC")
             ->paginate(20);
+        //dump($result);
         $this->assign('result', $result);
         $this->assign('page', $result->render());
         return $this->fetch();
@@ -77,7 +78,7 @@ class OrdersController extends AdminBaseController
             $array_id = [];
             $param = [];
 
-            $ordercode = date("Ymdhis").rand(1000,9999);
+            $ordercode = "A".date("Ymdhis").rand(1000,9999);
 
             //上传文件身份证正面
             $updata = new Upload();
@@ -225,6 +226,7 @@ class OrdersController extends AdminBaseController
                     $param['isprint'] = 0;      //是否打印过
                     //审核状态
                     $param['check'] = 1;        //是否欠费
+                    $param['isdel'] = 0;        //是否删除
 
                     if($groupid == 6){
                         $param['check_name'] = $badmin['username'];
@@ -293,7 +295,7 @@ class OrdersController extends AdminBaseController
                   }
             }
             $datas['agreement'] = serialize($agreements);
-
+            $datas['update_time'] = time();
             //dump($datas);
             //exit();
             $rs = Db::name('orders')->insert($datas);
@@ -398,6 +400,8 @@ class OrdersController extends AdminBaseController
 
             $id = $this->request->param('id');
             $oid = $this->request->param('oid');
+            $order_id = $this->request->param('order_id');
+            $owe_time = $this->request->param('owe_time');
 
             //上传文件身份证正面
             $updata = new Upload();
@@ -448,20 +452,28 @@ class OrdersController extends AdminBaseController
                 }
             }
             $datas['agreement'] = serialize($agreements);
-
-            //dump($datas);
+            $datas['update_time'] = time();
             //exit();
             $rs = Db::name('orders')->where(array("id"=>$oid))->update($datas);
+
             if ($rs) {
+                $parem['owe_time'] = strtotime($owe_time);
+                Db::name('carts')->where(array("id"=>$id))->update($parem);
+
+                $adminid = Session::get("name");
+                $active = "编辑课程订单";
+                $this->cource_log($id,$adminid,$active);
+
                 $this->success('编辑成功！',url('Orders/index'));
             } else {
                 $this->error('系统异常，请稍后提交！',url('Orders/index'));
             }
-
         }
         else
         {
             $id = $this->request->param('cid');
+            $oid = $this->request->param('oid');
+            $order_id = $this->request->param('order_id');
             $goods_data = $this->getGoodslist();
             $pages = $goods_data->render();
             $this->assign('pages', $pages);
@@ -473,14 +485,311 @@ class OrdersController extends AdminBaseController
             ];
             $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.agreement,o.upload_file";
             $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
-
             //dump(unserialize($data['pay_pic']));
+
+            $join2 = [
+                ["portal_post p","p.id=c.goods_id"],
+                ["orders o","o.order_id = c.order_id"]
+            ];
+            $where2['c.order_id'] = $order_id;
+            $field2 = "c.*,p.post_title,p.year_price1,p.year_price2,p.year_price3";
+            $cartlist = Db::name("carts")->alias("c")->join($join2)->field($field2)->where($where2)->select();
+            //dump($cartlist);
+            $ids = array();
+            foreach($cartlist as $vo){
+                array_push($ids,$vo['goods_id']);
+            }
+            $this->assign('goods_id', implode(",",$ids));
             $this->assign('id', $id);
             $this->assign('oid', $data['oid']);
+            $this->assign('order_id', $data['order_id']);
+            $this->assign('cartlist', $cartlist);
             $this->assign('data', $data);
             return $this->fetch();
         }
 
+    }
+
+    public function delete(){
+
+        $cid = $this->request->param('cid');
+        $oid = $this->request->param('oid');
+        //$order_id = $this->request->param('order_id');
+        $datas['update_time'] = time();
+        $rs = Db::name('orders')->where(array("id"=>$oid))->update($datas);
+        if ($rs) {
+            $parem['isdel'] = 1;
+            Db::name('carts')->where(array("id"=>$cid))->update($parem);
+
+            $adminid = Session::get("name");
+            $active = "删除课程订单";
+            $this->cource_log($cid,$adminid,$active);
+
+            $this->success('删除成功！',url('Orders/index'));
+        } else {
+            $this->error('系统异常，请稍后提交！',url('Orders/index'));
+        }
+    }
+
+    //写入开课系统操作日志
+    public function cource_log($id,$adminid,$active){
+        if(!empty($id) && !empty($adminid)){
+            $data["cid"] = $id;
+            $data["status"] = 0;
+            $data["adminid"] = $adminid;
+            $data["remark"] = $active;
+            $data["datetime"] = time();
+            Db::name("course_log")->insert($data);
+        }
+    }
+
+    //开课日志列表
+    public function logs(){
+
+        $id = $this->request->param("cid");
+        $where['status'] = 0;
+        if(!empty($id)){
+            $where['cid'] = $id;
+        }
+        $loglist = Db::name('course_log')->where($where)->order('id DESC ')->paginate(20);
+        $this->assign('page', $loglist->render());// 赋值分页输出
+        $this->assign('loglist', $loglist);
+        return $this->fetch();
+    }
+
+    public function previews(){
+
+        $id = $this->request->param("cid");
+        $where['c.id'] = $id;
+        $join = [
+            ["orders o","o.order_id = c.order_id"],
+            ["member m","o.member_id = m.id"],
+            ["portal_post p","p.id = c.goods_id"]
+        ];
+        $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
+        .address,m.company";
+        $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+        $goodsid = $data['goods_id'];
+        $goodstypes = $this->getXiangmu($goodsid);
+        $data["classname"] = $goodstypes['classname3'];
+        $data["classname2"] = $goodstypes['classname2'];
+
+        $this->assign("data",$data);
+        return $this->fetch();
+    }
+
+    //根据goodsid查询项目
+    public function getXiangmu($goodsid){
+        $goodsdata =  Db::name('portal_category_post')->where(array('post_id'=>$goodsid))->find();
+        $cateid = $goodsdata['category_id'];
+
+        $goodscate1 = Db::name('portal_category')->where(array('id'=>$cateid))->find();
+        $cateid1 = $goodscate1['parent_id'];
+        $catename1 = $goodscate1['name'];
+
+        $goodscate2 = Db::name('portal_category')->where(array('id'=>$cateid1))->find();
+        $cateid2 = $goodscate2['parent_id'];
+        $catename2 = $goodscate2['name'];
+
+        $goodscate3 = Db::name('portal_category')->where(array('id'=>$cateid2))->find();
+        $cateid3 = $goodscate3['parent_id'];
+        $catename3 = $goodscate3['name'];
+
+        $data = array(
+            "classname1" => $catename1,
+            "classname2" => $catename2,
+            "classname3" => $catename3,
+            "pinyin" => $goodscate3["pinyin"]
+        );
+        return $data;
+    }
+
+    //打印订单 20190104 redwe
+    public function printOrder(){
+        $cid     = $this->request->param('cid');
+        if(empty($cid)){
+            $this->error('参数错误');
+        }
+        $where['c.id'] = $cid;
+        $join = [
+            ["orders o","o.order_id = c.order_id"],
+            ["member m","o.member_id = m.id"],
+            ["portal_post p","p.id = c.goods_id"]
+        ];
+        $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
+        .address,m.company";
+        $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+        if(empty($data)){
+            $this->error('暂无数据');
+        }
+        $orderid = $data["order_id"];
+        $goodsid = $data["goods_id"];
+        $classname = $data['post_title'];
+        $datetime = date("Y-m-d h:i:s",time());
+        $this->assign('data',$data);
+
+        $oldnum =  Db::name('print_log')->where(array('orderid'=>$cid))->find();
+
+        $goodstypes = $this->getXiangmu($goodsid);
+        //dump($goodstypes);
+        if(!empty($goodstypes['classname3'])){
+            $data["classname3"] = $goodstypes['classname3'];
+        }
+
+        $data["classname2"] = $goodstypes['classname2'];
+        $data["pinyin"] = $goodstypes['pinyin'];
+        $pingyin = $goodstypes['pinyin'];
+        if(empty($oldnum)){
+            $pingyin = strtoupper($pingyin);
+            //dump($pingyin);
+            if(empty($pingyin)){
+                $pingyin = "A";
+            }
+            else
+            {
+                $pingyin = $pingyin[0];
+            }
+            $date = date("Ymd",time());
+
+            $newnum =  Db::name('print_log')->order("id desc")->find();
+            if($newnum){
+                $numid = $newnum["listid"];
+            }
+            else
+            {
+                $numid = 0;
+            }
+            $sourceNumber = $numid + 1;
+            //$numcode = substr(strval($sourceNumber+1000000),1);
+            $numcode = rand(100000,999999);
+            $orderCode = $date.$pingyin.$numcode;
+
+            $savedata = array(
+                "orderid" =>$cid,
+                "printcode" => $orderCode,
+                "datetime" => $datetime,
+                "listid" => $sourceNumber
+            );
+
+            $result = Db::name('print_log')->insert($savedata);
+            if($result){
+                Db::name('carts')->where(array('id'=>$cid))->update(array("isprint"=>1));
+            }
+        }
+        else
+        {
+            $orderCode = $oldnum['printcode'];
+            $where = array("orderid"=>$orderid);
+            $savedata = array(
+                "printcode" => $orderCode,
+                "datetime" => $datetime
+            );
+            $result = Db::name('print_log')->where($where)->update($savedata);
+            if($result){
+                $res = Db::name('carts')->where(array('id'=>$cid))->find();
+                if(empty($res['isprint'])){
+                    Db::name('carts')->where(array('id'=>$cid))->update(array("isprint"=>1));
+                }
+                else
+                {
+                    Db::name('carts')->where(array('id'=>$cid))->setInc("isprint");
+                }
+            }
+            //$this->error("该记录已经存在");
+        }
+        //dump($data);
+        $this->assign('cate',$goodstypes);
+        $this->assign('orderCode',$orderCode);
+        return $this->fetch();
+    }
+
+    //审核
+    public function check()
+    {
+        if ($this->request->isPost()) {
+            $id = $this->request->param("cid");
+            $strname = '';
+            $strres = "未通过";
+            $groupid =Session::get("group_id");
+            $order = Db::name('carts')->where(array("id"=>$id))->find();
+            $check = $this->request->param('check');
+            $typeid = $this->request->param('type');
+            $course_time = $this->request->param('course_time');
+            $data['check_time'] = time();
+            if($check==2){
+                $strres = "通过";
+                $course_time = strtotime($course_time);
+                if($course_time<time()){
+                    $this->error('提交失败！课程过期时间不正确！');
+                    exit();
+                }
+                $data['check'] = $check;
+                $data['course_time'] = $course_time;
+                if($groupid == 5){
+                    if($typeid == '2'){
+                        $data['status']=2;
+                    }
+                    else
+                    {
+                        $data['status']=1;
+                    }
+                    $strname = "总监";
+                }
+                if($groupid == 3){
+                    if($typeid == 2){
+                        $data['status']=1;
+                    }
+                    $strname = "经理";
+                }
+                if($groupid == 1){
+                    $data['status']=1;
+                    $strname = "管理员";
+                }
+            }
+
+            if($check==3){
+                $data['check'] = $check;
+                $data['check_note']=$this->request->param('check_note');
+            }
+
+            $check_name = Session::get('name');
+            $data['check_name'] = $check_name;
+
+            if($check==2 && $groupid != 3){
+                $acc_model = new AccountsChangeController();
+                $result=$acc_model->add_accounts($this->admin_id,$order['course_money'],2,$id);
+                if($result['code']==500){
+                    $this->error($result['msg']);
+                    exit;
+                }
+            }
+            $rs = Db::name('carts')->where(array('id'=>$id))->update($data);
+            if($rs){
+                $this->cource_log($id,$check_name,$strname."审核订单".$strres);
+                $this->success('提交成功！');
+            }else{
+                $this->error('提交失败！请联系管理员');
+            }
+        } else {
+            $id = $this->request->param("cid");
+            $groupid = Session::get("group_id");
+            //$kcdata = Db::name('carts')->where(array('id'=>$id))->find();
+            $where['c.id'] = $id;
+            $join = [
+                ["orders o","o.order_id = c.order_id"],
+                ["member m","o.member_id = m.id"],
+                ["portal_post p","p.id = c.goods_id"]
+            ];
+            $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
+        .address,m.company";
+            $kcdata = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+
+            $this->assign("groupid",$groupid);
+            $this->assign("kcdata",$kcdata);
+            $this->assign("type",$kcdata['ck_type']);
+            $this->assign("id",$id);
+            return $this->fetch();
+        }
     }
 
 }
