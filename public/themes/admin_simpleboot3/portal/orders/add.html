@@ -24,6 +24,8 @@
     </ul>
     <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer" enctype="multipart/form-data">
         <input type="hidden" name="applicant" id="applicant" value="{$applicant}">
+        <input type="hidden" name="check_name" id="check_name" value="{$check_name}">
+        <input type="hidden" name="group_id" id="group_id" value="{$group_id}">
         <div class="space-4"></div>
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">手机号</label>
@@ -203,7 +205,7 @@
 
         <div class="clearfix form-actions">
             <div class="col-md-offset-3 col-md-9">
-                <button class="btn btn-info" type="submit">
+                <button class="btn btn-info" type="button"  onclick="return checkdate()">
                     <i class="icon-ok bigger-110"></i>
                     保存
                 </button>
@@ -218,6 +220,94 @@
             </div>
         </div>
     </form>
+
+    <script>
+        function wsinfo(){
+            var Socket =  io.connect(ws_url);
+            var content = $("#phone").val();     //学员手机号
+            var student = $("#username").val();     //学员姓名
+            var applicant = $("#applicant").val(); //申请人
+            var goodsname = $("#goods_id").val(); //课程id
+            var course_money = 0;    //$("#course_money").val();   //课程费用
+            var pay_money = 0;    //$("#pay_money").val();     //已支付费用
+            var check_name = $("#check_name").val();     //审核人
+            var goodstype_subject_id = 1;   //$("#goodstype_subject_id").val();     //是否为正常订单
+            var group_id = $("#group_id").val();
+            //alert("ok");
+            //告诉服务器端有用户登录
+            // if(!isEmpty(content)){
+            var sendData =  {
+                student:student,
+                applicant:applicant,
+                goodsname:goodsname,
+                course_money:course_money,
+                pay_money:pay_money,
+                username:check_name,
+                content:content,
+                group_id:group_id,
+                type_id:goodstype_subject_id
+            };
+            //alert(check_name);
+            //Socket.emit('login', {userid:'1', username:'redwe'});
+            Socket.emit('message',sendData);
+            console.log(sendData);
+            //}
+        }
+
+        function checkdate(){
+            var phone = $("#phone").val();
+            var username = $("#username").val();
+
+            if(!isEmpty(phone) || !isEmpty(username)){
+                alert("请输入电话和用户名再提交！");
+                return false;
+            }
+            var email = $("#email").val();
+            var address = $("#address").val();
+            if(!isEmpty(email) || !isEmpty(address)){
+                alert("请输入邮箱和地址再提交！");
+                return false;
+            }
+            var company = $("#company").val();
+            var province = $("#province").val();
+            if(!isEmpty(province) || !isEmpty(company)){
+                alert("请输入单位和考区再提交！");
+                return false;
+            }
+
+            //alert(checkMoney('course_money'));
+            if(!checkMoney('course_money')){
+                alert("请输入成交金额再提交！");
+                return false;
+            }
+
+            if(!checkMoney('pay_money')){
+                alert("请输入已付金额再提交！");
+                return false;
+            }
+
+            wsinfo();
+            setTimeout(function(){
+                add_customer.submit();
+            },1000);
+
+        }
+        //course_money、pay_money
+        function checkMoney(moneys){
+            $temp = '';
+            $("."+moneys).each(function(){
+                var money = $(this).val();
+                if(!isEmpty(money)){
+                    return false;
+                }
+                else
+                {
+                    $temp += ","+money;
+                }
+            });
+            return $temp;
+        }
+    </script>
 
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false">
         <div class="modal-dialog" style="width: 1200px;">

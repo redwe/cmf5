@@ -2,92 +2,45 @@
 </head>
 <body>
 <div class="wrap js-check-wrap">
-        <ul class="nav nav-tabs">
-            <li><a href="{:url('article_info/lists')}">公告信息管理</a></li>
-            <li><a href="{:url('article_info/add_article')}">添加公告</a></li>
-            <li class="active"><a href="#">编辑公告</a></li>
-        </ul>
-                        <!-- PAGE CONTENT BEGINS -->
-                        <form class="form-horizontal js-ajax-form margin-top-20"  role="form" method="POST" id="add_customer" enctype="multipart/form-data">
-                            <input name="department" type="hidden" value="{$depart.id}">
-                            <div class="space-4"></div>
-                            <input type="hidden" name="id" id="id" value="{$res.id}" />
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label no-padding-right">部门：</label>
-                                <div class="col-sm-3">
-                                    <input name="bumen" class="form-control" value=" {$depart.department}"> &nbsp;
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label no-padding-right">类别</label>
-                                <div class="col-sm-9">
-                                    <input name="types" type="radio" <php>if($res['types']==1){</php> checked <php>}</php> value="1"> 综合类
-                                    <input name="types" type="radio" <php>if($res['types']==2){</php> checked <php>}</php> value="2"> 课程类
-                                </div>
-                            </div>
-                            <div class="space-4"></div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label no-padding-right">标题</label>
-                                <div class="col-sm-6">
-                                    <input type="text" name="title" id="title" value="{$res.title}" class="form-control"  />
-                                </div>
-                            </div>
-
-                            <div class="space-4"></div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label no-padding-right">缩略图</label>
-                                <div class="col-sm-7" style="cursor: pointer">
-                                    <if condition="$res.thumb == ''">
-                                        <img width="100" id="thumb_img" onclick="$('#thumb').click()" src="/static/images/default.png">
-                                     <else />
-                                        <img width="100" id="thumb_img" onclick="$('#thumb').click()" src="{$res.thumb}">
-                                    </if>
-                                    <input style="display: none" type="file" name="thumb" id="thumb" class="col-xs-10 col-sm-5" onchange="setdeafultpic(this,'thumb')" />
-                                </div>
-                            </div>
-                            <div class="space-4"></div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label no-padding-right">内容摘要</label>
-                                <div class="col-sm-6">
-                                    <textarea class="form-control" name="remark" id="remark" >{$res.remark}</textarea>
-                                 </div>
-                            </div>
-                            <div class="space-4"></div>
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label no-padding-right">详细内容</label>
-                                <div class="col-sm-6">
-                                    <script type="text/plain" id="content" name="content">{$res.content|htmlspecialchars_decode}</script>
-                                </div>
-                            </div>
-
-                            <div class="clearfix form-actions">
-                                <div class="col-md-offset-3 col-md-9">
-                                    <button class="btn btn-info js-ajax-submit" type="submit" onclick="return checkdate()"> <i class="icon-ok bigger-110"></i> 确认</button>
-                                    &nbsp; &nbsp; &nbsp;
-                                    <button class="btn" type="reset"  onClick="window.history.back()"> <i class="icon-undo bigger-110"></i> 返回 </button>
-                                </div>
-                            </div>
-                        </form>
-
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('accounts/index')}">用户资金余额</a></li>
+        <li><a href="{:url('accounts/lists')}">资金明细</a></li>
+        <li><a href="{:url('accounts/buy')}">购课记录</a></li>
+        <li><a href="{:url('accounts/tuike')}">退课记录</a></li>
+        <li class="active"><a href="#">资金充值</a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20"  role="form" method="POST"  enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{$account.id}" />
+        <input type="hidden" name="uid" value="{$account.uid}" />
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right" for="form-field-1">管理员:</label>
+            <div class="col-sm-6">
+                <input type="text" id="form-field-1" class="form-control" readonly value="{$account.username}" />
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right" for="form-field-2">充值金额:</label>
+            <div class="col-sm-6">
+                <input type="text" name="accounts"  id="form-field-2" value="" class="form-control" />
+            </div>
+        </div>
+        <div class="clearfix form-actions">
+            <div class="col-md-offset-3 col-md-6">
+                <button class="btn btn-info" type="submit">
+                    <i class="icon-ok bigger-110"></i>
+                    保存
+                </button>
+                &nbsp; &nbsp; &nbsp;
+                <button class="btn btn-info" type="button">
+                    <a href="javascript:history.go(-1);" style="color:#fff;text-decoration:none">返回上一页</a>
+                </button>
+            </div>
+        </div>
+    </form>
     </div><!-- /.main-container-inner -->
 <script type="text/javascript" src="__STATIC__/js/admin.js"></script>
 <script type="text/javascript" src="__STATIC__/js/common.js"></script>
-<script type="text/javascript">
-    //编辑器路径定义
-    var editorURL = GV.WEB_ROOT;
-</script>
-<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
-<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
-<script type="text/javascript">
-    $(function () {
 
-        editorcontent = new baidu.editor.ui.Editor();
-        editorcontent.render('content');
-        try {
-            editorcontent.sync();
-        } catch (err) {
-        }
-    });
-</script>
 </body>
 </html>

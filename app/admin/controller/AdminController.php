@@ -98,11 +98,11 @@ class AdminController extends AdminBaseController
             $pid = cmf_get_current_admin_id();
             $where["a.id"] = $pid;
             $grouplist = Db::name('admin')->alias("a")->join($join)->field($field)->where($where)->find();
-            $adminlist = Db::name('admin')->alias("a")->join($join)->field($field)->where($where)->select();
+            $where2["a.pid"] = $pid;
+            $adminlist = Db::name('admin')->alias("a")->join($join)->field($field)->where($where2)->select();
             $adminlist = json_decode($adminlist,true);
             foreach($adminlist as $k=>$v){
                 $adminlist[$k]['groupname']= "销售员";
-                $adminlist["groupname"] = "总监";
             }
             $grouplist["salers"] = $adminlist;
             $groupData[0]["groups"] = [$grouplist];
@@ -125,7 +125,7 @@ class AdminController extends AdminBaseController
             array_push($groupData,array("id"=>5,"groupname"=>"总监","groups"=>$salerlist));
         }
         //$sql = Db::name("admin")->getLastSql();
-        //dump($sql);
+        //dump($groupData);
         $this->assign("groupid",$group_id);
         $this->assign('groupData',$groupData);
         return $this->fetch();

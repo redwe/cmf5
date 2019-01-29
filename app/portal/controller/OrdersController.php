@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\portal\controller;
 
+use app\admin\model\AccountsModel;
 use cmf\controller\AdminBaseController;
 use think\Db;
 use think\Session;
@@ -41,7 +42,7 @@ class OrdersController extends AdminBaseController
             ["member m","m.id = o.member_id"],
         ];
         $field = 'o.*,c.id as cid,g.post_title,c.kc_year,c.check_time,c.is_owe,c.course_money,c.pay_money,c.course_time,c.check_name,m.username,m.phone,c
-        .create_time,c.ck_type';
+        .create_time,c.status,c.ck_type';
         $result = Db::name("orders")->alias("o")
             ->join($join)->field($field)
             ->where($where)
@@ -56,6 +57,10 @@ class OrdersController extends AdminBaseController
     public function add()
     {
         $request = Request::instance();
+        $admin_id = cmf_get_current_admin_id();
+        $groupid = Session::get('group_id');
+        $adminname = Session::get('name');
+        $check_name = Session::get('check_name');
 
         if($request->isAjax()){
             $page = $this->request->param("page");
@@ -88,6 +93,7 @@ class OrdersController extends AdminBaseController
             $member = Db::name('member')->where(array('phone' => $_POST['phone']))->find();
             //如果用户不存在，新增用户
             if (empty($member)) {
+                $user['admin_id'] = $admin_id;
                 $user['username'] = $_POST['username'];
                 $user['phone'] = $_POST['phone'];
                 $user['password'] = md5(md5($_POST['phone']));
@@ -144,16 +150,9 @@ class OrdersController extends AdminBaseController
                 Db::name('member')->where(array('phone' => $_POST['phone']))->update($user);
             }   //保存用户信息结束
 
-            //保存课程信息到购物车表
-            $admin_id = cmf_get_current_admin_id();
-            $groupid = Session::get('group_id');
-            $adminname = Session::get('name');
-
-            $groups = Db::name("admin")->where(array("id"=>$admin_id))->find();
-            $pid = $groups["pid"];
-
-            $badmin = Db::name("admin")->where(array("id"=>$pid))->find();
-            //dump($badmin);
+            $param['check_name'] = $check_name;
+            //创建时间
+            $param['create_time'] = time();
 
             $goodsids = $_POST['goods_id'];
             if(strpos($goodsids,',')){
@@ -176,7 +175,7 @@ class OrdersController extends AdminBaseController
             $course_moneys = $_POST['course_money'];        //成交金额
             $pay_moneys = $_POST['pay_money'];      //已付金恩
             $i = 0;
-
+            $rs = 0;
             foreach($goods as $vo){
 
                 $where2['goods_id'] = $vo['id'];
@@ -227,82 +226,77 @@ class OrdersController extends AdminBaseController
                     //审核状态
                     $param['check'] = 1;        //是否欠费
                     $param['isdel'] = 0;        //是否删除
-
-                    if($groupid == 6){
-                        $param['check_name'] = $badmin['username'];
-                    }
-                    else
-                    {
-                        $param['check_name'] = $adminname;
-                    }
-                    //创建时间
-                    $param['create_time'] = time();
                     $rs = Db::name('carts')->insert($param);
-                    $i++;
+                    if($rs){
+                        $i++;
+                    }
                 }
                 //dump($param);
             }   //购物车保存结束
 
-            //保存订单到数据库
-            //添加人员ID
-            $datas['admin_id'] = $admin_id;
-            //用户ID
-            $datas['member_id'] = $member['id'];
-            $datas['order_id'] = $ordercode;        //订单号，时间+随机数
-            //分属角色
-            $datas['group_id'] = $groupid;
-            $datas['applicant'] = $adminname;
-            $datas['teacher'] = $adminname;
-            $datas['payment'] = $_POST['pay_way'];
-            $datas['remarks'] = $_POST['remarks'];
-            $pay_pics = array();
-            //转款截图上传1
-            for($i=1;$i<5;$i++)
-            {
-                if(request()->file('pay_pic'.$i)) {
-                    $uploads = $updata->uploadpic('pay_pic'.$i);
+            if($i>0) {
+                //保存订单到数据库
+                //添加人员ID
+                $datas['admin_id'] = $admin_id;
+                //用户ID
+                $datas['member_id'] = $member['id'];
+                $datas['order_id'] = $ordercode;        //订单号，时间+随机数
+                //分属角色
+                $datas['group_id'] = $groupid;
+                $datas['applicant'] = $adminname;
+                $datas['teacher'] = $adminname;
+                $datas['payment'] = $_POST['pay_way'];
+                $datas['remarks'] = $_POST['remarks'];
+                $pay_pics = array();
+                //转款截图上传1
+                for ($i = 1; $i < 5; $i++) {
+                    if (request()->file('pay_pic' . $i)) {
+                        $uploads = $updata->uploadpic('pay_pic' . $i);
+                        if ($uploads['res']) {
+                            //$datas['pay_pic'] = $uploads['data'];
+                            array_push($pay_pics, $uploads['data']);
+                        } else {
+                            array_push($pay_pics, '');
+                        }
+                    }
+                }
+                $datas['pay_pic'] = serialize($pay_pics);
+
+                //协议文件上传
+                if (request()->file('agreement')) {
+                    $uploads = $updata->uploadpic('agreement', $file_path, $file_array);
                     if ($uploads['res']) {
-                        //$datas['pay_pic'] = $uploads['data'];
-                        array_push($pay_pics,$uploads['data']);
-                    }
-                    else
-                    {
-                        array_push($pay_pics,'');
+                        $datas['upload_file'] = $uploads['data'];
                     }
                 }
-            }
-            $datas['pay_pic'] = serialize($pay_pics);
 
-            //协议文件上传
-            if(request()->file('agreement')) {
-                $uploads = $updata->uploadpic('agreement', $file_path, $file_array);
-                if ($uploads['res']) {
-                    $datas['upload_file'] = $uploads['data'];
+                $agreements = array();
+                //协议图片上传1
+                for ($i = 1; $i < 5; $i++) {
+                    if (request()->file('agreement' . $i)) {
+                        $uploads = $updata->uploadpic('agreement' . $i);
+                        if ($uploads['res']) {
+                            //$datas['pay_pic'] = $uploads['data'];
+                            array_push($agreements, $uploads['data']);
+                        } else {
+                            array_push($agreements, '');
+                        }
+                    }
+                }
+                $datas['agreement'] = serialize($agreements);
+                $datas['update_time'] = time();
+                //dump($datas);
+                //exit();
+                $rs = Db::name('orders')->insert($datas);
+                if ($rs) {
+                    $this->success('新增成功！', url('Orders/index'));
+                } else {
+                    $this->error('系统异常，请稍后提交！', url('Orders/index'));
                 }
             }
-
-            $agreements = array();
-            //协议图片上传1
-            for($i=1;$i<5;$i++) {
-                  if (request()->file('agreement'.$i)) {
-                      $uploads = $updata->uploadpic('agreement'.$i);
-                      if ($uploads['res']) {
-                          //$datas['pay_pic'] = $uploads['data'];
-                          array_push($agreements, $uploads['data']);
-                      } else {
-                          array_push($agreements, '');
-                      }
-                  }
-            }
-            $datas['agreement'] = serialize($agreements);
-            $datas['update_time'] = time();
-            //dump($datas);
-            //exit();
-            $rs = Db::name('orders')->insert($datas);
-            if ($rs) {
-                $this->success('新增成功！',url('Orders/index'));
-            } else {
-                $this->error('系统异常，请稍后提交！',url('Orders/index'));
+            else
+            {
+                $this->error('课程已经存在，不能重复购买课程！', url('Orders/index'));
             }
         } //提交保存订单结束
 
@@ -317,6 +311,8 @@ class OrdersController extends AdminBaseController
         $this->assign('pages', $pages);
         $this->assign('goods_data', $goods_data);
         $this->assign('applicant', $applicant);
+        $this->assign('check_name', $check_name);
+        $this->assign('group_id', $groupid);
         return $this->fetch();
     }
 
@@ -714,8 +710,10 @@ class OrdersController extends AdminBaseController
             $order = Db::name('carts')->where(array("id"=>$id))->find();
             $check = $this->request->param('check');
             $typeid = $this->request->param('type');
+            $check_note = $this->request->param('check_note');
             $course_time = $this->request->param('course_time');
             $data['check_time'] = time();
+
             if($check==2){
                 $strres = "通过";
                 $course_time = strtotime($course_time);
@@ -723,7 +721,6 @@ class OrdersController extends AdminBaseController
                     $this->error('提交失败！课程过期时间不正确！');
                     exit();
                 }
-                $data['check'] = $check;
                 $data['course_time'] = $course_time;
                 if($groupid == 5){
                     if($typeid == '2'){
@@ -747,17 +744,16 @@ class OrdersController extends AdminBaseController
                 }
             }
 
-            if($check==3){
-                $data['check'] = $check;
-                $data['check_note']=$this->request->param('check_note');
-            }
+             $data['check'] = $check;
+             $data['check_note'] = $check_note;
 
             $check_name = Session::get('name');
             $data['check_name'] = $check_name;
+            $admin_id = cmf_get_current_admin_id();
 
             if($check==2 && $groupid != 3){
-                $acc_model = new AccountsChangeController();
-                $result=$acc_model->add_accounts($this->admin_id,$order['course_money'],2,$id);
+                $acc_model = new AccountsModel();
+                $result=$acc_model->add_accounts($admin_id,$order['course_money'],2,$id);
                 if($result['code']==500){
                     $this->error($result['msg']);
                     exit;

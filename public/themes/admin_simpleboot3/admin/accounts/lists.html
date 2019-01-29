@@ -3,26 +3,26 @@
 <body>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li class="active"><a href="{:url('accounts/index')}">用户资金余额</a></li>
-        <li class="active"><a href="{:url('accounts/lists')}">资金明细</a></li>
-        <li class="active"><a href="{:url('accounts/buy')}">购课记录</a></li>
-        <li class="active"><a href="{:url('accounts/tuike')}">退课记录</a></li>
-        <li><a href="{:url('accounts/add')}">资金充值</a></li>
+        <li <php>if($type_id==5){ echo 'class="active"';}</php>><a href="{:url('accounts/index',array('type'=>'5'))}">用户资金余额</a></li>
+        <li <php>if($type_id==0){ echo 'class="active"';}</php> ><a href="{:url('accounts/lists',array('type'=>0))}">资金明细</a></li>
+        <li <php>if($type_id==2){ echo 'class="active"';}</php>><a href="{:url('accounts/lists',array('type'=>2))}">购课记录</a></li>
+        <li <php>if($type_id==3){ echo 'class="active"';}</php>><a href="{:url('accounts/lists',array('type'=>3))}">退课记录</a></li>
+        <li <php>if($type_id==1){ echo 'class="active"';}</php> ><a href="{:url('accounts/lists',array('type'=>1))}">充值记录</a></li>
     </ul>
-    <form class="form-inline">
+    <form class="form-inline margin-top-20">
         <div class="form-group">
-            <input type="text" class="form-control" id="username" placeholder="请输入管理员姓名" name="username" value="{$username}">
+            <input type="text" class="form-control" id="username" placeholder="请输入管理员姓名" name="username" value="">
         </div>
         <div class="form-group">
-            <input type="text" name="create_time" id="create_time" placeholder="开始时间" class="form-control" value="" onClick="WdatePicker()">
+            <input type="text" name="create_time" id="create_time" placeholder="开始时间" class="form-control js-bootstrap-date" value="">
         </div>
         <div class="form-group">
-            <input type="text" name="create_time_" id="create_time_" placeholder="结束时间" class="form-control" value="" onClick="WdatePicker()">
+            <input type="text" name="create_time_" id="create_time_" placeholder="结束时间" class="form-control js-bootstrap-date" value="">
         </div>
         <button type="submit" class="btn btn-default">搜索</button>
         <button type="submit" name="export" value="yes" class="btn btn-default">导出</button>
     </form>
-    <table id="sample-table-1" class="table table-striped table-bordered table-hover">
+    <table id="sample-table-1" class="table table-striped table-bordered table-hover margin-top-20">
         <thead>
         <tr>
             <th>id</th>
@@ -48,7 +48,7 @@
         </volist>
         </tbody>
     </table>
-    <div class="page" style="font-size:25px;">{$page}</div>
+    <div class="pagination">{$page}</div>
 </div>
 <script type="text/javascript" src="__STATIC__/js/admin.js"></script>
 </body>

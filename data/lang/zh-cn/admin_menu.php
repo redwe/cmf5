@@ -14,7 +14,7 @@ return array (
   'ADMIN_ADMIN_INDEX' => '管理员',
   'ADMIN_ADMIN_USERINFO' => '个人信息',
   'ADMIN_ADMIN_USERINFOPOST' => '管理员个人信息修改提交',
-  'ADMIN_ADMININDEX_DEFAULT' => '组织管理',
+  'ADMIN_ADMININDEX_DEFAULT' => '管理员管理',
   'ADMIN_ARTICLE_INFO_ADD_ARTICLE' => '添加公告信息',
   'ADMIN_ARTICLE_INFO_ARTICLE' => '公告详情页',
   'ADMIN_ARTICLE_INFO_INDEX' => '公告信息首页',

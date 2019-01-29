@@ -48,6 +48,7 @@
         .nav-list > li ul.submenu ul.submenu > li a > [class*="fa-"]:first-child {
             left: 30px;
         }
+        .msg_li{text-align: left; padding: 10px; line-height: 24px;}
         /*----------------导航hack--------------------*/
     </style>
 
@@ -178,7 +179,7 @@
         </div>
 
         <div class="navbar-collapse collapse" id="navbar-main">
-            <div class="pull-left" style="position: relative;">
+            <div class="pull-left" style="position: relative; display: none">
                 <a id="task-pre" class="task-changebt"><i class="fa fa-chevron-left"></i></a>
                 <div id="task-content">
                     <ul class="nav navbar-nav cmf-component-tab" id="task-content-inner">
@@ -218,12 +219,12 @@
                             <i class="icon-tasks"></i>
                             <span id="messages3" class="badge badge-grey">0</span>
                         </a>
-                        <ul id="msg_content3" class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+                        <ul id="msg_content3" class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close" style="width: 300px;">
                             <li class="dropdown-header">
                                 <i class="icon-warning-sign"></i>
                                 <span id="msg3">0</span>条消息
                             </li>
-                            <li id="message3" style="text-align: left; padding: 10px;"></li>
+                            <li id="message3" class="msg_li"></li>
                         </ul>
                     </li>
                 </if>
@@ -235,12 +236,12 @@
                             <i class="icon-bell-alt icon-animated-bell"></i>
                             <span id="messages2" class="badge badge-important">0</span>
                         </a>
-                        <ul id="msg_content2" class="pull-right dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-close">
+                        <ul id="msg_content2" class="pull-right dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-close" style="width: 300px;">
                             <li class="dropdown-header">
                                 <i class="icon-warning-sign"></i>
                                 <span id="msg2">0</span>条消息
                             </li>
-                            <li id="message2" style="text-align: left; padding: 10px;"></li>
+                            <li id="message2" class="msg_li"></li>
                         </ul>
                     </li>
                 </if>
@@ -251,11 +252,11 @@
                             <i class="icon-envelope icon-animated-vertical"></i>
                             <span id="messages" class="badge badge-success">0</span>
                         </a>
-                        <ul id="msg_content" class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+                        <ul id="msg_content" class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close" style="width: 300px;">
                             <li class="dropdown-header">
                                 <i class="icon-envelope-alt"></i> <span id="msg">0</span>条消息
                             </li>
-                            <li id="message" style="text-align: left; padding: 10px;">
+                            <li id="message" class="msg_li">
 
                             </li>
                         </ul>
@@ -488,6 +489,28 @@
         var type_id = obj.type_id;
         //alert(obj.content);
         if(group_id == 5 && type_id == 1) {
+            html += '<span class="msg-body">' +
+            '最新审核消息：' + '<br>' +
+            '审核人：' + check_name + '<br>' +
+            '申请人：' + applicant + '<br>' +
+            '学员姓名：' + student + '<br>' +
+            '课程名称：' + goodsname + '<br>' +
+            '课程费用：' + course_money + '<br>' +
+            '支付金额：' + pay_money + '<br>' +
+            '</span>' +
+            '<span class="msg-time">' +
+            '<i class="icon-time"></i>' +
+            '<span>1分钟以前</span>' +
+            '</span>' +
+            '</a>';
+            $("#message").html(html);
+            count++;
+            $("#msg").html(count);
+            $("#messages").html(count);
+            showHide("msg_content");
+            playSound('__STATIC__/sounds/msg1.wav','sound');
+        }
+        else if(group_id == 3 && applicant == adminname) {
             html += '<span class="msg-body">' +
             '最新审核消息：' + '<br>' +
             '审核人：' + check_name + '<br>' +

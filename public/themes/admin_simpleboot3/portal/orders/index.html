@@ -102,11 +102,11 @@
                         </if>
                     </td>
                     <td>
-                        <notempty name="vo.status">
+                        <if condition="$vo.status==1">
                             已开课
                             <else/>
                             未开课
-                        </notempty>
+                        </if>
                     </td>
                     <td>{$vo.check_time|date="Y-m-d",###}</td>
                     <td>

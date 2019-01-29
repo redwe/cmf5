@@ -14,6 +14,7 @@ use cmf\controller\AdminBaseController;
 use think\Db;
 use app\admin\model\AdminMenuModel;
 use think\Session;
+use app\admin\model\AccountsModel;
 
 class AccountsController extends AdminBaseController
 {
@@ -22,6 +23,7 @@ class AccountsController extends AdminBaseController
     {
         $username = $this->request->param('username');
         $export = $this->request->param('export');
+        $type_id = $this->request->param('type');
 
         $group_id = Session::get("group_id");
 
@@ -72,6 +74,7 @@ class AccountsController extends AdminBaseController
             }
         }
         $this->assign('accounts', $accounts);
+        $this->assign('type_id',$type_id);
         $this->assign('page', $pages);// 赋值分页输出
         return $this->fetch();
     }
@@ -88,31 +91,31 @@ class AccountsController extends AdminBaseController
         $group_id = Session::get("group_id");
 
         if($group_id != 1){
-            $where['uid'] = cmf_get_current_admin_id();
+            $where['c.uid'] = cmf_get_current_admin_id();
         }else {
             $where = [];
         }
         $type=[1=>'管理员充值',2=>'购买课程',3=>'退款'];
         if ($type_id && $type_id != ""){
-            $where ['jy_accounts_log.type']= $type_id;
+            $where ['c.type']= $type_id;
         }
         if ($username && $username != ''){
-            $where['jy_admin.username']= array('like',"%{$username}%") ;
+            $where['a.username']= array('like',"%{$username}%") ;
         }
         if ($create_time && $create_time !="") {
-            $where['time'] = ['egt',$create_time];
+            $where['c.time'] = ['egt',$create_time];
             if ($create_time_!= '') {
-                $where['time'] = [['egt',$create_time],['elt',$create_time_. " 23:59:59'"],'and'];
+                $where['c.time'] = [['egt',$create_time],['elt',$create_time_. " 23:59:59'"],'and'];
             }
         }
+        $tt = '';
+        $join = [
+            ["admin a","a.id = c.uid"]
+        ];
+        $field = 'c.*,a.username';
         //导出
         if ($export == 'yes') {
-            $list = Db::name('accounts_log')
-                ->field('jy_accounts_log.*,jy_admin.username')
-                ->join('jy_admin ON jy_accounts_log.uid=jy_admin.id','left')
-                ->where($where)
-                ->order('time desc')
-                ->select();
+            $list = Db::name('accounts_log')->alias("c")->join($join)->field($field)->where($where)->order('time desc')->select();
 
             header("Content-type: application/vnd.ms-excel; charset=utf-8");
             header("Content-Disposition: attachment; filename=资金管理明细信息".time().".csv");
@@ -139,37 +142,40 @@ class AccountsController extends AdminBaseController
             echo(mb_convert_encoding($data,"UTF-16LE","UTF-8"));
             exit;
         }
-        $accounts_log = Db::name('accounts_log')
-            ->field('jy_accounts_log.*,jy_admin.username')
-            ->join('jy_admin ON jy_accounts_log.uid=jy_admin.id','left')
-            ->where($where)
-            ->order('time desc')
-            ->select();
+        $accounts_log = Db::name('accounts_log')->alias("c")->join($join)->field($field)
+            ->where($where)->order('c.time desc')
+            ->paginate(20);
+        $page = $accounts_log->render();
         switch ($type_id){
             case 1:$tt = '充值';break;
             case 2:$tt = '购买';break;
             case 3:$tt = '退款';break;
-
         }
         $this->assign('tt',$tt);
         $this->assign('type',$type);
+        $this->assign('type_id',$type_id);
+        $this->assign('page',$page);
         $this->assign('accounts_log',$accounts_log);
         return $this->fetch();
     }
 
     //充值
-    public function edit_accounts(){
+    public function edit(){
         $id=$this->request->param('id');
         if ($this->request->isPost()) {
             $uid=$this->request->param('uid');
             $change_accounts=$this->request->param('accounts');
-            AccountsChangeController::add_accounts($uid,$change_accounts,1);
+            $setAcount = new AccountsModel();
+            $setAcount->add_accounts($uid,$change_accounts,1);
             $this->success('充值成功',url('accounts/index'));
         }else{
+            $join = [
+                ["admin a","a.id = c.uid"]
+            ];
+            $field = 'c.*,a.username';
             $account = Db::name('accounts')
-                ->field('jy_accounts.*,jy_admin.username')
-                ->join('jy_admin ON jy_accounts.uid=jy_admin.id','left')
-                ->where(array('jy_accounts.id'=>$id))
+                ->alias("c")->field($field)->join($join)
+                ->where(array('c.id'=>$id))
                 ->find();
             $this->assign('account',$account);
             return $this->fetch();
@@ -237,4 +243,5 @@ class AccountsController extends AdminBaseController
         $this->assign('accounts_info',$accounts_info);
         return $this->fetch();
     }
+
 }

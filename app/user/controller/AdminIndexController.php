@@ -15,6 +15,7 @@ use cmf\controller\AdminBaseController;
 use think\Db;
 use app\user\model\UserModel;
 use app\admin\model\Upload;
+use think\Session;
 
 /**
  * Class AdminIndexController
@@ -88,6 +89,8 @@ class AdminIndexController extends AdminBaseController
         if (!empty($request['uid'])) {
             $where['id'] = intval($request['uid']);
         }
+        $group_id = Session::get("group_id");
+        if($group_id)
         $keywordComplex = [];
         if (!empty($request['keyword'])) {
             $keyword = $request['keyword'];
