@@ -224,7 +224,7 @@ class OrdersController extends AdminBaseController
                     $param['result'] = '';      //考试成绩单上传
                     $param['isprint'] = 0;      //是否打印过
                     //审核状态
-                    $param['check'] = 1;        //是否欠费
+                    $param['check'] = 1;        //是否审核
                     $param['isdel'] = 0;        //是否删除
                     $rs = Db::name('carts')->insert($param);
                     if($rs){
@@ -699,6 +699,73 @@ class OrdersController extends AdminBaseController
         return $this->fetch();
     }
 
+    public function getAccount($pid,$type,$filed='*'){
+        if(empty($pid)){
+            $pid = cmf_get_current_admin_id();
+        }
+        $data = Db::name("admin")->field($filed)->where(array('pid'=>$pid))->select();
+        if(empty($data)){
+            return array();
+        }
+        if($type == 1){
+            return $data;
+        }elseif ($type == 2){
+            $new_arr = array();
+            if($filed != '*'){
+                foreach ($data as $k=>$v){
+                    $new_arr[] = $v[$filed];
+                }
+                return $new_arr;
+            }else{
+                return $data;
+            }
+        }
+        return array();
+    }
+
+    //开课审核列表
+    public function checklist(){
+
+        $username = $this->request->param('username');
+        $group_id = Session::get("group_id");
+        $where = array();
+        $adminid = cmf_get_current_admin_id();
+
+        if ($username) {
+            $where['m.username'] = array('like','%'.$username.'%');
+        }
+        $ids = $this->getAccount('',2,'id');
+        //$admin_id = $_SESSION['admin_id'];
+        array_push($ids,$adminid);
+        //dump($ids);
+        if($group_id == 5){
+            $where['o.admin_id'] = array('IN',trim(implode(',',$ids),','));
+        }
+        $where['c.isdel'] = 0;
+        $where['c.check'] = 1;
+        if($group_id == 3){
+            $where = array('c.check'=>2,'c.ck_type'=>2,'c.status'=>2);
+        }
+        $join = [
+            ["carts c","c.order_id = o.order_id","left"],
+            ["portal_post g","c.goods_id = g.id"],
+            ["member m","m.id = o.member_id"],
+        ];
+        $field = 'o.*,c.id as cid,g.post_title,c.kc_year,c.check,c.check_time,c.is_owe,c.course_money,c.pay_money,c.course_time,c.check_name,m.username,
+        m.phone,c.create_time,c.status,c.ck_type,m.card_face,m.card_back';
+        $result = Db::name("orders")->alias("o")
+            ->join($join)->field($field)
+            ->where($where)
+            ->order("o.id DESC")
+            ->paginate(20);
+
+        //dump(Db::name("orders")->getLastSql());
+        $this->assign('username', $username);
+        $this->assign('order', $result);
+        $this->assign('page', $result->render());// 赋值分页输出
+        return $this->fetch();
+    }
+
     //审核
     public function check()
     {
@@ -786,6 +853,26 @@ class OrdersController extends AdminBaseController
             $this->assign("id",$id);
             return $this->fetch();
         }
+    }
+
+    //查看订单详情
+    public function look()
+    {
+        $id = $this->request->param('cid');
+
+        $where['c.id'] = $id;
+        $join = [
+            ["orders o","o.order_id = c.order_id"],
+            ["member m","o.member_id = m.id"],
+            ["portal_post p","p.id = c.goods_id"]
+        ];
+        $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,o.agreement,o.upload_file,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
+        .address,m.company";
+        $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+//dump($data);
+        $this->assign('id', $id);
+        $this->assign('data', $data);
+        return $this->fetch();
     }
 
 }

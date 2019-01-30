@@ -25,7 +25,6 @@
 		<button class="btn btn-primary" type="button" onclick="player_current('313A5C7994F57292');" id="player_current">当前播放时间</button>
 		<button class="btn btn-primary" type="button" onclick="player_seek('313A5C7994F57292');" id="player_seek">拖动到60s</button>
 	</div>
-	<div class="panel-body"  id="display_info"></div>
 </div>
 <div class="tool-player">
 	<script src="http://union.bokecc.com/player?vid=313A5C7994F57292&siteid=07552B247EACAED4&autoStart=false&width=848&height=450&playerid=55295D704B531A0D&playertype=1" type="text/javascript"></script>
@@ -85,7 +84,7 @@ function getSWF(objectId) {
 var prefix = "cc_";
 function player_play(id) { // 开始播放
 	var player = getSWF(prefix +id);
-    //console.log(player);
+    console.log(player);
 	player.play();
 }
 

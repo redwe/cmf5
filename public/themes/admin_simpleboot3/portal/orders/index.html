@@ -61,6 +61,9 @@
             </tr>
             </thead>
             <foreach name="result" item="vo">
+                <php>
+                    $cid = $vo['cid'];
+                </php>
                 <tr>
                     <td>
                         <input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
@@ -110,18 +113,18 @@
                     </td>
                     <td>{$vo.check_time|date="Y-m-d",###}</td>
                     <td>
-                        <a href="{:url('Orders/check',array('cid'=>$vo['cid']))}">审核</a>
-                        <a href="{:url('Orders/bufeilist',array('cid'=>$vo['cid']))}">补费</a>
-                        <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">续学</a>
-                        <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">休学</a>
-                        <a href="{:url('Orders/continuer',array('cid'=>$vo['cid']))}">转课</a>
-                        <a href="{:url('Orders/increase',array('cid'=>$vo['cid']))}">新增</a>
-                        <a href="{:url('Orders/tuike',array('cid'=>$vo['cid']))}">退课</a>
-                        <a href="{:url('Orders/printOrder',array('cid'=>$vo['cid']))}">打印</a>
-                        <a href="{:url('Orders/logs',array('cid'=>$vo['cid']))}">日志</a>
-                        <a href="{:url('Orders/previews',array('cid'=>$vo['cid']))}">预览</a>
-                        <a href="{:url('Orders/edit',array('cid'=>$vo['cid'],'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
-                        <a href="{:url('Orders/delete',array('cid'=>$vo['cid'],'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+                        <a href="{:url('Orders/look',array('cid'=>$cid))}">查看</a>
+                        <a href="{:url('Orders/previews',array('cid'=>$cid))}">预览</a>
+                        <a href="{:url('Orders/bufeilist',array('cid'=>$cid))}">补费</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$cid))}">续学</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$cid))}">休学</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$cid))}">转课</a>
+                        <a href="{:url('Orders/increase',array('cid'=>$cid))}">新增</a>
+                        <a href="{:url('Orders/tuike',array('cid'=>$cid))}">退课</a>
+                        <a href="{:url('Orders/printOrder',array('cid'=>$cid))}">打印</a>
+                        <a href="{:url('Orders/logs',array('cid'=>$cid))}">日志</a>
+                        <a href="{:url('Orders/edit',array('cid'=>$cid,'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
+                        <a href="{:url('Orders/delete',array('cid'=>$cid,'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
                     </td>
                 </tr>
             </foreach>

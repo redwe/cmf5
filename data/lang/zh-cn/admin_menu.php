@@ -128,6 +128,8 @@ return array (
   'PORTAL_ADMINTAG_ADDPOST' => '添加文章标签提交',
   'PORTAL_ADMINTAG_DELETE' => '删除文章标签',
   'PORTAL_ADMINTAG_UPSTATUS' => '更新标签状态',
+  'PORTAL_ORDERS_CHECK' => '审核提交',
+  'PORTAL_ORDERS_CHECKLIST' => '开课审核',
   'PORTAL_ORDERS_DEFAULT' => '开课系统',
   'PORTAL_ORDERS_INDEX' => '开课列表',
   'PORTAL_ORDERS_LOGS' => '开课日志',
