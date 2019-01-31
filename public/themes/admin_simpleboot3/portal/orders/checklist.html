@@ -54,7 +54,16 @@
                 <td>{$vo.kc_year}年</td>
                 <td>{$vo.course_money}</td>
                 <td>{$vo.pay_money}</td>
-                <td>{$vo.is_owe}</td>
+                <td>
+                    <if condition="$vo.is_owe eq 1">
+                            <span class="red">
+                                已欠费
+                                {$vo.course_money - $vo.pay_money} 元
+                              </span>
+                        <else/>
+                        未欠费
+                    </if>
+                </td>
                 <td>
                     <volist name="pay_pics" id="vo2">
                         <a href="{$vo2}" target="_blank">

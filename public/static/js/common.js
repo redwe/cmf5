@@ -1,6 +1,30 @@
 /**
  * Created by Administrator on 2019/1/9 0009.
  */
+
+function setCheckbox(obj,str){
+    if(obj.checked){
+        checkAll(str);
+    }
+    else
+    {
+        cancleAll(str)
+    }
+}
+
+function checkAll(str){
+    $(document.getElementsByName(str)).each(function(i){
+        this.checked = true;
+    })
+}
+
+function cancleAll(str){
+    $(document.getElementsByName(str)).each(function(i){
+        this.checked = false;
+    })
+}
+
+
 function setdeafultpic(obj,id){
     if (typeof FileReader == 'undefined') {
         document.getElementById(id).InnerHTML = "<h1>当前浏览器不支持FileReader接口</h1>";

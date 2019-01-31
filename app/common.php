@@ -34,6 +34,145 @@ function isEmail($email){
     }
 }
 
+//将数组的指定的值变成键
+function arrayValueToKey($arr = array(),$value='id'){
+    $new_arr = [];
+    if(!is_array($arr)){
+        return false;
+    }
+    foreach($arr as $key=>$val){
+        $new_arr[$val[$value]] = $val;
+    }
+    return $new_arr;
+}
+
+//发送验证码短信
+function sendMsg($phone,$type =1){
+    $verify = rand(100000,999999);
+    $flag = 0;
+    $params='';//要post的数据
+    $argv = array(
+        'name'=>'acjy',     //必填参数。用户账号
+        'pwd'=>'2D676E307B841FD3D22ECF045670',     //必填参数。（web平台：基本资料中的接口密码）
+        //'content'=>'短信验证码为：'.$verify.'，请勿将验证码提供给他人。',   //必填参数。发送内容（1-500 个汉字）UTF-8编码
+        //'content'=>$msg,   //必填参数。发送内容（1-500 个汉字）UTF-8编码
+        'content'=>'短信验证码为：'.$verify.'，请勿将验证码提供给他人。',   //必填参数。发送内容（1-500 个汉字）UTF-8编码
+        'mobile'=>$phone,   //必填参数。手机号码。多个以英文逗号隔开
+        'stime'=>'',   //可选参数。发送时间，填写时已填写的时间发送，不填时为当前时间发送
+        'sign'=>'奥创百科',    //必填参数。用户签名。
+        'type'=>'pt',  //必填参数。固定值 pt
+        'extno'=>''    //可选参数，扩展码，用户定义扩展码，只能为数字
+    );
+
+    foreach ($argv as $key=>$value) {
+        if ($flag!=0) {
+            $params .= "&";
+            $flag = 1;
+        }
+        $params.= $key."="; $params.= urlencode($value);// urlencode($value);
+        $flag = 1;
+    }
+    $url = "http://210.5.152.195:1860/asmx/smsservice.aspx?".$params; //提交的url地址
+    $con= substr( file_get_contents($url), 0, 1 );  //获取信息发送后的状态
+    if($con == '0'){
+
+        if($type ==1) {
+            session('verify', $verify);
+            return true;
+        }else{
+            if(M('msg_code')->add(array('phone'=>$phone,'create_time'=>date('Y-m-d H:i:s'),'msg_code'=>$verify))){
+                return true;
+            }
+        }
+    }
+    else{
+        return false;
+    }
+
+}
+
+//发送自定义内容短信
+function sendMsg2($phone,$content){
+
+    $flag = 0;
+    $params='';//要post的数据
+    $argv = array(
+        'name'=>'acjy',     //必填参数。用户账号
+        'pwd'=>'2D676E307B841FD3D22ECF045670',     //必填参数。（web平台：基本资料中的接口密码）
+        //'content'=>'短信验证码为：'.$verify.'，请勿将验证码提供给他人。',   //必填参数。发送内容（1-500 个汉字）UTF-8编码
+        //'content'=>$msg,   //必填参数。发送内容（1-500 个汉字）UTF-8编码
+        'content'=>$content,   //必填参数。发送内容（1-500 个汉字）UTF-8编码
+        'mobile'=>$phone,   //必填参数。手机号码。多个以英文逗号隔开
+        'stime'=>'',   //可选参数。发送时间，填写时已填写的时间发送，不填时为当前时间发送
+        'sign'=>'奥创百科',    //必填参数。用户签名。
+        'type'=>'pt',  //必填参数。固定值 pt
+        'extno'=>''    //可选参数，扩展码，用户定义扩展码，只能为数字
+    );
+
+    foreach ($argv as $key=>$value) {
+        if ($flag!=0) {
+            $params .= "&";
+            $flag = 1;
+        }
+        $params.= $key."="; $params.= urlencode($value);// urlencode($value);
+        $flag = 1;
+    }
+    $url = "http://210.5.152.195:1860/asmx/smsservice.aspx?".$params; //提交的url地址
+    $con= substr( file_get_contents($url), 0, 1 );  //获取信息发送后的状态
+    if($con == '0'){
+        return true;
+    }
+    else{
+        return false;
+    }
+
+}
+
+
+function send_email($nickname, $from, $password, $to, $subject = '', $content = '', $Attachment='')
+{
+    //require('./Vendor/phpmailer/phpmailer/src/PHPMailer.php');
+    // 实例化PHPMailer核心类
+    $mail = new \PHPMailer();
+    // 是否启用smtp的debug进行调试 开发环境建议开启 生产环境注释掉即可 默认关闭debug调试模式
+    $mail->SMTPDebug = 1;
+    // 使用smtp鉴权方式发送邮件
+    $mail->isSMTP();
+    // smtp需要鉴权 这个必须是true
+    $mail->SMTPAuth = true;
+    // 链接qq域名邮箱的服务器地址
+    $mail->Host = 'smtp.qq.com';
+    // 设置使用ssl加密方式登录鉴权
+    $mail->SMTPSecure = 'ssl';
+    // 设置ssl连接smtp服务器的远程服务器端口号
+    $mail->Port = 465;
+    // 设置发送的邮件的编码
+    $mail->CharSet = 'UTF-8';
+    // 设置发件人昵称 显示在收件人邮件的发件人邮箱地址前的发件人姓名
+    $mail->FromName = $nickname;
+    // smtp登录的账号 QQ邮箱即可
+    $mail->Username = $from;
+    // smtp登录的密码 使用生成的授权码
+    $mail->Password = $password;
+    // 设置发件人邮箱地址 同登录账号
+    $mail->From = $from;
+    // 邮件正文是否为html编码 注意此处是一个方法
+    $mail->isHTML(true);
+    // 设置收件人邮箱地址
+    $mail->addAddress($to);
+    // 添加多个收件人 则多次调用方法即可
+    //$mail->addAddress('87654321@163.com');
+    // 添加该邮件的主题
+    $mail->Subject = $subject;
+    // 添加邮件正文
+    $mail->Body = $content;
+    // 为该邮件添加附件
+    $mail->addAttachment($Attachment);
+    // 发送邮件 返回状态
+    $status = $mail->send();
+}
+
+
 function jsonOut($code,$data){
     return json(array("code"=>$code,'data'=>$data));
 }
@@ -50,6 +189,11 @@ function randomStr(){
     return $str;
 }
 
+//生成订单号
+function getOrderCode(){
+    $ordercode = "A".date("Ymdhis").rand(1000,9999);
+    return $ordercode;
+}
 
 function RMB_Upper($num)
 {
@@ -155,3 +299,4 @@ function RMB_Upper($num)
     //echo'<br/>';
     return $new_str;
 }
+

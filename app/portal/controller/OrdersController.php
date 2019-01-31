@@ -1,13 +1,4 @@
 <?php
-// +----------------------------------------------------------------------
-// | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: 老猫 <thinkcmf@126.com>
-// +----------------------------------------------------------------------
 namespace app\portal\controller;
 
 use app\admin\model\AccountsModel;
@@ -16,39 +7,123 @@ use think\Db;
 use think\Session;
 use think\Request;
 use app\admin\model\Upload;
+use app\portal\model\OrdersModel;
+use phpmailerException;
 
-/**
- * Class AdminIndexController
- * @package app\portal\controller
- * @adminMenuRoot(
- *     'name'   =>'门户管理',
- *     'action' =>'default',
- *     'parent' =>'',
- *     'display'=> true,
- *     'order'  => 30,
- *     'icon'   =>'th',
- *     'remark' =>'门户管理'
- * )
- */
 class OrdersController extends AdminBaseController
 {
 
     public function index(){
 
+        $group_id = Session::get("group_id");
+        $teacher = $this->request->param("teacher");
+        $applicant = $this->request->param("applicant");
+        $checkname = $this->request->param("checkname");
+        $type_id = $this->request->param('type_id');
+        $username = $this->request->param('username');
+        $cnname = $this->request->param('cnname');
+        $goods_name = $this->request->param("goods_name");
+        $phone = $this->request->param('phone');
+        $province = $this->request->param("province");
+        //$badmin = $this->request->param("badmin");
+
+        $start_time = $this->request->param('start_time');
+        $end_time = $this->request->param('end_time');
+
+        $this->assign('start_time',$start_time);
+        $this->assign('end_time',$end_time);
+
+        $type = $this->request->param("type");
+        $this->assign('type',$type);
+
+        if (!empty($type)) {
+            $where['c.ck_type'] = $type;
+        }
+
+        $isqf = $this->request->param("isqf");
+        $this->assign('isqf',$isqf);
+
+        if (!empty($isqf)) {
+            if($isqf==1){
+                $where['c.is_owe'] = 0;
+            }
+            else
+            {
+                $where['c.is_owe'] = 1;
+            }
+        }
+
+        $check = $this->request->param("check");
+        $this->assign('check',$check);
+
+        if (!empty($check)) {
+            if($check==2){
+                $where['c.check'] = 2;
+            }
+            else
+            {
+                $where['c.check'] = 3;
+            }
+        }
+
         $where['c.isdel'] = 0;
-        $join = [
-            ["carts c","c.order_id = o.order_id","left"],
-            ["portal_post g","c.goods_id = g.id"],
-            ["member m","m.id = o.member_id"],
-        ];
-        $field = 'o.*,c.id as cid,g.post_title,c.kc_year,c.check_time,c.is_owe,c.course_money,c.pay_money,c.course_time,c.check_name,m.username,m.phone,c
-        .create_time,c.status,c.ck_type';
-        $result = Db::name("orders")->alias("o")
-            ->join($join)->field($field)
-            ->where($where)
-            ->order("o.id DESC")
-            ->paginate(20);
-        //dump($result);
+
+        if ($applicant) {
+            $where['o.applicant'] = array('like','%'.$applicant.'%');
+        }
+        if ($checkname) {
+            $where['c.check_name'] = array('like','%'.$checkname.'%');
+        }
+        if ($teacher) {
+            $where['o.teacher'] = array('like','%'.$teacher.'%');
+        }
+        if(!empty($username)){
+            $where['m.username'] = $username;
+        }
+        if(!empty($cnname)){
+            $where['m.cnname'] = $cnname;
+        }
+        if(!empty($goods_name)){
+            $where['p.post_title'] = array('like','%'.$goods_name.'%');
+        }
+        if(!empty($phone)){
+            $where['m.phone'] = $phone;
+        }
+        if(!empty($province)){
+            $where['m.province'] = array('like','%'.$province.'%');
+        }
+        if(!empty($badmin)){
+            $where['c.check_name'] = array('like','%'.$badmin.'%');
+        }
+
+        if(!empty($start_time)){
+            $where['c.check_time'] = array('gt',strtotime($start_time));
+        }
+        if(!empty($end_time)){
+            $where['c.check_time'] = array('lt',strtotime($end_time));
+        }
+        if(!empty($start_time) && !empty($end_time)){
+            $where['c.check_time'] = array('between',array(strtotime($start_time),strtotime($end_time)));
+        }
+
+        $orderObject = new OrdersModel();
+        $cateids = $orderObject->getCateids($type_id);
+
+        if(!empty($type_id)){
+            if(!empty($cateids)){
+                $gids = $orderObject->getGoodsid($cateids);
+                //dump($cateids);
+                $gids2 = implode(",",$gids);
+                $where['c.goods_id'] = array('in', $gids2);
+            }
+        }
+        $types = $orderObject->getTopCate();
+        $result = $orderObject->getOrderlist($where,20);
+        //dump($orderObject->getLastSql());
+
+        $this->assign('types',$types);
+        $this->assign('type_id',$type_id);
+        $this->assign('group_id',$group_id);//用户组ID
         $this->assign('result', $result);
         $this->assign('page', $result->render());
         return $this->fetch();
@@ -64,7 +139,8 @@ class OrdersController extends AdminBaseController
 
         if($request->isAjax()){
             $page = $this->request->param("page");
-            $goods_data = $this->getGoodslist(20,$page);
+            $orderObject = new OrdersModel();
+            $goods_data = $orderObject->getGoodslist(20,$page);
             $pages = $goods_data->render();
             $tempstr = '';
             foreach($goods_data as $vo){
@@ -82,9 +158,7 @@ class OrdersController extends AdminBaseController
             $rs = 0;
             $array_id = [];
             $param = [];
-
-            $ordercode = "A".date("Ymdhis").rand(1000,9999);
-
+            $ordercode = getOrderCode();
             //上传文件身份证正面
             $updata = new Upload();
             $file_path = '/upload/files/';
@@ -299,8 +373,8 @@ class OrdersController extends AdminBaseController
                 $this->error('课程已经存在，不能重复购买课程！', url('Orders/index'));
             }
         } //提交保存订单结束
-
-        $goods_data = $this->getGoodslist();
+        $orderObject = new OrdersModel();
+        $goods_data = $orderObject->getGoodslist();
         $pages = $goods_data->render();
         //dump($goods_data);
         //$gogdslist['page'] = $page;
@@ -314,28 +388,6 @@ class OrdersController extends AdminBaseController
         $this->assign('check_name', $check_name);
         $this->assign('group_id', $groupid);
         return $this->fetch();
-    }
-
-    public function getGoodslist($limit=20,$page=1,$title='',$goods_type=''){
-        $where["p.post_status"] = 1;
-
-        if(!empty($title)){
-            $where['p.post_title'] = array('like','%'.$title.'%');
-        }
-        $join = [
-            ["portal_category_post c","c.post_id=p.id"]
-        ];
-        $field = 'p.*,c.category_id';
-        if(!empty($goods_type)){
-            $where["c.category_id"] = $goods_type;
-        }
-        $param['page'] = $page;
-        $param['path'] = 'javascript:AjaxPage([PAGE]);';
-        $goods_data = Db::name("portal_post")
-            //->alias("p")->join($join)->field($field)->where($where)->order('p.id desc')
-            ->paginate($limit,false,$param);
-        //$page = $goods_data->render();
-        return $goods_data;
     }
 
     //获取用户是否存
@@ -379,7 +431,9 @@ class OrdersController extends AdminBaseController
 
         if($request->isAjax()){
             $page = $this->request->param("page");
-            $goods_data = $this->getGoodslist(20,$page);
+
+            $orderObject = new OrdersModel();
+            $goods_data = $orderObject->getGoodslist(20,$page);
             $pages = $goods_data->render();
             $tempstr = '';
             foreach($goods_data as $vo){
@@ -470,18 +524,17 @@ class OrdersController extends AdminBaseController
             $id = $this->request->param('cid');
             $oid = $this->request->param('oid');
             $order_id = $this->request->param('order_id');
-            $goods_data = $this->getGoodslist();
+
+            $orderObject = new OrdersModel();
+            $goods_data = $orderObject->getGoodslist();
             $pages = $goods_data->render();
             $this->assign('pages', $pages);
             $this->assign('goods_data', $goods_data);
 
             $where['c.id'] = $id;
-            $join = [
-              ["orders o","o.order_id = c.order_id"]
-            ];
-            $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.agreement,o.upload_file";
-            $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
-            //dump(unserialize($data['pay_pic']));
+
+            $orderObject = new OrdersModel();
+            $data = $orderObject->getOrderlist($where,0);
 
             $join2 = [
                 ["portal_post p","p.id=c.goods_id"],
@@ -490,6 +543,7 @@ class OrdersController extends AdminBaseController
             $where2['c.order_id'] = $order_id;
             $field2 = "c.*,p.post_title,p.year_price1,p.year_price2,p.year_price3";
             $cartlist = Db::name("carts")->alias("c")->join($join2)->field($field2)->where($where2)->select();
+
             //dump($cartlist);
             $ids = array();
             foreach($cartlist as $vo){
@@ -557,47 +611,18 @@ class OrdersController extends AdminBaseController
 
         $id = $this->request->param("cid");
         $where['c.id'] = $id;
-        $join = [
-            ["orders o","o.order_id = c.order_id"],
-            ["member m","o.member_id = m.id"],
-            ["portal_post p","p.id = c.goods_id"]
-        ];
-        $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
-        .address,m.company";
-        $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+
+        $orderObject = new OrdersModel();
+        $data = $orderObject->getOrderlist($where,0);
+
         $goodsid = $data['goods_id'];
-        $goodstypes = $this->getXiangmu($goodsid);
+        $orderObject = new OrdersModel();
+        $goodstypes = $orderObject->getXiangmu($goodsid);
         $data["classname"] = $goodstypes['classname3'];
         $data["classname2"] = $goodstypes['classname2'];
 
         $this->assign("data",$data);
         return $this->fetch();
-    }
-
-    //根据goodsid查询项目
-    public function getXiangmu($goodsid){
-        $goodsdata =  Db::name('portal_category_post')->where(array('post_id'=>$goodsid))->find();
-        $cateid = $goodsdata['category_id'];
-
-        $goodscate1 = Db::name('portal_category')->where(array('id'=>$cateid))->find();
-        $cateid1 = $goodscate1['parent_id'];
-        $catename1 = $goodscate1['name'];
-
-        $goodscate2 = Db::name('portal_category')->where(array('id'=>$cateid1))->find();
-        $cateid2 = $goodscate2['parent_id'];
-        $catename2 = $goodscate2['name'];
-
-        $goodscate3 = Db::name('portal_category')->where(array('id'=>$cateid2))->find();
-        $cateid3 = $goodscate3['parent_id'];
-        $catename3 = $goodscate3['name'];
-
-        $data = array(
-            "classname1" => $catename1,
-            "classname2" => $catename2,
-            "classname3" => $catename3,
-            "pinyin" => $goodscate3["pinyin"]
-        );
-        return $data;
     }
 
     //打印订单 20190104 redwe
@@ -607,14 +632,10 @@ class OrdersController extends AdminBaseController
             $this->error('参数错误');
         }
         $where['c.id'] = $cid;
-        $join = [
-            ["orders o","o.order_id = c.order_id"],
-            ["member m","o.member_id = m.id"],
-            ["portal_post p","p.id = c.goods_id"]
-        ];
-        $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
-        .address,m.company";
-        $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+
+        $orderObject = new OrdersModel();
+        $data = $orderObject->getOrderlist($where,0);
+
         if(empty($data)){
             $this->error('暂无数据');
         }
@@ -626,7 +647,8 @@ class OrdersController extends AdminBaseController
 
         $oldnum =  Db::name('print_log')->where(array('orderid'=>$cid))->find();
 
-        $goodstypes = $this->getXiangmu($goodsid);
+        $orderObject = new OrdersModel();
+        $goodstypes = $orderObject->getXiangmu($goodsid);
         //dump($goodstypes);
         if(!empty($goodstypes['classname3'])){
             $data["classname3"] = $goodstypes['classname3'];
@@ -699,30 +721,6 @@ class OrdersController extends AdminBaseController
         return $this->fetch();
     }
 
-    public function getAccount($pid,$type,$filed='*'){
-        if(empty($pid)){
-            $pid = cmf_get_current_admin_id();
-        }
-        $data = Db::name("admin")->field($filed)->where(array('pid'=>$pid))->select();
-        if(empty($data)){
-            return array();
-        }
-        if($type == 1){
-            return $data;
-        }elseif ($type == 2){
-            $new_arr = array();
-            if($filed != '*'){
-                foreach ($data as $k=>$v){
-                    $new_arr[] = $v[$filed];
-                }
-                return $new_arr;
-            }else{
-                return $data;
-            }
-        }
-        return array();
-    }
-
     //开课审核列表
     public function checklist(){
 
@@ -734,30 +732,20 @@ class OrdersController extends AdminBaseController
         if ($username) {
             $where['m.username'] = array('like','%'.$username.'%');
         }
-        $ids = $this->getAccount('',2,'id');
+        $orderObject = new OrdersModel();
+        $ids = $orderObject->getAccount('',2,'id');
         //$admin_id = $_SESSION['admin_id'];
         array_push($ids,$adminid);
         //dump($ids);
         if($group_id == 5){
             $where['o.admin_id'] = array('IN',trim(implode(',',$ids),','));
         }
-        $where['c.isdel'] = 0;
         $where['c.check'] = 1;
         if($group_id == 3){
             $where = array('c.check'=>2,'c.ck_type'=>2,'c.status'=>2);
         }
-        $join = [
-            ["carts c","c.order_id = o.order_id","left"],
-            ["portal_post g","c.goods_id = g.id"],
-            ["member m","m.id = o.member_id"],
-        ];
-        $field = 'o.*,c.id as cid,g.post_title,c.kc_year,c.check,c.check_time,c.is_owe,c.course_money,c.pay_money,c.course_time,c.check_name,m.username,
-        m.phone,c.create_time,c.status,c.ck_type,m.card_face,m.card_back';
-        $result = Db::name("orders")->alias("o")
-            ->join($join)->field($field)
-            ->where($where)
-            ->order("o.id DESC")
-            ->paginate(20);
+        $orderObject = new OrdersModel();
+        $result = $orderObject->getOrderlist($where,20);
 
         //dump(Db::name("orders")->getLastSql());
         $this->assign('username', $username);
@@ -838,14 +826,8 @@ class OrdersController extends AdminBaseController
             $groupid = Session::get("group_id");
             //$kcdata = Db::name('carts')->where(array('id'=>$id))->find();
             $where['c.id'] = $id;
-            $join = [
-                ["orders o","o.order_id = c.order_id"],
-                ["member m","o.member_id = m.id"],
-                ["portal_post p","p.id = c.goods_id"]
-            ];
-            $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
-        .address,m.company";
-            $kcdata = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+            $orderObject = new OrdersModel();
+            $kcdata = $orderObject->getOrderlist($where,0);
 
             $this->assign("groupid",$groupid);
             $this->assign("kcdata",$kcdata);
@@ -859,20 +841,492 @@ class OrdersController extends AdminBaseController
     public function look()
     {
         $id = $this->request->param('cid');
-
         $where['c.id'] = $id;
-        $join = [
-            ["orders o","o.order_id = c.order_id"],
-            ["member m","o.member_id = m.id"],
-            ["portal_post p","p.id = c.goods_id"]
-        ];
-        $field = "c.*,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,o.agreement,o.upload_file,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m
-        .address,m.company";
-        $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->find();
+        $orderObject = new OrdersModel();
+        $data = $orderObject->getOrderlist($where,0);
 //dump($data);
         $this->assign('id', $id);
         $this->assign('data', $data);
         return $this->fetch();
     }
+
+    public function remark(){
+
+        if ($this->request->isPost()) {
+
+            $id = $this->request->param("cid");
+            $content = $this->request->param('content');
+            $admin_name = Session::get('name');
+
+            $data['order_id'] = $id;
+            $data['content'] = $content;
+            $data['admin_name'] = $admin_name;
+            $data['status'] = 1;
+            $data['create_time'] = time();
+
+            //上传图片
+            $updata = new Upload();
+            if(request()->file('thumb')){
+                $uploads = $updata->uploadpic('thumb');
+                if ($uploads['res']) {
+                    $data['thumb'] = $uploads['data'];
+                }
+            }
+            $file_path = '/upload/files/';
+            $file_array = ["doc","docx","pdf","xlsx"];
+            //上传文件
+            if(request()->file('agreement')){
+                $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
+                if ($uploads['res']) {
+                    $data['agreement'] = $uploads['data'];
+                }
+            }
+
+            $rs = Db::name('remarks')->where(array('id'=>$id))->insert($data);
+            if($rs){
+                $this->success('备注成功！',url('Orders/guestList'));
+            }else{
+                $this->error('提交失败！请联系管理员',url('Orders/guestList'));
+            }
+        } else {
+            $id = $this->request->param("cid");
+            $groupid =Session::get("group_id");
+
+            $where['c.id'] = $id;
+            $orderObject = new OrdersModel();
+            $kcdata = $orderObject->getOrderlist($where,0);
+
+            $remarklist = Db::name('remarks')->where(array('order_id'=>$id))->select();
+            $this->assign("remarklist",$remarklist);
+            //dump($remarklist);
+            $this->assign("groupid",$groupid);
+            $this->assign("kcdata",$kcdata);
+            $this->assign("id",$id);
+            return $this->fetch();
+        }
+    }
+
+    public function guestlist(){
+
+        $group_id = Session::get("group_id");
+        $teacher = $this->request->param("teacher");
+        $type_id = $this->request->param('type_id');
+        $name = $this->request->param('cnname');
+        $goods_name = $this->request->param("goods_name");
+        $phone = $this->request->param('phone');
+        $province = $this->request->param("province");
+        $badmin = $this->request->param("badmin");
+
+        $where = array();
+
+        if ($teacher) {
+            $where['o.teacher'] = array('like','%'.$teacher.'%');
+        }
+        if(!empty($name)){
+            $where['m.cnname'] = array('like','%'.$name.'%');
+        }
+        if(!empty($goods_name)){
+            $where['p.post_title'] = array('like','%'.$goods_name.'%');
+        }
+        if(!empty($phone)){
+            $where['m.phone'] = $phone;
+        }
+        if(!empty($province)){
+            $where['m.province'] = array('like','%'.$province.'%');
+        }
+        if(!empty($badmin)){
+            $where['c.check_name'] = array('like','%'.$badmin.'%');
+        }
+
+        $orderObject = new OrdersModel();
+        if(!empty($type_id)) {
+            $cateids = $orderObject->getCateids($type_id);
+            if (!empty($cateids)) {
+                $gids = $orderObject->getGoodsid($cateids);
+                //dump($cateids);
+                $gids2 = implode(",", $gids);
+                $where['c.goods_id'] = array('in', $gids2);
+            }
+        }
+        $order = $orderObject->getOrderlist($where,20);
+        $types = $orderObject->getTopCate();
+
+        $this->assign('types',$types);
+        $this->assign('type_id',$type_id);
+        $this->assign('order', $order);
+        $this->assign('page', $order->render());// 赋值分页输出
+        $this->assign('group_id',$group_id);//用户组ID
+        return $this->fetch();
+    }
+
+
+    public function sendMessage(){
+
+        $allids = $this->request->param("allids");
+        $where["c.isdel"] = 0;
+        $phones = [];
+        if(!empty($allids)){
+            $where = array('m.id'=>["in",$allids]);
+            $orderObject = new OrdersModel();
+            $userlist = $orderObject->getOrderlist($where,20);
+
+            foreach($userlist as $vo){
+                array_push($phones,$vo['phone']);
+            }
+            if(count($phones)==1){
+                $phone = $phones[0];
+            }
+            else
+            {
+                $phone = implode($phones,",");
+            }
+        }
+        else
+        {
+            $this->error('请选择用户！',url("Orders/guestList"));
+            exit();
+        }
+
+        $this->assign('phone', $phone);
+        $this->assign('ids',$allids);
+        return $this->fetch();
+    }
+
+    //批量发送短信
+    public function sendGSM(){
+        if ($this->request->isPost()) {
+            $phonelist = [];
+            $phones = $this->request->param("phone");
+            $content = $this->request->param("content");
+
+            if(empty($phones) || empty($content)){
+                $this->error('手机号和短信内容不能为空！',url("Orders/guestList"));
+                exit();
+            }
+            if(strpos($phones,",")){
+                $phonelist = explode(",",$phones);
+            }
+            else
+            {
+                array_push($phonelist,$phones);
+            }
+            if(sendMsg2($phones,$content)){
+                $this->success("发送成功！",url("Orders/guestList"));
+            } else {
+                $this->error('系统异常，请稍后提交！',url("Orders/guestList"));
+            }
+            //dump($phones);
+        }
+    }
+
+    public function sendEmail(){
+        $allids = $this->request->param("allids");
+        $where["c.isdel"] = 0;
+        $Email = [];
+        if(!empty($allids)){
+            $where = array('c.id'=>["in",$allids]);
+            $orderObject = new OrdersModel();
+            $userlist = $orderObject->getOrderlist($where,20);
+            foreach($userlist as $vo){
+                if(!empty($vo['email'])){
+                    array_push($Email,$vo['email']);
+                }
+            }
+            if(count($Email)==1){
+                $Email = $Email[0];
+            }
+            else
+            {
+                $Email = implode($Email,",");
+            }
+        }
+        else
+        {
+            $this->error('请选择用户！',url("Orders/guestList"));
+            exit();
+        }
+        //dump($Email);
+        $this->assign('Email', $Email);
+        $this->assign('ids',$allids);
+        return $this->fetch();
+    }
+
+
+    public function sendMail(){
+
+        $email = $this->request->param("email");
+        $subject = $this->request->param("subject");
+        $content = $this->request->param("content");
+        $nickname = $this->request->param("nickname");
+        $from = '3007081055@qq.com';     //发送邮箱地址
+        $password = "efevnfwxdrouddfj"; //发送邮箱密码
+        $Attachment = ''; //附件文件地址
+        //上传图片
+        $updata = new Upload();
+
+        $file_path = '/upload/files/';
+        $file_array = ["jpg","png","rar","zip","txt","doc","docx","pdf","xlsx"];
+        //上传文件
+        if(request()->file('agreement')){
+            $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
+            if ($uploads['res']) {
+                $Attachment = $uploads['data'];
+            }
+        }
+
+        if(empty($email) || empty($content)){
+            $this->error('邮箱地址和内容不能为空！',url("Orders/guestList"));
+            exit();
+        }
+        $orderObject = new OrdersModel();
+        $result = $orderObject->send_email($nickname, $from, $password, $email, $subject, $content,$Attachment);
+        //dump($result);
+        if($result){
+            $this->success("发送成功！",url("Orders/guestList"));
+        } else {
+            $this->error('系统异常，请稍后提交！',url("Orders/guestList"));
+        }
+    }
+
+    //导入
+    public function daoru(){
+        if ($this->request->isPost()) {
+            // 上传
+            $updata = new Upload();
+            $file_name = '';
+            $cart = [];
+            $order = [];
+            $user = [];
+            $rootUrl = $_SERVER['DOCUMENT_ROOT'];
+
+            $file_path = '/upload/excel/';
+            $file_array = ['xls','xlsx'];
+            //上传文件
+            if(request()->file('agreement')){
+                $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
+                if ($uploads['res']) {
+                    $file_name = $uploads['data'];
+                }
+            }
+            $orderObject = new OrdersModel();
+            $exl = $orderObject->import_exl($rootUrl.$file_name);
+
+            //获取所有的课程信息
+            $goodslist = Db::name("portal_post")->select();
+            $goods_data = arrayValueToKey($goodslist,'id');
+            //dump($exl);
+            $count = count($exl);
+            for($i=0; $i<$count; $i++){
+                $ordercode = getOrderCode();
+                if($i>0){
+                    $kc_price = 0;
+                    switch ($exl[$i]['kc_year']){
+                        case 1:
+                            $kc_price = $goods_data[$exl[$i]['goods_id']]['kc1_price'];
+                            break;
+                        case 2:
+                            $kc_price = $goods_data[$exl[$i]['goods_id']]['kc2_price'];
+                            break;
+                        case 3:
+                            $kc_price = $goods_data[$exl[$i]['goods_id']]['kc3_price'];
+                            break;
+                        default:$kc_price = 0;
+                    }
+                    if(empty($kc_price)){
+                        $kc_price = 0;
+                    }
+                    $phone = $exl[$i]['phone'];
+                    $userdatas = Db::name("member")->where(array("phone"=>$phone))->find();
+
+                    $userid = $userdatas["id"];
+                    $adminidData = $orderObject->getAdminid($exl[$i]['applicant']);
+
+                    $userlist = Db::name("member")->select();
+                    $user_data = arrayValueToKey($userlist,'phone');
+                    //dump($adminidData);
+
+                    $cart[$i]['goods_id']=$exl[$i]['goods_id'];
+                    $cart[$i]['order_id'] = $ordercode;
+                    $cart[$i]['member_id'] = $user_data[$exl[$i]['phone']]['id'];
+                    $cart[$i]['course_time']=$exl[$i]['course_time'];
+                    $cart[$i]['course_money']=$exl[$i]['course_money'];
+                    $cart[$i]['is_owe']=$exl[$i]['course_money'] > $exl[$i]['pay_money'] ? 1 : 0;
+                    $cart[$i]['ck_type']=1;
+                    $cart[$i]['create_time']=$exl[$i]['time'];
+                    $cart[$i]['check']=2;
+                    $cart[$i]['check_name'] = $adminidData['shenher'];
+                    $cart[$i]['status']=1;
+                    $cart[$i]['isdel']=0;
+                    $cart[$i]['kc_year']=$exl[$i]['kc_year'];
+                    $cart[$i]['kc_price'] = $kc_price;
+                    //$cart[$i]['post_title'] = $goods_data[$exl[$i]['goods_id']]['title'];
+
+                    $order[$i]['admin_id'] = $adminidData['id'];
+                    $order[$i]['member_id'] = $user_data[$exl[$i]['phone']]['id'];
+                    $order[$i]['payment']=$exl[$i]['payment'];
+                    //$order[$i]['applicant'] = 'admin';
+                    $order[$i]['teacher']=$exl[$i]['teacher'];
+                    $order[$i]['applicant'] = $exl[$i]['applicant'];
+                    $order[$i]['group_id'] = $adminidData['group_id'];
+
+                    //存储用户表
+                    $user[$i]['username']=$exl[$i]['username'];
+                    $user[$i]['phone']=$exl[$i]['phone'];
+                    $user[$i]['email']=$exl[$i]['email'];
+                }
+            }
+            //dump($cart);
+            //导入之前 检查是否重复开课
+            $count2 = count($cart);
+            for($i=1; $i<$count2; $i++){
+                if(isset($cart[$i]['member_id'])){
+                    $member_id = $cart[$i]['member_id'];
+                }
+                else
+                {
+                    $member_id = 0;
+                }
+                if(isset($cart[$i]['goods_id'])){
+                    $goods_id = $cart[$i]['goods_id'];
+                }
+                else
+                {
+                    $goods_id = 0;
+                }
+                if(isset($cart[$i]['phone'])){
+                    $phone = $cart[$i]['phone'];
+                }
+                else
+                {
+                    $phone = '';
+                }
+                $where = array(
+                    'member_id'=>$member_id,
+                    'goods_id'=>$goods_id,
+                    'ck_type'=>1
+                );
+                Db::name("carts")->where($where)->delete();
+                Db::name("carts")->insert($cart[$i]);
+                Db::name("orders")->insert($order[$i]);
+                $members = Db::name("member")->where(array("username"=>$user[$i]['username']))->find();
+                if(!empty($members['id'])){
+                    Db::name("orders")->insert($user[$i]);
+                }
+            }
+//            if($course_order->addAll($new)){
+            $this->success('导入成功',url('Orders/index'));
+//            }else{
+//                $this->error('导入失败');
+//            }
+            exit();
+        }
+        return $this->fetch();
+    }
+
+    //导出
+    public function daochu(){
+
+        if ($this->request->isPost()) {
+            $group_id = Session::get("group_id");
+            $teacher = $this->request->param("teacher");
+            $type_id = $this->request->param('type_id');
+            $name = $this->request->param('cnname');
+            $goods_name = $this->request->param("goods_name");
+            $phone = $this->request->param('phone');
+            $province = $this->request->param("province");
+            $badmin = $this->request->param("badmin");
+
+            $where["c.isdel"] = 0;
+
+            if ($teacher) {
+                $where['o.teacher'] = array('like','%'.$teacher.'%');
+            }
+            if(!empty($name)){
+                $where['m.cnname'] = array('like','%'.$name.'%');
+            }
+            if(!empty($goods_name)){
+                $where['p.post_title'] = array('like','%'.$goods_name.'%');
+            }
+            if(!empty($phone)){
+                $where['m.phone'] = $phone;
+            }
+            if(!empty($province)){
+                $where['m.province'] = array('like','%'.$province.'%');
+            }
+            if(!empty($badmin)){
+                $where['c.check_name'] = array('like','%'.$badmin.'%');
+            }
+
+            $orderObject = new OrdersModel();
+            if(!empty($type_id)){
+                $cateids = $orderObject->getCateids($type_id);
+                if(!empty($cateids)){
+
+                    $gids = $orderObject->getGoodsid($cateids);
+                    //dump($cateids);
+                    $gids2 = implode(",",$gids);
+                    $where['c.goods_id'] = array('in', $gids2);
+                }
+            }
+            $list = $orderObject->getOrderlist($where,1000);
+            //$types = $orderObject->getTopCate();
+            header("Content-type: application/vnd.ms-excel; charset=utf-8");
+            header("Content-Disposition: attachment; filename=客户信息.csv");
+            $data = "ID\t";
+            $data .= "用户名\t";
+            $data .= "姓名\t";
+            $data .= "手机号\t";
+            $data .= "课程ID\t";
+            $data .= "课程\t";
+            $data .= "课程费用\t";
+            $data .= "已交费用\t";
+            $data .= "欠款费用\t";
+            $data .= "转账方式\t";
+            $data .= "过期时间\t";
+            $data .= "添加时间\t";
+            $data .= "招生老师\t";
+            $data .= "学员邮箱\t";
+            $data .= "身份证号\t";
+            $data .= "单位\t";
+            $data .= "地址\t";
+            $data .= "考区\t";
+            $data .= "服务年限\t";
+            $data .= "申请人\t";
+            $data .= "\t\n";
+
+            foreach ($list as $k => $v) {
+
+                $data .= $v['id'] . "\t";
+                $data .= trim($v['username']) . "\t";
+                $data .= trim($v['cnname']) . "\t";
+                $data .= trim($v['phone']) . "\t";
+                $data .= $v['goods_id'] . "\t";
+                $data .= $v['post_title'] . "\t";
+                $data .= $v['course_money'] . "\t";
+                $data .= $v['pay_money'] . "\t";
+                $data .= ($v['course_money']-$v['pay_money']) . "\t";
+                $data .= $v['payment'] . "\t";
+                $expiration_time = '';
+                if ($v['course_time']) {
+                    $expiration_time = date('Y/m/d H:i:s', $v['course_time']);
+                }
+                $data .= $expiration_time . "\t";
+                $data .= date('Y/m/d H:i:s', $v['create_time']) . "\t";
+                $data .= $v['teacher'] . "\t";
+                $data .= $v['email'] . "\t";
+                $data .= "'".$v['cardnum'] . "\t";
+                $data .= $v['company'] . "\t";
+                $data .= $v['address'] . "\t";
+                $data .= $v['province'] . "\t";
+                $data .= $v['kc_year'] . "\t";
+                $data .= $v['applicant'] . "\t";
+                $data .= "\t\n";
+            }
+            echo(chr(255) . chr(254));
+            echo(mb_convert_encoding($data, "UTF-16LE", "UTF-8"));
+            exit;
+        }
+    }
+
 
 }

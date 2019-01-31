@@ -1,6 +1,7 @@
 <include file="public@header"/>
 <style>
     .red{ color: #FF0000}
+    .width-120{ width: 100px;}
 </style>
 </head>
 <body>
@@ -10,24 +11,66 @@
         <li><a href="{:url('orders/logs')}">开课日志</a></li>
         <li><a href="{:url('orders/add')}">添加订单</a></li>
     </ul>
-    <form class="well form-inline margin-top-20" method="post" action="{:url('orders/index')}">
-        分类:
-        <select class="form-control" name="category" style="width: 140px;">
-            <option value='0'>全部</option>
-            {$category_tree|default=''}
-        </select> &nbsp;&nbsp;
+    <form class="well form-inline margin-top-20" method="post" name="sForm" action="{:url('orders/index')}">
+        <div class="form-group">
+            <input class="form-control" style="width: 120px;" id="username" placeholder="请输入用户名" name="username" value="{$Request.param.username}">
+        </div>
+        <div class="form-group">
+            <input class="form-control" style="width: 120px;" id="applicant" placeholder="请输入申请人" name="applicant" value="{$Request.param.applicant}">
+        </div>
+        <div class="form-group">
+            <input class="form-control" style="width: 120px;" id="checkname" placeholder="请输入审核人" name="checkname" value="{$Request.param.checkname}">
+        </div>
+        <div class="form-group">
+            <input style="width: 120px;" class="form-control" id="cnname" placeholder="请输入用户姓名" name="cnname" value="{$Request.param.cnname}">
+        </div>
+        <div class="form-group">
+            <input class="form-control" style="width: 120px;" id="goods_name" placeholder="请输入课程名" name="goods_name" value="{$Request.param.goods_name}">
+        </div>
+        <div class="form-group">
+            <select name="type" class="form-control">
+                <option value="0">课程类型</option>
+                <option value="1" <eq name="type" value="1">selected</eq> >正常</option>
+                <option value="2" <eq name="type" value="2">selected</eq>>非正常</option>
+                <option value="3" <eq name="type" value="3">selected</eq>>内部学习</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <select name="isqf" class="form-control">
+                <option value="0">是否欠费</option>
+                <option value="1" <eq name="isqf" value="1">selected</eq> >未欠费</option>
+                <option value="2" <eq name="isqf" value="2">selected</eq> >已欠费</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <select name="check" class="form-control">
+                <option value="0">课程状态</option>
+                <option value="2" <eq name="check" value="2">selected</eq> >审核通过</option>
+                <option value="3" <eq name="check" value="3">selected</eq> >审核失败</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <select name="type_id" class="form-control">
+                <option value="0">选择课程项目</option>
+                <foreach name="types" item="tp">
+                    <option value="{$tp.id}" <eq name="type_id" value="$tp['id']">selected</eq>>{$tp.name}</option>
+                </foreach>
+            </select>
+        </div>
         时间:
-        <input type="text" class="form-control js-bootstrap-datetime" name="start_time"
+        <input type="text" class="form-control js-bootstrap-datetime" name="start_time" placeholder="课程审核时间从"
                value="{$start_time|default=''}"
-               style="width: 140px;" autocomplete="off">-
-        <input type="text" class="form-control js-bootstrap-datetime" name="end_time"
+               style="width: 120px;" autocomplete="off">-
+        <input type="text" class="form-control js-bootstrap-datetime" name="end_time" placeholder="到课程审核时间"
                value="{$end_time|default=''}"
-               style="width: 140px;" autocomplete="off"> &nbsp; &nbsp;
-        关键字:
-        <input type="text" class="form-control" name="keyword" style="width: 200px;"
-               value="{$keyword|default=''}" placeholder="请输入关键字...">
+               style="width: 120px;" autocomplete="off"> &nbsp;
         <input type="submit" class="btn btn-primary" value="搜索"/>
-        <a class="btn btn-danger" href="{:url('orders/index')}">清空</a>
+        <!--<a class="btn btn-danger" href="{:url('orders/index')}">清空</a>-->
+        <button type="button" class="btn btn-danger plBtn">批量修改</button>
+        <a type="button" class="btn btn-default drBtn" href="{:url('Orders/daoru')}">导入</a>
+        <a type="button" class="btn btn-default dcBtn" href="{:url('Orders/daochu')}">导出</a>
     </form>
     <form class="js-ajax-form" action="" method="post">
         <table class="table table-hover table-bordered table-list">
@@ -105,9 +148,11 @@
                         </if>
                     </td>
                     <td>
-                        <if condition="$vo.status==1">
+                        <if condition="$vo.status==1 and $vo.check==2">
                             已开课
-                            <else/>
+                         <elseif condition="$vo.check==3">
+                             已拒绝
+                         <else/>
                             未开课
                         </if>
                     </td>
@@ -123,6 +168,7 @@
                         <a href="{:url('Orders/tuike',array('cid'=>$cid))}">退课</a>
                         <a href="{:url('Orders/printOrder',array('cid'=>$cid))}">打印</a>
                         <a href="{:url('Orders/logs',array('cid'=>$cid))}">日志</a>
+                        <a href="{:url('Orders/remark',array('cid'=>$cid))}">备注</a>
                         <a href="{:url('Orders/edit',array('cid'=>$cid,'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
                         <a href="{:url('Orders/delete',array('cid'=>$cid,'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
                     </td>
@@ -133,6 +179,30 @@
     </form>
 </div>
 <script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/common.js"></script>
+<script>
+    $(function () {
+        $('.plBtn').click(function () {
+            var url = '{:url(\'Orders/pledit\')}?';
+            var form = $('.sForm');
+            var params = '';
+            var data = form.serializeArray();
+            $.each(data,function () {
+                params = params+this.name+'='+this.value+'&';
+            });
+            url = url+params;
+            console.log(url);
+            window.location.href = url;
+            return false;
+        });
 
+        $('.dcBtn').click(function () {
+            sForm.action = $(this).attr('href');
+            sForm.method = "post";
+            sForm.submit();
+            return false;
+        });
+    })
+</script>
 </body>
 </html>
