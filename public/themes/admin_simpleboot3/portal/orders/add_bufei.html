@@ -1,0 +1,235 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li class="active"><a href="javascript:;">学员补费</a></li>
+        <li><a href="{:url('orders/add')}">添加订单</a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20" action="{:url('Orders/add_bufei')}" role="form" method="POST" id="add_bufei"
+          enctype="multipart/form-data">
+        <php>
+            $orderid = $userdata['id'];
+            $username = $userdata['username'];
+            if(!empty($bufei_data)){
+            $bid = $bufei_data['id'];
+            $price = $bufei_data['price'];
+            $payment = $bufei_data['payment'];
+            $paytime = $bufei_data['datetime'];
+            $marks = $bufei_data['marks'];
+            $picurl1 = $bufei_data['picurl1'];
+            $picurl2 = $bufei_data['picurl2'];
+            }
+            else
+            {
+            $bid = '';
+            $price = '';
+            $payment = '';
+            $paytime = '';
+            $marks = '';
+            $picurl1 = '';
+            $picurl2 = '';
+            }
+        </php>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">用户姓名</label>
+            <input name="cid" type="hidden" value="{$cid}">
+            <input name="do" type="hidden" value="{$do}">
+            <input name="bid" type="hidden" value="{$bid}">
+            <div class="col-sm-6">
+                <input type="text" name="username" id="stu_name" readonly placeholder="请输入用户姓名" class="form-control" value="{$username}" />
+            </div>
+        </div>
+
+        <div class="space-4"></div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">补费金额</label>
+
+            <div class="col-sm-6">
+                <input type="text" name="price" id="price" placeholder="请输入补费金额"  class="form-control course_money" value="{$price}" />
+            </div>
+        </div>
+
+        <div class="space-4"></div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">转账方式</label>
+
+            <div class="col-sm-6">
+                <select name="payment" class="form-control">
+                    <option <php>if($payment=='微信'){</php> selected <php>}</php> value="微信">微信</option>
+                    <option <php>if($payment=='支付宝'){</php> selected <php>}</php> value="支付宝">支付宝</option>
+                    <option <php>if($payment=='银行卡'){</php> selected <php>}</php> value="银行卡">银行卡</option>
+                    <option <php>if($payment=='刷卡'){</php> selected <php>}</php> value="刷卡">刷卡</option>
+                </select>
+                <!--<input type="text" name="pay_way" id="transfer_way" id="form-field-2" placeholder=""  class="col-xs-10 col-sm-5" />-->
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">转账截图1</label>
+            <div class="col-sm-6">
+                <input type="file" name="pay_pic1" class="col-xs-10 col-sm-5" value="" />
+                <notempty name="picurl1">
+                    <img style="height: 60px;" src="{$picurl1}">
+                </notempty>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">转账截图2</label>
+            <div class="col-sm-6">
+                <input type="file" name="pay_pic2"  class="col-xs-10 col-sm-5" value=""/>
+                <notempty name="picurl2">
+                    <img style="height: 60px;" src="{$picurl2}">
+                </notempty>
+            </div>
+        </div>
+
+        <div class="space-4"></div>
+        <div class="form-group owe_time">
+            <label class="col-sm-3 control-label no-padding-right">欠款补交时间</label>
+            <div class="col-sm-6">
+                <input name="paytime"  placeholder=""  class="form-control js-bootstrap-datetime" value="{:date('Y-m-d h:i:s',time())}" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">备注</label>
+
+            <div class="col-sm-6">
+                <textarea class="form-control" rows="5" name="remarks" id="content" >{$marks}</textarea>
+            </div>
+        </div>
+        <input type="hidden" name="orderid" id="orderid" value="{$orderid}">
+        <input type="hidden" name="applicant" id="applicant" value="{$Think.session.username}">
+        <div class="clearfix form-actions">
+            <div class="col-md-offset-3 col-md-9">
+                <button class="btn btn-info" type="button" onclick="return checkdate()">
+                    <i class="icon-ok bigger-110"></i>
+                    提交审核
+                </button>
+
+                &nbsp; &nbsp; &nbsp;
+                <button class="btn" type="reset"  onClick="window.history.back()">
+                    <i class="icon-undo bigger-110"></i>
+                    返回
+                </button>
+            </div>
+        </div>
+    </form>
+    <script>
+        function wsinfo(){
+
+            var Socket =  io.connect(ws_url);
+            var content = "学员补费";     //学员手机号
+            var student = $("#stu_name").val();     //学员姓名
+            var applicant = $("#applicant").val(); //申请人
+            var goodsname = $("#orderid").val(); //课程id
+            var course_money = 0;    //$("#course_money").val();   //课程费用
+            var pay_money = 0;    //$("#pay_money").val();     //已支付费用
+            var check_name = $("#check_name").val();     //审核人
+            var goodstype_subject_id = 1;   //$("#goodstype_subject_id").val();     //是否为正常订单
+            var group_id = $("#groupid").val();
+
+            //告诉服务器端有用户登录
+            // if(!isEmpty(content)){
+            var sendData =  {
+                student:student,
+                applicant:applicant,
+                goodsname:goodsname,
+                course_money:course_money,
+                pay_money:pay_money,
+                username:check_name,
+                content:content,
+                group_id:group_id,
+                type_id:goodstype_subject_id
+            };
+            //alert(check_name);
+            //Socket.emit('login', {userid:'1', username:'redwe'});
+            Socket.emit('message',sendData);
+            console.log(sendData);
+            //}
+        }
+        function checkdate(){
+
+            var username = $("#stu_name").val();
+            var price = $("#price").val();
+            if(!isEmpty(price) || !isEmpty(username)){
+                alert(price+"请输入用户名和补费金额再提交！"+username);
+                return false;
+            }
+            wsinfo();
+            setTimeout(function(){
+                add_bufei.submit();
+            },1000);
+        }
+    </script>
+
+    <div style="width: 90%; margin: auto;">
+        <h3>补费记录</h3>
+        <table id="example-advanced" class="table table-striped table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>用户名</th>
+                <th>金额</th>
+                <th>付款方式</th>
+                <th>转款截图</th>
+                <th>备注</th>
+                <th>状态</th>
+                <th>时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody class="data_show">
+            <volist name="dataList" id="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.username}</td>
+                    <td>{$vo.price}</td>
+                    <td>{$vo.payment}</td>
+                    <td>
+                        <a target="_blank" href="{$vo.picurl1}">
+                            <img style="height: 30px;" src="{$vo.picurl1}"></a>
+                        <a target="_blank" href="{$vo.picurl1}">
+                            <img style="height: 30px;" src="{$vo.picurl2}"></a>
+                    </td>
+                    <td>{$vo.marks}</td>
+                    <td>
+                        <if condition="$vo['status']==1">
+                            已审核
+                            <elseif condition="$vo['status']==2" />
+                            已拒绝
+                            <else />
+                            <a style="color: #999" href="#">未审核</a>
+                        </if>
+                    </td>
+                    <td>{$vo.datetime}</td>
+                    <td>
+                        <if condition="$group_id==6 and $vo['status'] !=1">
+                            <a href="{:url('Orders/add_bufei',array('bid'=>$vo['id'],'cid'=>$cid,'do'=>'edit'))}">编辑</a> |
+                            <a href="{:url('Orders/add_bufei',array('bid'=>$vo['id'],'cid'=>$cid,'do'=>'del'))}">删除</a>
+                            <else />
+                            <a style="color: #999" href="#">编辑</a> |
+                            <a style="color: #999" href="#">删除</a>
+                        </if>
+                    </td>
+                </tr>
+            </volist>
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/common.js"></script>
+</body>
+</html>

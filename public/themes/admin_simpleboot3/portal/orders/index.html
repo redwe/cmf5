@@ -160,17 +160,32 @@
                     <td>
                         <a href="{:url('Orders/look',array('cid'=>$cid))}">查看</a>
                         <a href="{:url('Orders/previews',array('cid'=>$cid))}">预览</a>
-                        <a href="{:url('Orders/bufeilist',array('cid'=>$cid))}">补费</a>
-                        <a href="{:url('Orders/continuer',array('cid'=>$cid))}">续学</a>
+                        <if condition="$vo.is_owe eq 1">
+                            <a href="{:url('Orders/add_bufei',array('cid'=>$cid))}">补费</a>
+                        </if>
+                        <if condition="$vo.course_time lt time() and $vo.status eq 1">
+                            <a href="{:url('Orders/continuer',array('cid'=>$cid,'do'=>'xuxue'))}">续学</a>
+                        </if>
                         <a href="{:url('Orders/continuer',array('cid'=>$cid))}">休学</a>
-                        <a href="{:url('Orders/continuer',array('cid'=>$cid))}">转课</a>
+                        <a href="{:url('Orders/continuer',array('cid'=>$cid,'do'=>'zhuan'))}">转课</a>
                         <a href="{:url('Orders/increase',array('cid'=>$cid))}">新增</a>
-                        <a href="{:url('Orders/tuike',array('cid'=>$cid))}">退课</a>
+                        <if condition="$vo.status eq 1">
+                            <a href="{:url('Orders/tuike',array('cid'=>$cid))}">退课</a>
+                        </if>
+                        <if condition="$group_id eq 5">
+                            <a class="green" href="{:U('Oprders/applicant',array('id'=>$vo['id']))}" title="修改申请人">
+                                <i class="icon-eye-open bigger-130"></i>申请人
+                            </a>
+                        </if>
                         <a href="{:url('Orders/printOrder',array('cid'=>$cid))}">打印</a>
                         <a href="{:url('Orders/logs',array('cid'=>$cid))}">日志</a>
-                        <a href="{:url('Orders/remark',array('cid'=>$cid))}">备注</a>
-                        <a href="{:url('Orders/edit',array('cid'=>$cid,'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
-                        <a href="{:url('Orders/delete',array('cid'=>$cid,'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+                        <if condition="$group_id eq 7 or $group_id eq 1 or $group_id eq 3">
+                            <a href="{:url('Orders/remark',array('cid'=>$cid))}">备注</a>
+                        </if>
+                        <if condition=" $vo.check eq 3 or $group_id eq 1">
+                            <a href="{:url('Orders/edit',array('cid'=>$cid,'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
+                            <a href="{:url('Orders/delete',array('cid'=>$cid,'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+                        </if>
                     </td>
                 </tr>
             </foreach>
@@ -183,16 +198,9 @@
 <script>
     $(function () {
         $('.plBtn').click(function () {
-            var url = '{:url(\'Orders/pledit\')}?';
-            var form = $('.sForm');
-            var params = '';
-            var data = form.serializeArray();
-            $.each(data,function () {
-                params = params+this.name+'='+this.value+'&';
-            });
-            url = url+params;
-            console.log(url);
-            window.location.href = url;
+            sForm.method = 'get';
+            sForm.action = '{:url(\'Orders/pledit\')}';
+            sForm.submit();
             return false;
         });
 

@@ -1347,4 +1347,645 @@ class OrdersController extends AdminBaseController
     }
 
 
+    //批量修改
+    public function pledit(){
+
+        $adminname1 = $this->request->param("adminname1");
+        $adminname2 = $this->request->param("adminname2");
+
+        if(!empty($adminname1) && !empty($adminname2)){
+            //原C管理员，转出方
+            $admins1 = Db::name("admin")->where(array("username"=>$adminname1))->find();
+            $adminid1 = $admins1['id'];
+            //dump($admins1);
+            //新管理员，转入方
+            $admins2 = Db::name("admin")->where(array("username"=>$adminname2))->find();
+            $adminid2 = $admins2['id'];
+            $pid = $admins2['pid'];
+            $group_id = $admins2['group_id'];
+
+            if($group_id==5){
+                $adminid3 = $adminname2;
+
+                $result1 = Db::name("orders")->where(array("admin_id"=>$adminid1,"applicant"=>$adminname1))->find();
+                $check_name1 = $result1["check_name"];
+                $result = Db::name("carts")->where(array("check_name"=>$check_name1))->update(array("check_name"=>$adminid3));
+            }
+            else
+            {
+                //C管理员的审核人
+                $badmin = Db::name('admin')->where(array('id' => $pid))->find();
+                $adminid3 = $badmin['username'];
+            }
+
+            $where = array("o.admin_id"=>$adminid1,"o.applicant"=>$adminname1);
+            $datas = array("o.admin_id"=>$adminid2,"o.applicant"=>$adminname2,"c.check_name"=>$adminid3);
+            $join = [
+                ["orders o","o.order_id=c.order_id"]
+            ];
+            $result = Db::name("carts")->alias("c")->join($join)->where($where)->update($datas);
+
+            if($result){
+                $this->success('批量修改成功',url('Orders/index'));
+            }
+            else
+            {
+                $this->error('批量修改失败');
+            }
+        }
+        else
+        {
+            $group_id = Session::get("group_id");
+            $teacher = $this->request->param("teacher");
+            $applicant = $this->request->param("applicant");
+            $checkname = $this->request->param("checkname");
+            $type_id = $this->request->param('type_id');
+            $username = $this->request->param('username');
+            $cnname = $this->request->param('cnname');
+            $goods_name = $this->request->param("goods_name");
+            $phone = $this->request->param('phone');
+            $province = $this->request->param("province");
+            //$badmin = $this->request->param("badmin");
+
+            $start_time = $this->request->param('start_time');
+            $end_time = $this->request->param('end_time');
+
+            $this->assign('start_time',$start_time);
+            $this->assign('end_time',$end_time);
+
+            $type = $this->request->param("type");
+            $this->assign('type',$type);
+            $this->assign('type_id',$type_id);
+
+            if (!empty($type)) {
+                $where['c.ck_type'] = $type;
+            }
+
+            $isqf = $this->request->param("isqf");
+            $this->assign('isqf',$isqf);
+
+            if (!empty($isqf)) {
+                if($isqf==1){
+                    $where['c.is_owe'] = 0;
+                }
+                else
+                {
+                    $where['c.is_owe'] = 1;
+                }
+            }
+            $check = $this->request->param("check");
+            $this->assign('check',$check);
+
+            if (!empty($check)) {
+                if($check==2){
+                    $where['c.check'] = 2;
+                }
+                else
+                {
+                    $where['c.check'] = 3;
+                }
+            }
+
+            $where['c.isdel'] = 0;
+
+            if ($applicant) {
+                $where['o.applicant'] = array('like','%'.$applicant.'%');
+            }
+            if ($checkname) {
+                $where['c.check_name'] = array('like','%'.$checkname.'%');
+            }
+            if ($teacher) {
+                $where['o.teacher'] = array('like','%'.$teacher.'%');
+            }
+            if(!empty($username)){
+                $where['m.username'] = $username;
+            }
+            if(!empty($cnname)){
+                $where['m.cnname'] = $cnname;
+            }
+            if(!empty($goods_name)){
+                $where['p.post_title'] = array('like','%'.$goods_name.'%');
+            }
+            if(!empty($phone)){
+                $where['m.phone'] = $phone;
+            }
+            if(!empty($province)){
+                $where['m.province'] = array('like','%'.$province.'%');
+            }
+            if(!empty($badmin)){
+                $where['c.check_name'] = array('like','%'.$badmin.'%');
+            }
+
+            if(!empty($start_time)){
+                $where['c.check_time'] = array('gt',strtotime($start_time));
+            }
+            if(!empty($end_time)){
+                $where['c.check_time'] = array('lt',strtotime($end_time));
+            }
+            if(!empty($start_time) && !empty($end_time)){
+                $where['c.check_time'] = array('between',array(strtotime($start_time),strtotime($end_time)));
+            }
+
+            $orderObject = new OrdersModel();
+            $cateids = $orderObject->getCateids($type_id);
+
+            if(!empty($type_id)){
+                if(!empty($cateids)){
+                    $gids = $orderObject->getGoodsid($cateids);
+                    //dump($cateids);
+                    $gids2 = implode(",",$gids);
+                    $where['c.goods_id'] = array('in', $gids2);
+                }
+            }
+            $result = $orderObject->getOrderlist($where,20);
+            //dump($orderObject->getLastSql());
+
+            $ids = $orderObject->getAccount('',2,'id');
+            $admin_id = cmf_get_current_admin_id();
+            array_push($ids,$admin_id);
+
+            if($group_id != 1){
+                $where['m.admin_id'] = array('IN',trim(implode(',',$ids),','));
+            }
+            $this->assign("wherestr",json_encode($where));
+
+            if ($this->request->isPost()) {
+
+                $course_time = $this->request->param('course_time');
+                if(empty($course_time)){
+                    $this->error('请填写课程结束时间');
+                }
+                $where = $this->request->param("wherestr");
+                $where = htmlspecialchars_decode($where);
+                $where = json_decode($where,true);
+              if(!empty($where)){
+                  $join = [
+                    ["orders o","o.order_id=c.order_id"]
+                  ];
+                  $res = Db::name('carts')->alias('c')->join($join)->where($where)->update(array('c.course_time'=>strtotime($course_time)));
+                  if($res){
+                      $this->success('批量修改成功'.$res.'条数据',url('Orders/index'));
+                  }else{
+                      $this->error('批量修改失败');
+                  }
+                  exit();
+               }
+                else
+                {
+                    $this->error('缺少修改条件！');
+                }
+            }
+        }
+        $this->assign('group_id',$group_id);//用户组ID
+        $this->assign('result', $result);
+        $this->assign('page', $result->render());
+        return $this->fetch();
+    }
+
+//学员补费
+    public function add_bufei(){
+
+        $group_id = Session::get("group_id");
+
+        if ($this->request->isPost()) {
+
+            $cid = $this->request->param('cid');
+            $price = $this->request->param('price');
+            $username = $this->request->param('username');
+            $payment = $this->request->param('payment');
+            $marks = $this->request->param('remarks');
+            $paytime = $this->request->param("paytime");
+            $do = $this->request->param("do");
+            $bid = $this->request->param("bid");
+
+            if(empty($cid) || empty($price)){
+                $this->error('参数错误');
+            }
+
+            $save_data = array(
+                'orderid'=>$cid,
+                'price'=>$price,
+                'username'=>$username,
+                'payment'=>$payment,
+                'marks'=>$marks,
+                'status'=>0,
+                'datetime'=>$paytime
+            );
+
+            $updata = new Upload();
+
+            if(request()->file('pay_pic1')){
+                $uploads = $updata->uploadpic('pay_pic1');
+                if ($uploads['res']) {
+                    $save_data['picurl1'] = $uploads['data'];
+                }
+            }
+
+            if(request()->file('pay_pic2')){
+                $uploads = $updata->uploadpic('pay_pic2');
+                if ($uploads['res']) {
+                    $save_data['picurl2'] = $uploads['data'];
+                }
+            }
+
+            if($do=='edit' && !empty($bid)){
+                $result = Db::name('bufeis')->where(array('id'=>$bid))->update($save_data);
+                if($result){
+                    $this->success('保存成功',url('Orders/add_bufei',array("cid"=>$cid)));
+                }else{
+                    $this->error('保存失败');
+                }
+            }
+            else
+            {
+                if(Db::name('bufeis')->insert($save_data)){
+                    $this->success('保存成功',url('Orders/add_bufei',array("cid"=>$cid)));
+                }else{
+                    $this->error('保存失败');
+                }
+            }
+        }
+        else
+        {
+            $bid = $this->request->param("bid");
+            $cid = $this->request->param("cid");
+            $do = $this->request->param("do");
+            if(!empty($bid) && $do=="edit"){
+                $bufei_data = Db::name("bufeis")->where(array("id"=>$bid))->find();
+                $this->assign('bufei_data',$bufei_data);
+            }
+
+            if(!empty($bid) && $do=="del"){
+                $data['status'] = -1;
+                Db::name("bufeis")->where(array("id"=>$bid))->update($data);
+                $this->success('删除成功');
+            }
+
+            $wherec = array("c.id"=>$cid);
+            $orderObject = new OrdersModel();
+            $userdata = $orderObject->getOrderlist($wherec,0);
+            $this->assign('userdata',$userdata);
+
+            $where["b.orderid"] = $cid;
+            $where['b.status'] = ["gt",-1];
+            $join = [
+              ["carts c","c.id=b.orderid"],
+              ["member m","m.id=c.member_id"]
+            ];
+            $field = "b.*,m.username";
+            $dataList = Db::name("bufeis")->alias("b")->join($join)->field($field)->where($where)->select();
+            $this->assign('dataList',$dataList);
+            $this->assign('cid',$cid);
+            $this->assign("group_id",$group_id);
+            $this->assign('do',$do);
+            return $this->fetch();
+        }
+    }
+
+
+    public function bufeilist(){
+
+        $group_id = Session::get("group_id");
+        $admin_id = Session::get('admin_id');
+        $username = Session::get('username');
+
+        $bid = $this->request->param("bid");
+        $orderid = $this->request->param("orderid");
+        $where = [];
+        $do = $this->request->param("do");
+
+        $where['b.status'] = array("gt",-1);
+
+        if(!empty($bid) && $do=="edit"){
+            $bufei_data = Db::name("bufeis")->where(array("id"=>$bid))->find();
+            $this->assign('bufei_data',$bufei_data);
+        }
+
+        if(!empty($bid) && $do=="exam"){
+            $data['status'] = 1;
+            Db::name("bufeis")->where(array("id"=>$bid))->update($data);
+        }
+
+        if($group_id == 6){
+            $where = array('o.admin_id' => $admin_id);
+        }
+
+        if($group_id == 5){
+            $where = array('c.check_name' => $username);
+        }
+
+        $join = [
+            ["carts c","c.id=b.orderid"],
+            ["orders o","c.order_id=o.order_id"],
+            ["member m","m.id=c.member_id"]
+        ];
+        $field = "b.*,m.username,o.admin_id,o.member_id,c.goods_id,o.applicant,c.check_name";
+
+        $dataList = Db::name("bufeis")->alias("b")->join($join)->field($field)
+            ->where($where)
+            ->order("b.id desc")
+            ->select();
+
+        $this->assign('dataList',$dataList);
+        $this->assign('orderid',$orderid);
+        $this->assign("group_id",$group_id);
+        $this->assign('do',$do);
+        return $this->fetch();
+    }
+
+
+    public function bufei_del(){
+
+        $bid = $this->request->param("bid");
+        $where = array("id"=>$bid);
+
+        if(!empty($bid)){
+            $data['status'] = -1;
+            Db::name("bufeis")->where($where)->update($data);
+            $this->success('删除成功');
+        }
+        else
+        {
+            $this->error('参数不足！');
+            exit();
+        }
+    }
+
+
+    public function bufei_sh(){
+        if ($this->request->isPost()) {
+
+                $group_id = Session::get("group_id");
+                $admin_id = Session::get('admin_id');
+                $username = Session::get('username');
+
+                $bid = $this->request->param("bid");
+                $cid = $this->request->param("cid");
+                $course_time = $this->request->param("course_time");
+                $check = $this->request->param("check");
+                $where = [];
+                $result = 0;
+                $is_owe = 0;
+
+                if (empty($cid) || empty($bid) || empty($group_id)) {
+                    $this->error('参数不足！');
+                    exit();
+                } elseif($check == 2) {
+                    $res = Db::name("bufeis")->where(array("id" => $bid))->find();
+                    $price = $res["price"];
+                    if (!empty($price)) {
+                        $res2 = Db::name("carts")->where(array("id" => $cid))->find();
+                        $bufei0 = $res2['course_money'];    //成交价
+                        $bufei1 = $res2['pay_money'];    //已缴费
+                        $bufei2 = $bufei1 + $price;        //补费后已缴费
+
+                        if ($bufei2 > $bufei0) {
+                            $result2 = Db::name("bufeis")->where(array("id" => $bid))->update(array("status" => 2));
+                            $this->error('补费金额不正确，已拒绝通过！');
+                        } elseif ($bufei2 < $bufei0) {
+                            $is_owe = 1;
+                        } else {
+                            $is_owe = 0;
+                        }
+
+                        $bufei_time = time();
+                        $data = array(
+                            "pay_money" => $bufei2,
+                            "is_owe" => $is_owe,
+                            "owe_time" => $bufei_time,
+                            "course_time" => strtotime($course_time)
+                        );
+                        if (($group_id == 5 && $username == $res2['check_name']) || $group_id == 1 || $group_id == 3) {
+                            $result = Db::name("carts")->where(array("id" => $cid))->update($data);
+                            if ($result) {
+                                $result2 = Db::name("bufeis")->where(array("id" => $bid))->update(array("status" => 1));
+                                $active_name = Session::get('username');
+                                $this->cource_log($cid,$active_name,"学员订单补费");
+                                $this->success('审核成功', url('Orders/bufeilist'));
+                            } else {
+                                $this->error('审核失败');
+                            }
+                        } else {
+                            $this->error('您的权限不足！');
+                        }
+                    } else {
+                        $this->error('数据不完整！');
+                    }
+                }
+                else
+                {
+                    if($check == 3){
+                        $result2 = Db::name("bufeis")->where(array("id" => $bid))->update(array("status" => 2));
+                        if($result2){
+                            $this->success('审核已拒绝通过!', url('Orders/bufeilist'));
+                        }
+                    }
+                }
+        }
+        else
+        {
+            $bid = $this->request->param("bid");
+            $cid = $this->request->param("cid");
+            $join = [
+                ["carts c","c.id=b.orderid"],
+                ["orders o","c.order_id=o.order_id"],
+                ["member m","m.id=c.member_id"]
+            ];
+            $field = "b.*,m.username,o.admin_id,o.member_id,c.goods_id,o.applicant,c.course_time";
+            $where = array("b.id" => $bid);
+            $res2 = Db::name("bufeis")->alias("b")->join($join)->field($field)->where($where)->find();
+            $this->assign('applicant',$res2['applicant']);
+            $this->assign('res2',$res2);
+            $this->assign('bid',$bid);
+            $this->assign('cid',$cid);
+            return $this->fetch();
+        }
+    }
+
+
+    //开课续学信息
+    public function continuer(){
+
+        if ($this->request->isAjax()) {
+            $page = $this->request->param("page");
+            $orderObject = new OrdersModel();
+            $goods_data = $orderObject->getGoodslist(20,$page);
+            $pages = $goods_data->render();
+            $tempstr = '';
+            foreach($goods_data as $vo){
+                $tempstr = $tempstr.'<tr><td>'.$vo["id"].'</td><td>'.$vo["post_title"].'</td><td>'.date("Y-m-d H:i:s",$vo["create_time"]).'</td><td><input name="goods_id" class="goods_id" type="checkbox" value="'.$vo['id'].'" data-name="'.$vo['post_title'].'" /></td></tr>';
+            }
+            //dump($goods_data);
+            $gogdslist['pages'] = $pages;
+            $gogdslist['goods_data'] = $tempstr;
+            return json($gogdslist);
+        }
+        $id     = $this->request->param('cid');
+        if(empty($id)){
+            $this->error('参数错误');
+        }
+        $orderObject = new OrdersModel();
+        $where = array('c.id'=>$id);
+        $data =  $orderObject->getOrderlist($where,0);;
+        if(empty($data)){
+            $this->error('暂无数据');
+        }
+
+        $admin_id = Session::get('admin_id');
+        $groupid = Session::get('group_id');
+        $adminname = Session::get('username');
+
+        if ($this->request->isPost()) {
+            $pay_money = $this->request->param('pay_money');
+            $course_money = $this->request->param('course_money');
+            $course_time = $this->request->param('course_time');
+            $owe_time = $this->request->param('owe_time');
+            $kc_type = $this->request->param('kc_type');
+            $kc_price = $this->request->param('kc_price');
+            $remarks = $this->request->param('remarks');
+            $payment = $this->request->param('payment');
+            $member_id = $this->request->param('member_id');
+            $check_name =$this->request->param('check_name');
+            $admin_id = $this->request->param("admin_id");
+            $teacher = $this->request->param("teacher");
+            $applicant = $this->request->param('applicant');
+            $do = $this->request->param('do');
+
+            if(empty($course_money) || empty($pay_money)){
+                $type = 3;
+            }
+            if(($course_money/$kc_price) < 0.8){
+                $type = 2;
+            }
+            else
+            {
+                $type = 1;
+            }
+            if($pay_money < $course_money){
+                $isowe = 1;
+            }
+            else
+            {
+                $isowe = 0;
+            }
+            $groups = Db::name("admin")->where(array("id"=>$admin_id))->find();
+            $pid = $groups["pid"];
+
+            $badmin = Db::name("admin")->where(array("id"=>$pid))->find();
+
+            if($groupid == 6){
+                $check_name = $badmin['username'];
+            }
+            else
+            {
+                $check_name = $adminname;
+            }
+
+            if($pay_money >$course_money){
+                $this->error('支付金额不能大于成交金额');
+            }
+            if(empty($course_money)){
+                // $this->error('成交金额不能为空');
+            }
+
+            $save_data = array(
+                'pay_money'=>$pay_money,
+                'course_money'=>$course_money,
+                'course_time'=>strtotime($course_time),
+                'owe_time'=>strtotime($owe_time),
+                'kc_type'=>$kc_type,
+                'kc_price'=>$kc_price,
+                'remarks'=>$remarks,
+                'pay_way'=>$payment,
+                'group_id' => $groupid,
+                'member_id'=>$member_id,
+                'admin_id'=>$admin_id,
+                'teacher'=>$teacher,
+                'applicant'=>$adminname,
+                'check_name'=>$check_name,
+                'is_owe' => $isowe,
+                'type' => $type,
+                'check' => 1,
+                'time' => time()
+            );
+
+            $updata = new Upload();
+
+            if(request()->file('result') && $do == 'xuxue'){
+                $uploads = $updata->uploadpic('result');
+                if ($uploads['res']) {
+                    $result_data['result'] = $uploads['data'];
+                }
+            }
+
+            $result_data['status'] = 0; //关闭原来的课程
+            $result_id = Db::name('carts')->where(array('id' => $id,'status'=>1))->update($result_data);
+
+            if($result_id){
+                if($do=="xuxue"){
+                    $tempstr = "续学";
+                }else{
+                    $tempstr = "转课";
+                }
+                $active_name = Session::get('username');
+                $this->cource_log($id,$active_name,"学员".$tempstr."关闭原课程");
+            }
+
+            $goods_id = $this->request->param('goods_id');
+            if(empty($goods_id)){
+                $this->error('课程错误');
+            }
+            $goods = Db::name('portal_post')->where(array('id' => $goods_id))->find();
+            if(empty($goods)){
+                $this->error('课程错误');
+            }
+            $course_order = Db::name('carts')->where(array('goods_id' => $goods_id,'member_id'=>$member_id,'status'=>1))->find();
+            if(!empty($course_order)){
+                $this->error('课程已经存在!');
+            }
+            $save_data['goods_id'] = $goods_id;
+            $save_data['goods_name'] = $goods['post_title'];
+            //上传文件
+
+            if($groupid == 6){
+                $save_data['check'] = 1;
+                $save_data['check_note'] = '';
+            }
+
+            if(Db::name('carts')->insert($save_data)){
+                $this->success('提交成功',url('Orders/index'));
+            }else{
+                $this->error('操作失败');
+            }
+            exit();
+
+        }
+        $qfje = $data['course_money'] - $data['pay_money'];
+        if($qfje>0){
+            $data['qf'] = 1;
+            $data['qfje'] = $qfje;
+        }else{
+            $data['qf'] = 0;
+            $data['qfje'] = '未欠费';
+        }
+        $do     = $this->request->param('do');
+        $this->assign('do',$do);
+        //获取课程信息
+        $orderObject = new OrdersModel();
+        $goods_data = $orderObject->getGoodslist();
+        $pages = $goods_data->render();
+        $this->assign('pages', $pages);
+        $this->assign('goods_data',$goods_data);
+        $this->assign('data',$data);
+        $this->assign('group_id',$groupid);
+        $this->assign('session_groupid',$groupid);
+        $cadminlist = Db::name("admin")
+            ->where(array("group_id"=>6))
+            ->field("id,username")
+            ->select();
+        $this->assign('cadminlist',$cadminlist);
+        //dump($data);
+        return $this->fetch();
+    }
+
 }

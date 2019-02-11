@@ -129,6 +129,7 @@ return array (
   'PORTAL_ADMINTAG_DELETE' => '删除文章标签',
   'PORTAL_ADMINTAG_UPSTATUS' => '更新标签状态',
   'PORTAL_ORDERS_ADD' => '新增订单',
+  'PORTAL_ORDERS_BUFEILIST' => '补费列表',
   'PORTAL_ORDERS_CHECK' => '审核提交',
   'PORTAL_ORDERS_CHECKLIST' => '开课审核',
   'PORTAL_ORDERS_DEFAULT' => '开课系统',

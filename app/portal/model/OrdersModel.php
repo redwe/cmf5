@@ -25,7 +25,7 @@ class OrdersModel extends Model
             ["member m","o.member_id = m.id"],
             ["portal_post p","p.id = c.goods_id"]
         ];
-        $field = "c.*,c.id as cid,o.id as oid,o.remarks,o.payment,o.pay_pic,o.applicant,o.teacher,o.agreement,o.upload_file,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m.address,m.company,m.card_face,m.card_back";
+        $field = "c.*,c.id as cid,o.id as oid,o.remarks,o.payment,o.pay_pic,o.admin_id,o.applicant,o.teacher,o.agreement,o.upload_file,p.post_title,m.username,m.cnname,m.phone,m.cardnum,m.email,m.province,m.address,m.company,m.card_face,m.card_back";
         if($limit>0){
             $data = Db::name("carts")->alias("c")->join($join)->field($field)->where($where)->order("o.id DESC")->paginate($limit);
         }
