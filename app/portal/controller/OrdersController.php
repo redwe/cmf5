@@ -1114,11 +1114,11 @@ class OrdersController extends AdminBaseController
             //获取所有的课程信息
             $goodslist = Db::name("portal_post")->select();
             $goods_data = arrayValueToKey($goodslist,'id');
-            //dump($exl);
+            array_splice($exl,0,1); //删除第一个表头数组元素，不能用unset(),否则索引0将不存在。
             $count = count($exl);
+            $orderObject = new OrdersModel();
             for($i=0; $i<$count; $i++){
-                $ordercode = getOrderCode();
-                if($i>0){
+                //$ordercode = getOrderCode();
                     $kc_price = 0;
                     switch ($exl[$i]['kc_year']){
                         case 1:
@@ -1136,21 +1136,36 @@ class OrdersController extends AdminBaseController
                         $kc_price = 0;
                     }
                     $phone = $exl[$i]['phone'];
-                    $userdatas = Db::name("member")->where(array("phone"=>$phone))->find();
-
-                    $userid = $userdatas["id"];
+                    $where['phone'] = $phone;
+                    $userdatas = Db::name("member")->where($where)->find();
+                    //dump($exl[$i]['phone']);
+                    if(empty($userdatas)){
+                        //continue;   //如果用户不存在，跳过此记录。
+                          //或插入新用户
+                        $user[$i]['password'] = cmf_password($exl[$i]['phone']);
+                        $user[$i]['regtime'] = time();
+                        $user[$i]['status'] = 1;
+                        $user[$i]['regip']   = get_client_ip(0, true);
+                        Db::name("members")->insert($user[$i]);
+                        $userid = Db::name("members")->getLastInsID();
+                    }
+                    else
+                    {
+                        $userid = $userdatas["id"];
+                    }
                     $adminidData = $orderObject->getAdminid($exl[$i]['applicant']);
 
-                    $userlist = Db::name("member")->select();
-                    $user_data = arrayValueToKey($userlist,'phone');
-                    //dump($adminidData);
+                    $course_money = $exl[$i]['course_money'];
+                    $pay_money = $exl[$i]['pay_money'];
 
                     $cart[$i]['goods_id']=$exl[$i]['goods_id'];
-                    $cart[$i]['order_id'] = $ordercode;
-                    $cart[$i]['member_id'] = $user_data[$exl[$i]['phone']]['id'];
+                    //$cart[$i]['order_id'] = $ordercode;
+                    $cart[$i]['member_id'] = $userid;
                     $cart[$i]['course_time']=$exl[$i]['course_time'];
-                    $cart[$i]['course_money']=$exl[$i]['course_money'];
-                    $cart[$i]['is_owe']=$exl[$i]['course_money'] > $exl[$i]['pay_money'] ? 1 : 0;
+                    $cart[$i]['course_money']=$course_money;
+                    $cart[$i]['pay_money']=$pay_money;
+
+                    $cart[$i]['is_owe']=$course_money > $pay_money ? 1 : 0;
                     $cart[$i]['ck_type']=1;
                     $cart[$i]['create_time']=$exl[$i]['time'];
                     $cart[$i]['check']=2;
@@ -1162,7 +1177,7 @@ class OrdersController extends AdminBaseController
                     //$cart[$i]['post_title'] = $goods_data[$exl[$i]['goods_id']]['title'];
 
                     $order[$i]['admin_id'] = $adminidData['id'];
-                    $order[$i]['member_id'] = $user_data[$exl[$i]['phone']]['id'];
+                    $order[$i]['member_id'] = $userid;
                     $order[$i]['payment']=$exl[$i]['payment'];
                     //$order[$i]['applicant'] = 'admin';
                     $order[$i]['teacher']=$exl[$i]['teacher'];
@@ -1173,12 +1188,10 @@ class OrdersController extends AdminBaseController
                     $user[$i]['username']=$exl[$i]['username'];
                     $user[$i]['phone']=$exl[$i]['phone'];
                     $user[$i]['email']=$exl[$i]['email'];
-                }
             }
-            //dump($cart);
             //导入之前 检查是否重复开课
             $count2 = count($cart);
-            for($i=1; $i<$count2; $i++){
+            for($i=0; $i<$count2; $i++){
                 if(isset($cart[$i]['member_id'])){
                     $member_id = $cart[$i]['member_id'];
                 }
@@ -1193,31 +1206,36 @@ class OrdersController extends AdminBaseController
                 {
                     $goods_id = 0;
                 }
-                if(isset($cart[$i]['phone'])){
-                    $phone = $cart[$i]['phone'];
+
+                $where_Order = array(
+                    'member_id'=>$member_id,
+                    'teacher'=>$order[$i]['teacher']
+                );
+                //检测是否存在该用户订单，存在则合并订单，不存在则新建订单
+                $orderData = Db::name("orders")->where($where_Order)->find();
+                if(empty($orderData)){
+                    $ordreCode = getOrderCode();
+                    $order[$i]['order_id'] = $ordreCode;
+                    Db::name("orders")->insert($order[$i]);
                 }
                 else
                 {
-                    $phone = '';
+                    $ordreCode = $orderData['order_id'];
                 }
+                $cart[$i]["order_id"] = $ordreCode;
                 $where = array(
                     'member_id'=>$member_id,
                     'goods_id'=>$goods_id,
                     'ck_type'=>1
                 );
-                Db::name("carts")->where($where)->delete();
+                Db::name("carts")->where($where)->delete();     //删除重复的课程
                 Db::name("carts")->insert($cart[$i]);
-                Db::name("orders")->insert($order[$i]);
-                $members = Db::name("member")->where(array("username"=>$user[$i]['username']))->find();
-                if(!empty($members['id'])){
-                    Db::name("orders")->insert($user[$i]);
-                }
             }
-//            if($course_order->addAll($new)){
-            $this->success('导入成功',url('Orders/index'));
-//            }else{
-//                $this->error('导入失败');
-//            }
+            if($count2>0){
+                $this->success('成功导入'.$count2.'条数据!',url('Orders/index'));
+            }else{
+               $this->error('导入失败');
+            }
             exit();
         }
         return $this->fetch();
