@@ -20,7 +20,7 @@
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
         <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
-        <li class="active"><a href="javascript:;">学员续学/转课</a></li>
+        <li class="active"><a href="javascript:;">学员{$tempstr}课程</a></li>
         <li><a href="{:url('orders/add')}">添加订单</a></li>
     </ul>
     <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer" name="add_customer" enctype="multipart/form-data">
@@ -28,6 +28,7 @@
         <input type="hidden" name="applicant" id="applicant" value="{$data.applicant}">
         <input type="hidden" name="admin_id" id="admin_id" value="{$data.admin_id}">
         <input type="hidden" name="member_id" id="member_id" value="{$data.member_id}">
+        <input type="hidden" name="order_id" id="order_id" value="{$data.order_id}">
         <input type="hidden" name="id" value="{$data.id}">
         <input type="hidden" name="do" value="{$do}">
         <div class="space-4"></div>
@@ -146,7 +147,7 @@
             <label class="col-sm-3 control-label no-padding-right">课程ID</label>
 
             <div class="col-sm-6">
-                <input type="number"  data-toggle="modal" data-target="#myModal" name="goods_id"  value="" id="goods_id"  placeholder="请输入要开课程的ID"  class="form-control" />
+                <input autocomplete="off" data-toggle="modal" readonly data-target="#myModal" name="goods_id"  value="" id="goods_id"  placeholder="请输入要开课程的ID"  class="form-control" />
             </div>
         </div>
         <div class="Hz"></div>
@@ -415,7 +416,7 @@
                 $("#goods_txt").html(goods_id2);
                 //console.log(goods_id);
                 //var goods_id = $("input[type='checkbox']:checked").val();
-                $('#goods_id').val(goods_id2);
+                $('#goods_id').val(goods_id2[0]);
                 if(goods_id2) {
                     $.ajax({
                         url: '{:url(\'Orders/getGoodsArray\')}',
@@ -430,38 +431,41 @@
                             kc_arr = e.data;
 
                             var html = "";
+
                             for(var i = 0; i < kc_arr.length; i++) {
-                                html = '<div class="Xk">' +
-                                '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">课程名称</label><div class="col-sm-6">' +
-                                '<span class="goods_name col-sm-5 green">' + kc_arr[i].post_title + '(id:' + kc_arr[i].id+ ')</span> ' +
-                                '<input data-key="'+i+'" data-id="'+kc_arr[i].id+'" type="button" value="删除" class="hkremove"></div></div>' +
-                                '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">课程年限</label><div class="col-sm-6">'+
-                                '<select name="kc_type[]" data-id="'+i+'" class="kc_type">';
-                                if(kc_arr[i].year_price1 != '') {
-                                    html += '<option value="1" data-price=' + kc_arr[i].year_price1 + '>一年</option>';
+                                if(i==0) {      //如果多选，只取第一个课程，其他忽略
+                                    html = '<div class="Xk">' +
+                                    '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">课程名称</label><div class="col-sm-6">' +
+                                    '<span class="goods_name col-sm-5 green">' + kc_arr[i].post_title + '(id:' + kc_arr[i].id + ')</span> ' +
+                                    '<input data-key="' + i + '" data-id="' + kc_arr[i].id + '" type="button" value="删除" class="hkremove"></div></div>' +
+                                    '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">课程年限</label><div class="col-sm-6">' +
+                                    '<select name="kc_type[]" data-id="' + i + '" class="kc_type">';
+                                    if (kc_arr[i].year_price1 != '') {
+                                        html += '<option value="1" data-price=' + kc_arr[i].year_price1 + '>一年</option>';
+                                    }
+                                    if (kc_arr[i].year_price2 != 0 && kc_arr[i].year_price2 != '') {
+                                        html += '<option value="2" data-price=' + kc_arr[i].year_price2 + '>二年</option>';
+                                    }
+                                    if (kc_arr[i].year_price3 != 0 && kc_arr[i].year_price3 != '') {
+                                        html += '<option value="3" data-price=' + kc_arr[i].year_price3 + '>三年</option>';
+                                    }
+
+                                    html += '</select></div></div>' +
+                                    '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">课程费用</label><div class="col-sm-6">' +
+                                    '<input value=' + kc_arr[i].year_price1 + ' type="text" readonly="" name="kc_price[]" id="kc_price' + i + '" placeholder="请选择课程年限" class="form-control kc_price kcSelect"> ' +
+                                    '</div></div>' +
+                                    '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">成交金额</label><div class="col-sm-6">' +
+                                    '<input value="" type="text" name="course_money[]" id="total_money' + i + '" placeholder="请输入实际成交金额" class="form-control course_money">' +
+                                    '</div></div>';
+
+
+                                    html += '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">已交费用</label><div class="col-sm-6">' +
+                                    '<input type="text" name="pay_money[]" data-key="' + i + '" id="pay_money' + i + '" placeholder="" class="form-control pay_money" />' +
+                                    '</div></div>';
+                                    html += '</div>';
+
+                                    $('.Hz').append(html);
                                 }
-                                if(kc_arr[i].year_price2 != 0 && kc_arr[i].year_price2 != '') {
-                                    html += '<option value="2" data-price=' + kc_arr[i].year_price2 + '>二年</option>';
-                                }
-                                if(kc_arr[i].year_price3 != 0 && kc_arr[i].year_price3 != '') {
-                                    html += '<option value="3" data-price=' + kc_arr[i].year_price3 + '>三年</option>';
-                                }
-
-                                html += '</select></div></div>' +
-                                '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">课程费用</label><div class="col-sm-6">'+
-                                '<input value=' + kc_arr[i].year_price1 + ' type="text" readonly="" name="kc_price[]" id="kc_price'+i+'" placeholder="请选择课程年限" class="form-control kc_price kcSelect"> '+
-                                '</div></div>' +
-                                '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">成交金额</label><div class="col-sm-6">'+
-                                '<input value="" type="text" name="course_money[]" id="total_money'+i+'" placeholder="请输入实际成交金额" class="form-control course_money">'+
-                                '</div></div>';
-
-
-                                html += '<div class="form-group"><label class="col-sm-3 control-label no-padding-right">已交费用</label><div class="col-sm-6">'+
-                                '<input type="text" name="pay_money[]" data-key="'+i+'" id="pay_money'+i+'" placeholder="" class="form-control pay_money" />'+
-                                '</div></div>';
-                                html += '</div>';
-
-                                $('.Hz').append(html);
 
                             }
                             $('.form-horizontal').on('change','.Hz .Xk select',function(){

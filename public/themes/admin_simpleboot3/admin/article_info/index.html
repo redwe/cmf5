@@ -42,8 +42,9 @@
                     <php>
                         $zero1=time(); //当前时间
                         $zero2=$vo['datetime'];  //发布时间
-                        $newtime=ceil(($zero2-$zero1)/86400); //60s*60min*24h
-                        if($newtime<5){
+                        $newtime = ceil(($zero1-$zero2)/86400); //60s*60min*24h
+                        $newtime = abs($newtime);
+                        if($newtime < 5){
                             $newimg = '<img src="__STATIC__/images/new.gif">';
                         }
                         else

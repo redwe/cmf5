@@ -9,7 +9,7 @@
     <ul class="nav nav-tabs">
         <li class="active"><a href="javascript:;">所有订单</a></li>
         <li><a href="{:url('orders/logs')}">开课日志</a></li>
-        <li><a href="{:url('orders/add')}">添加订单</a></li>
+        <li><a href="{:url('orders/add')}">添加课程</a></li>
     </ul>
     <form class="well form-inline margin-top-20" method="post" name="sForm" action="{:url('orders/index')}">
         <div class="form-group">
@@ -148,11 +148,17 @@
                         </if>
                     </td>
                     <td>
-                        <if condition="$vo.status==1 and $vo.check==2">
+                        <if condition="$vo.tk_status neq 0">
+                            已退课
+                        <elseif condition="$vo.status==1 and $vo.check==2" />
                             已开课
-                         <elseif condition="$vo.check==3">
+                        <elseif condition="$vo.status==0 and $vo.check==2" />
                              已拒绝
-                         <else/>
+                        <elseif condition="$vo.status==0 and $vo.check==1" />
+                             待审核
+                         <elseif condition="$vo.status==0 and $vo.check==3" />
+                             已拒绝
+                         <else />
                             未开课
                         </if>
                     </td>
@@ -166,14 +172,25 @@
                         <if condition="$vo.course_time lt time() and $vo.status eq 1">
                             <a href="{:url('Orders/continuer',array('cid'=>$cid,'do'=>'xuxue'))}">续学</a>
                         </if>
-                        <a href="{:url('Orders/continuer',array('cid'=>$cid))}">休学</a>
-                        <a href="{:url('Orders/continuer',array('cid'=>$cid,'do'=>'zhuan'))}">转课</a>
-                        <a href="{:url('Orders/increase',array('cid'=>$cid))}">新增</a>
+                        <if condition="$vo.course_time gt time() and $vo.status eq 1">
+                            <a href="{:url('Orders/continuer',array('cid'=>$cid,'do'=>'zhuan'))}">转课</a>
+                        </if>
+                        <a href="{:url('Orders/continuer',array('cid'=>$cid,'do'=>'new'))}">新增</a>
+                        <if condition="$vo.check eq 2">
+                            <empty name="vo.xiu_status">
+                                <a href="{:url('Orders/xiuxue',array('cid'=>$cid,'xiu'=>0))}">休学</a>
+                            </empty>
+                            <if condition="$vo.xiu_status eq 2">
+                                <a href="{:url('Orders/xiuxue',array('id'=>$vo['id'],'xiu'=>2))}" title="复学">
+                                    <i class="icon-eye-open bigger-130"></i>复学
+                                </a>
+                            </if>
+                        </if>
                         <if condition="$vo.status eq 1">
                             <a href="{:url('Orders/tuike',array('cid'=>$cid))}">退课</a>
                         </if>
                         <if condition="$group_id eq 5">
-                            <a class="green" href="{:U('Oprders/applicant',array('id'=>$vo['id']))}" title="修改申请人">
+                            <a class="green" href="{:url('Orders/applicant',array('id'=>$vo['id']))}" title="修改申请人">
                                 <i class="icon-eye-open bigger-130"></i>申请人
                             </a>
                         </if>
@@ -183,8 +200,8 @@
                             <a href="{:url('Orders/remark',array('cid'=>$cid))}">备注</a>
                         </if>
                         <if condition=" $vo.check eq 3 or $group_id eq 1">
-                            <a href="{:url('Orders/edit',array('cid'=>$cid,'oid'=>$vo['id'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
-                            <a href="{:url('Orders/delete',array('cid'=>$cid,'oid'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+                            <a href="{:url('Orders/edit',array('cid'=>$cid,'oid'=>$vo['oid'],'order_id'=>$vo['order_id']))}">{:lang('EDIT')}</a>
+                            <a href="{:url('Orders/delete',array('cid'=>$cid,'oid'=>$vo['oid']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
                         </if>
                     </td>
                 </tr>

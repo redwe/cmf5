@@ -99,12 +99,15 @@
                             <a href="{:url('Orders/close_order',array('cid'=>$cid,'status'=>2))}" title="关课">
                                 开课中
                             </a>
-                            </if>
-                            <if condition="$vo.status eq 0 and $vo.check eq 2"/>
+                            <elseif condition="$vo.status eq 0 and $vo.check eq 2"/>
                             <a href="{:url('Orders/close_order',array('cid'=>$cid,'status'=>1))}" title="开课">
                                 已关课
                             </a>
-                            <else/>
+                            <elseif condition="$vo.status eq 0 and $vo.check eq 3"/>
+                            <a href="{:url('Orders/close_order',array('cid'=>$cid,'status'=>1))}" title="开课">
+                                已拒绝
+                            </a>
+                        <elseif condition="$vo.status eq 0 and $vo.check eq 1"/>
                             <a href="{:url('Orders/check',array('cid'=>$cid,'status'=>2))}"
                                title="待审核">
                                 待审核

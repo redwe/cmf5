@@ -300,3 +300,27 @@ function RMB_Upper($num)
     return $new_str;
 }
 
+function getTempstr($do){
+    if($do=="xuxue"){
+        $tempstr = "续学";
+    }
+    elseif($do=="zhuan")
+    {
+        $tempstr = "转课";
+    }
+    else
+    {
+        $tempstr = "新增";
+    }
+    return $tempstr;
+}
+
+//反序列化图片
+function show_img($imgs){
+    $datas = unserialize($imgs);
+    $tempstr = '';
+    foreach($datas as $vo){
+        $tempstr = $tempstr."<a href='".$vo."' target='_blank'><img height='40' src='".$vo."'>";
+    }
+    return $tempstr;
+}

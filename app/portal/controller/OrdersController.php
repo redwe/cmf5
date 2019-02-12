@@ -503,11 +503,12 @@ class OrdersController extends AdminBaseController
             }
             $datas['agreement'] = serialize($agreements);
             $datas['update_time'] = time();
-            //exit();
-            $rs = Db::name('orders')->where(array("id"=>$oid))->update($datas);
+
+            $rs = Db::name('orders')->where(array("order_id"=>$order_id))->update($datas);
 
             if ($rs) {
                 $parem['owe_time'] = strtotime($owe_time);
+                $parem['check'] = 1;
                 Db::name('carts')->where(array("id"=>$id))->update($parem);
 
                 $adminid = Session::get("name");
@@ -532,7 +533,7 @@ class OrdersController extends AdminBaseController
             $this->assign('goods_data', $goods_data);
 
             $where['c.id'] = $id;
-
+            $where['c.isdel'] = 0;
             $orderObject = new OrdersModel();
             $data = $orderObject->getOrderlist($where,0);
 
@@ -541,6 +542,7 @@ class OrdersController extends AdminBaseController
                 ["orders o","o.order_id = c.order_id"]
             ];
             $where2['c.order_id'] = $order_id;
+            $where2['c.isdel'] = 0;
             $field2 = "c.*,p.post_title,p.year_price1,p.year_price2,p.year_price3";
             $cartlist = Db::name("carts")->alias("c")->join($join2)->field($field2)->where($where2)->select();
 
@@ -1804,187 +1806,550 @@ class OrdersController extends AdminBaseController
 
 
     //开课续学信息
-    public function continuer(){
+    public function continuer()
+    {
 
         if ($this->request->isAjax()) {
             $page = $this->request->param("page");
             $orderObject = new OrdersModel();
-            $goods_data = $orderObject->getGoodslist(20,$page);
+            $goods_data = $orderObject->getGoodslist(20, $page);
             $pages = $goods_data->render();
             $tempstr = '';
-            foreach($goods_data as $vo){
-                $tempstr = $tempstr.'<tr><td>'.$vo["id"].'</td><td>'.$vo["post_title"].'</td><td>'.date("Y-m-d H:i:s",$vo["create_time"]).'</td><td><input name="goods_id" class="goods_id" type="checkbox" value="'.$vo['id'].'" data-name="'.$vo['post_title'].'" /></td></tr>';
+            foreach ($goods_data as $vo) {
+                $tempstr = $tempstr . '<tr><td>' . $vo["id"] . '</td><td>' . $vo["post_title"] . '</td><td>' . date("Y-m-d H:i:s", $vo["create_time"]) . '</td><td><input name="goods_id" class="goods_id" type="checkbox" value="' . $vo['id'] . '" data-name="' . $vo['post_title'] . '" /></td></tr>';
             }
             //dump($goods_data);
             $gogdslist['pages'] = $pages;
             $gogdslist['goods_data'] = $tempstr;
             return json($gogdslist);
         }
-        $id     = $this->request->param('cid');
-        if(empty($id)){
+        $id = $this->request->param('cid');
+        if (empty($id)) {
             $this->error('参数错误');
         }
         $orderObject = new OrdersModel();
-        $where = array('c.id'=>$id);
-        $data =  $orderObject->getOrderlist($where,0);;
-        if(empty($data)){
-            $this->error('暂无数据');
+        $where = array('c.id' => $id);
+        $data = $orderObject->getOrderlist($where, 0);;
+        if (empty($data)) {
+            $this->error('暂无课程订单数据');
         }
 
-        $admin_id = Session::get('admin_id');
         $groupid = Session::get('group_id');
-        $adminname = Session::get('username');
 
         if ($this->request->isPost()) {
-            $pay_money = $this->request->param('pay_money');
-            $course_money = $this->request->param('course_money');
-            $course_time = $this->request->param('course_time');
-            $owe_time = $this->request->param('owe_time');
-            $kc_type = $this->request->param('kc_type');
-            $kc_price = $this->request->param('kc_price');
-            $remarks = $this->request->param('remarks');
-            $payment = $this->request->param('payment');
-            $member_id = $this->request->param('member_id');
-            $check_name =$this->request->param('check_name');
-            $admin_id = $this->request->param("admin_id");
-            $teacher = $this->request->param("teacher");
-            $applicant = $this->request->param('applicant');
-            $do = $this->request->param('do');
 
-            if(empty($course_money) || empty($pay_money)){
-                $type = 3;
-            }
-            if(($course_money/$kc_price) < 0.8){
-                $type = 2;
-            }
-            else
-            {
-                $type = 1;
-            }
-            if($pay_money < $course_money){
-                $isowe = 1;
-            }
-            else
-            {
-                $isowe = 0;
-            }
-            $groups = Db::name("admin")->where(array("id"=>$admin_id))->find();
-            $pid = $groups["pid"];
+            $old_id = $this->request->param('id');      //原来的订单ID
+            $order_id = $this->request->param('order_id');    //订单编号
+            $goods_id = $this->request->param('goods_id');    //课程id
+            $pay_money0 = $this->request->param('pay_money/a');    //已付费用
+            $pay_money = $pay_money0[0];
+            $course_money0 = $this->request->param('course_money/a');  //课程费用
+            $course_money = $course_money0[0];
+            $course_time = $this->request->param('course_time');    //课程到期时间
+            $owe_time = $this->request->param('owe_time');  //补费时间
+            $kc_type0 = $this->request->param('kc_type/a');    //课程年限
+            $kc_type = $kc_type0[0];
+            $kc_price0 = $this->request->param('kc_price/a');  //课程价格
+            $kc_price = $kc_price0[0];
+            $remarks = $this->request->param('remarks');    //摘要
+            $payment = $this->request->param('payment');    //支付方式
+            $member_id = $this->request->param('member_id');    //会员编号
+            $check_name = $this->request->param('check_name');   //审核人
+            $admin_id = $this->request->param("admin_id");      //申请人编号
+            $teacher = $this->request->param("teacher");        //招生老师
+            $applicant = $this->request->param('applicant');    //原申请人
+            $applicant0 = $this->request->param('applicant0');  //新申请人
+            $do = $this->request->param('do');      //续学xuxue/转课zhuan
+            $tempstr = getTempstr($do);
+            $this->assign("tempstr", $tempstr);
 
-            $badmin = Db::name("admin")->where(array("id"=>$pid))->find();
-
-            if($groupid == 6){
-                $check_name = $badmin['username'];
+            if (empty($goods_id)) {
+                $this->error('课程错误');
+                exit();
             }
-            else
-            {
-                $check_name = $adminname;
+            $goods = Db::name('portal_post')->where(array('id' => $goods_id))->find();
+            if (empty($goods)) {
+                $this->error('课程错误');
+                exit();
             }
-
-            if($pay_money >$course_money){
-                $this->error('支付金额不能大于成交金额');
-            }
-            if(empty($course_money)){
-                // $this->error('成交金额不能为空');
-            }
-
-            $save_data = array(
-                'pay_money'=>$pay_money,
-                'course_money'=>$course_money,
-                'course_time'=>strtotime($course_time),
-                'owe_time'=>strtotime($owe_time),
-                'kc_type'=>$kc_type,
-                'kc_price'=>$kc_price,
-                'remarks'=>$remarks,
-                'pay_way'=>$payment,
-                'group_id' => $groupid,
-                'member_id'=>$member_id,
-                'admin_id'=>$admin_id,
-                'teacher'=>$teacher,
-                'applicant'=>$adminname,
-                'check_name'=>$check_name,
-                'is_owe' => $isowe,
-                'type' => $type,
-                'check' => 1,
-                'time' => time()
-            );
 
             $updata = new Upload();
 
-            if(request()->file('result') && $do == 'xuxue'){
+            if (request()->file('result') && $do == 'xuxue') {
                 $uploads = $updata->uploadpic('result');
                 if ($uploads['res']) {
                     $result_data['result'] = $uploads['data'];
+                    $result_data['isexam'] = 1;
                 }
             }
-
-            $result_data['status'] = 0; //关闭原来的课程
-            $result_id = Db::name('carts')->where(array('id' => $id,'status'=>1))->update($result_data);
-
-            if($result_id){
-                if($do=="xuxue"){
-                    $tempstr = "续学";
-                }else{
-                    $tempstr = "转课";
-                }
-                $active_name = Session::get('username');
-                $this->cource_log($id,$active_name,"学员".$tempstr."关闭原课程");
-            }
-
-            $goods_id = $this->request->param('goods_id');
-            if(empty($goods_id)){
-                $this->error('课程错误');
-            }
-            $goods = Db::name('portal_post')->where(array('id' => $goods_id))->find();
-            if(empty($goods)){
-                $this->error('课程错误');
-            }
-            $course_order = Db::name('carts')->where(array('goods_id' => $goods_id,'member_id'=>$member_id,'status'=>1))->find();
-            if(!empty($course_order)){
-                $this->error('课程已经存在!');
-            }
-            $save_data['goods_id'] = $goods_id;
-            $save_data['goods_name'] = $goods['post_title'];
             //上传文件
-
-            if($groupid == 6){
-                $save_data['check'] = 1;
-                $save_data['check_note'] = '';
+            if ($do == 'xuxue' || $do == 'zhuan') {
+                $result_data['status'] = 0; //关闭原来的课程
+                $result_id = Db::name('carts')->where(array('id' => $old_id, 'status' => 1))->update($result_data);
+                if ($result_id) {
+                    $active_name = Session::get('name');
+                    $this->cource_log($old_id, $active_name, "学员" . $tempstr . "关闭原课程");
+                }
             }
 
-            if(Db::name('carts')->insert($save_data)){
-                $this->success('提交成功',url('Orders/index'));
+            $wh2 = array(
+                'goods_id' => $goods_id,
+                'member_id' => $member_id,
+                'status' => 1
+            );
+            if ($do == 'xuxue') {
+                $wh2["course_time"] = ["lt", time()];
+            }
+            if ($do == 'zhuan') {
+                    $wh2["course_time"] = ["gt", time()];
+             }
+                $course_order = Db::name('carts')->where($wh2)->find();
+                if (!empty($course_order)) {
+                    $this->error('课程已经存在!');
+                    exit();
+                }
+
+                if (empty($course_money) || empty($pay_money)) {
+                    $type = 3;
+                } else {
+                    if (($course_money / $kc_price) < 0.8) {
+                        $type = 2;
+                    } else {
+                        $type = 1;
+                    }
+                }
+
+                if ($pay_money < $course_money) {
+                    $isowe = 1;
+                } else {
+                    $isowe = 0;
+                }
+
+                if ($pay_money > $course_money) {
+                    $this->error('支付金额不能大于成交金额');
+                }
+                if (empty($course_money)) {
+                    // $this->error('成交金额不能为空');
+                }
+
+                $save_data = array(
+                    'order_id' => $order_id,
+                    'goods_id' => $goods_id,
+                    'pay_money' => $pay_money,
+                    'course_money' => $course_money,
+                    'course_time' => strtotime($course_time),
+                    'owe_time' => strtotime($owe_time),
+                    'kc_year' => $kc_type,
+                    'kc_price' => $kc_price,
+                    'member_id' => $member_id,
+                    'check_name' => $check_name,
+                    'is_owe' => $isowe,
+                    'ck_type' => $type,
+                    'check' => 1,
+                    'isdel' => 0,
+                    'create_time' => time()
+                );
+
+                if ($groupid == 6) {
+                    $save_data['check'] = 1;
+                    $save_data['check_note'] = '';
+                }
+
+                if (Db::name('carts')->insert($save_data)) {
+                    $this->success('提交成功', url('Orders/index'));
+                } else {
+                    $this->error('操作失败');
+                }
+                exit();
+
+            }
+            $qfje = $data['course_money'] - $data['pay_money'];
+            if ($qfje > 0) {
+                $data['qf'] = 1;
+                $data['qfje'] = $qfje;
+            } else {
+                $data['qf'] = 0;
+                $data['qfje'] = '未欠费';
+            }
+            $do = $this->request->param('do');      //续学xuxue/转课zhuan
+            $tempstr = getTempstr($do);
+            $this->assign("tempstr", $tempstr);
+            $this->assign('do', $do);
+            //获取课程信息
+            $orderObject = new OrdersModel();
+            $goods_data = $orderObject->getGoodslist();
+            $pages = $goods_data->render();
+            $this->assign('pages', $pages);
+            $this->assign('goods_data', $goods_data);
+            $this->assign('data', $data);
+            $this->assign('group_id', $groupid);
+            $this->assign('session_groupid', $groupid);
+            $cadminlist = Db::name("admin")
+                ->where(array("group_id" => 6))
+                ->field("id,username")
+                ->select();
+            $this->assign('cadminlist', $cadminlist);
+            //dump($data);
+            return $this->fetch();
+     }
+
+    //休学
+    public function xiuxue(){
+
+        if ($this->request->isPost()) {
+
+            $id = $this->request->param('id');
+            $cid = $this->request->param('cid');
+            $xiu_note = $this->request->param('xiu_note');
+            $check = $this->request->param('check');
+
+            $active_name = Session::get('name');
+
+            if(empty($id) && $check == 1)       //休学处理
+            {
+                if(empty($cid)){
+                    $this->error('参数错误');
+                }
+                if(empty($xiu_note)){
+                    $this->error('请输入休学原因');
+                }
+
+                $order = Db::name('carts')->where(array("id"=>$cid))->find();
+                if(empty($order)){
+                    $this->error('暂无数据');
+                }
+            }
+            else        //复学处理
+            {
+                $order = Db::name('xiuxues')->where(array("orderid"=>$id))->find();
+                if(empty($order)){
+                    $this->error('暂无数据');
+                }
+            }
+
+            if($check == 2){
+                $xiu_status = 3;
+                $xiu_str = '复学申请成功！';
+                $xiu_str2 = '复学申请失败！';
+
+                $save_data = array(
+                    'xiu_node2'=>$xiu_note,
+                    'xiu_status'=>$xiu_status,
+                    'xiu_time2'=>date("Y-m-d h:i:s",time())
+                );
+
+                if(Db::name('xiuxues')->where(array("orderid"=>$id))->update($save_data)){
+                    $this->cource_log($id,$active_name,"提交复学申请");
+                    Db::name('carts')->where(array("id"=>$id))->update(array("xiu_status"=>$xiu_status));
+                    $this->success($xiu_str,url("Orders/xiuList"));
+                }else{
+                    $this->error($xiu_str2,url("Orders/xiuList"));
+                }
+                exit();
+            }
+            else
+            {
+                $xiu_status = 1;
+                $xiu_str = '休学申请成功！';
+                $xiu_str2 = '休学申请失败！';
+
+                $save_data = array(
+                    'orderid'=>$cid,
+                    'xiu_node'=>$xiu_note,
+                    'xiu_status'=>$xiu_status,
+                    'xiu_time'=>date("Y-m-d h:i:s",time())
+                );
+
+                if(Db::name('xiuxues')->insert($save_data)){
+                    $this->cource_log($id,$active_name,"提交休学申请");
+                    Db::name('carts')->where(array("id"=>$cid))->update(array("xiu_status"=>$xiu_status));
+                    $this->success($xiu_str,url("Orders/xiuList"));
+                }else{
+                    $this->error($xiu_str2,url("Orders/xiuList"));
+                }
+                exit();
+            }
+        }
+        else
+        {
+            $xiu = $this->request->param('xiu');
+            $id = $this->request->param('id');
+            $cid = $this->request->param('cid');
+
+            if(empty($id))       //休学处理
+            {
+                $xiuxues = Db::name('carts')->where(array('id' => $cid))->find();
+            }
+            else
+            {
+                $xiuxues = Db::name('xiuxues')->where(array('id' => $id))->find();
+            }
+            $this->assign('xiuxues',$xiuxues);
+            $this->assign('id',$id);
+            $this->assign('cid',$cid);
+            $this->assign('xiu',$xiu);
+            return $this->fetch();
+        }
+    }
+
+    //休学列表
+    public function xiuList(){
+        $username = $this->request->param('username');
+        $admin_id = cmf_get_current_admin_id();
+        $group_id = Session::get("group_id");
+        $where = array();
+        if ($username) {
+            $where['m.username'] = array('like','%'.$username.'%');
+        }
+        $orderObject = new OrdersModel();
+        $ids = $orderObject->getAccount('',2,'id');
+        array_push($ids,$admin_id);
+        if($group_id != 1){
+            $where['o.admin_id'] = array('IN',trim(implode(',',$ids),','));
+        }
+        $where['x.xiu_status'] = array('neq',0);
+        $join = [
+            ["carts c","c.id=x.orderid"],
+            ["orders o","o.order_id=c.order_id"],
+            ["member m","m.id=c.member_id"],
+            ["portal_post p","p.id=c.goods_id"]
+        ];
+        $field = "x.*,m.username,m.phone,o.applicant,c.create_time,c.goods_id,p.post_title,c.course_money,c.pay_money,c.status,c.xiu_status as cxiu_status";
+        $order = Db::name('xiuxues')->alias('x')->join($join)->field($field)->where($where)->order('x.id DESC ')->paginate(20);
+        $this->assign('username', $username);
+        $this->assign('order', $order);
+        $this->assign('page', $order->render());// 赋值分页输出
+        return $this->fetch();
+    }
+
+    //休学操作，xiu_status值为1，休学申请，需要审核，2休学审核通过，3复学申请，4复学审核通过，-1拒绝通过复学，0拒绝休学
+    public function xiustatus(){
+
+        if ($this->request->isPost()) {
+
+            $id = $this->request->param('id');
+            $cid = $this->request->param('cid');
+            $xiuxue_note = $this->request->param('xiuxue_note');
+            $check = $this->request->param('check_id');
+            $xiu_status = $this->request->param("xiu_status");
+            $active_name = Session::get('name');
+
+            if(empty($id) || empty($cid)){
+                $this->error('参数错误');
+            }
+            if(empty($xiuxue_note)){
+                $this->error('请输入审核意见');
+            }
+            $order = Db::name('carts')->find($cid);
+            if(empty($order)) {
+                $this->error('暂无数据');
+            }
+            if($order['check'] !=2){
+                $this->error('该课程状态不支持休学');
+            }
+            if($xiu_status=='1'){
+                if($check == '2'){   //休学审核
+                    $status = 0;
+                    $xiucode = 2;
+                }
+                else
+                {
+                    $status = 1;
+                    $xiucode = 1;
+                }
+                $save_data = array(
+                    'remark'=>$xiuxue_note,
+                    'xiu_status' => $xiucode,
+                    'check_time'=>date("Y-m-d h:i:s",time())
+                );
+                $strtemp = "休学审核";
+            }
+            else
+            {
+                if($check == '2'){   //复学
+                    $status = 1;
+                    $xiucode = 4;
+                }
+                else
+                {
+                    $status = 0;
+                    $xiucode = 3;
+                }
+                $save_data = array(
+                    'remark2'=>$xiuxue_note,
+                    'xiu_status' => $xiucode,
+                    'check_time2'=>date("Y-m-d h:i:s",time())
+                );
+                $strtemp = "复学审核";
+            }
+
+            if(Db::name('xiuxues')->where(array('id'=>$id))->update($save_data)){
+                $order_data = array(
+                    'xiu_status' => $xiucode,
+                    'status'=>$status
+                );
+                Db::name('carts')->where(array('id'=>$cid))->update($order_data);
+                $this->cource_log($id,$active_name,$strtemp);
+                $this->success('审核成功',url("Orders/xiuList"));
             }else{
-                $this->error('操作失败');
+                $this->error('审核失败',url("Orders/xiuList"));
             }
             exit();
+        }
+        else
+        {
+            $id = $this->request->param('id');
+            $cid = $this->request->param('cid');
+            $check = $this->request->param('check');
+            $this->assign('id',$id);
+            $this->assign('cid',$cid);
+            $this->assign('check',$check);
+            return $this->fetch();
+        }
+    }
 
+    //退课申请
+    public function tuike(){
+
+        $cid = $this->request->param('cid');
+        if ($this->request->isPost()) {
+
+            $tk_note = $this->request->param('tk_note');
+            if(empty($cid)){
+                $this->error('参数错误');
+            }
+            if(empty($tk_note)){
+                $this->error('请输入退课原因');
+            }
+            $order = Db::name('carts')->where(array("id"=>$cid))->find();
+            if(empty($order)){
+                $this->error('暂无数据');
+                exit();
+            }
+            if(!empty($order['tk_status'])){
+                $this->error('课程状态不允许退课');
+            }
+            $save_data = array(
+                'tk_status'=>1,
+                'status'=>0
+            );
+            if(Db::name('carts')->where(array('id'=>$cid))->update($save_data)){
+                $istuike = Db::name("tuikes")->where(array('cid'=>$cid))->find();
+                if(empty($istuike)){
+                    $tk_data['cid'] = $cid;
+                    $tk_data['tk_status'] = 1;
+                    $tk_data['datetime'] = time();
+                    $tk_data['tk_note'] = $tk_note;
+                    Db::name('tuikes')->insert($tk_data);
+                }
+                $active_name = Session::get('name');
+                $this->cource_log($cid,$active_name,"申请退课");
+                $this->success('退课申请成功',url('Orders/tkList'));
+            }else{
+                $this->error('退课申请失败',url('Orders/index'));
+            }
+            exit();
         }
-        $qfje = $data['course_money'] - $data['pay_money'];
-        if($qfje>0){
-            $data['qf'] = 1;
-            $data['qfje'] = $qfje;
-        }else{
-            $data['qf'] = 0;
-            $data['qfje'] = '未欠费';
+        $this->assign('cid',$cid);
+        return $this->fetch();
+    }
+
+    //退课列表
+    public function tkList(){
+        $username = $this->request->param('username');
+        $admin_id = cmf_get_current_admin_id();
+        $group_id = Session::get("group_id");
+        $where = array();
+        if ($username) {
+            $where['m.username'] = array('like','%'.$username.'%');
         }
-        $do     = $this->request->param('do');
-        $this->assign('do',$do);
-        //获取课程信息
         $orderObject = new OrdersModel();
-        $goods_data = $orderObject->getGoodslist();
-        $pages = $goods_data->render();
-        $this->assign('pages', $pages);
-        $this->assign('goods_data',$goods_data);
-        $this->assign('data',$data);
-        $this->assign('group_id',$groupid);
-        $this->assign('session_groupid',$groupid);
-        $cadminlist = Db::name("admin")
-            ->where(array("group_id"=>6))
-            ->field("id,username")
-            ->select();
-        $this->assign('cadminlist',$cadminlist);
-        //dump($data);
+        $ids = $orderObject->getAccount('',2,'id');
+        array_push($ids,$admin_id);
+        if($group_id != 1){
+            $where['o.admin_id'] = array('IN',trim(implode(',',$ids),','));
+        }
+        $where['t.tk_status'] = ["gt",0];
+        $join = [
+            ["carts c","c.id=t.cid"],
+            ["orders o","o.order_id=c.order_id"],
+            ["member m","m.id=c.member_id"],
+            ["portal_post p","p.id=c.goods_id"]
+        ];
+        $field = 't.*,c.id as cid,c.check,c.goods_id,p.post_title,c.course_money,c.pay_money,o.applicant,m.username,m.phone,c.course_time,m.card_face,o
+        .pay_pic';
+        $order = Db::name('tuikes')->alias("t")->join($join)->field($field)->where($where)->order('t.id DESC ')->paginate(20);
+        $this->assign('username', $username);
+        $this->assign('order', $order);
+        $this->assign('page', $order->render());// 赋值分页输出
+        return $this->fetch();
+    }
+
+    //退课审核
+    public function tkstatus(){
+
+        $id = $this->request->param('id');
+        $cid = $this->request->param('cid');
+        $check = $this->request->param('check');
+        if ($this->request->isPost()) {
+
+            $admin_id = cmf_get_current_admin_id();
+
+            $tkstatus_note = $this->request->param('tkstatus_note');
+            $check_id = $this->request->param('check_id');
+            if(empty($check)){
+                $this->error('请先审核');
+            }
+            if(empty($id)){
+                $this->error('参数错误');
+            }
+            if(empty($tkstatus_note)){
+                $this->error('请输入退课原因');
+            }
+            if($check !=2){
+                $this->error('该课程状态不支持退课');
+            }
+            $tkdata = Db::name('tuikes')->find($id);
+            if(empty($tkdata)) {
+                $this->error('暂无数据');
+            }
+            $where = array("c.id"=>$cid);
+            $orderObject = new OrdersModel();
+            $order = $orderObject->getOrderlist($where,0);
+
+            $save_data = array(
+                'tkstatus_note'=>$tkstatus_note,
+                'tk_status'=>$check,
+                'checktime'=>time()
+            );
+            if($check_id == 2){
+                $a_model = Db::name('admin');
+                $adata = $a_model->where(array('id'=>$order['admin_id']))->find();
+                if(empty($adata)){
+                    $uid = $admin_id;
+                }else{
+                    if(empty($adata['pid'])){
+                        $uid = $admin_id;
+                    }else{
+                        $uid = $adata['pid'];
+                    }
+                }
+                $acc_model = new AccountsModel();
+                $result=$acc_model->add_accounts($uid,$order['course_money'],3,$id);
+                if($result['code']==500){
+                    $this->error($result['msg'],url('Orders/index'));
+                    exit;
+                }
+            }
+            if(Db::name('tuikes')->where(array('id'=>$id))->update($save_data)){
+                $active_name = Session::get('name');
+                $this->cource_log($id,$active_name,"审核退课");
+                $this->success('审核成功');
+            }else{
+                $this->error('审核失败');
+            }
+            exit();
+        }
         return $this->fetch();
     }
 

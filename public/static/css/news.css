@@ -29,7 +29,7 @@ a{text-decoration:none; color: #333;}
     line-height: 35px;
     border-radius: 4px;
 	text-align: center;	
-    border: 1px solid #142dac;
+    border: 1px solid #aaa;
 }
 
 
@@ -66,7 +66,6 @@ a{text-decoration:none; color: #333;}
 }
 
 .cuttor {
-	border-bottom: 2px solid #3377e9;
 	color: #142dac;
 }
 

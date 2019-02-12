@@ -1,0 +1,91 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li class="active"><a href="javascript:;">退课列表</a></li>
+        <li><a href="{:url('orders/add')}">添加订单</a></li>
+    </ul>
+    <form class="form-inline margin-top-20">
+        <div class="form-group">
+            <label class="sr-only">用户名</label>
+            <input type="text" class="form-control" id="username" placeholder="请输入用户名" name="username" value="{$username}">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form>
+    <table id="sample-table-1" class="table table-striped table-bordered table-hover margin-top-20">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>申请人</th>
+            <th>申请日期</th>
+            <th>培训课程</th>
+            <th>成交金额</th>
+            <th>已付金额</th>
+            <th>转账截图</th>
+            <th>学员姓名</th>
+            <th>手机号</th>
+            <th>身份证</th>
+            <th>课程结束时间</th>
+            <th>状态</th>
+            <th>申请原因</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="order" id="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.applicant}</td>
+                <td>{$vo.datetime|date="Y-m-d H:i",###}</td>
+                <td>{$vo.post_title}</td>
+                <td>{$vo.course_money}</td>
+                <td>{$vo.pay_money}</td>
+                <td>{$vo.pay_pic|show_img}</td>
+                <td>{$vo.username}</td>
+                <td>{$vo.phone}</td>
+                <td><a href="{$vo.card_face}" target="_blank">
+                    <img height="40" src="{$vo.card_face}">
+                </a></td>
+                <td>{$vo.course_time|date="Y-m-d H:i",###}</td>
+                <td>
+                    <if condition="$vo.tk_status neq 0">
+                        <if condition="$vo.tk_status eq 1">
+                            退课中
+                            <elseif condition="$vo.tk_status eq 2"/>
+                            退课成功
+                        </if>
+                        <else/>
+                        <if condition="$vo.check eq 1  ">
+                            审核中
+                            <elseif condition="$vo.check eq 2 "/>
+                            审核通过
+                            <else/>
+                            审核失败
+                        </if>
+                    </if>
+                </td>
+                <th>{$vo.tk_note}</th>
+                <th><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                    <if condition="$vo.tk_status eq 1">
+                        <a class="green" href="{:url('Orders/tkstatus',array('id'=>$vo['id'],'cid'=>$vo['cid'],'check'=>$vo['check']))}" title="审核">
+                            <i class="icon-eye-open bigger-130"></i>审核
+                        </a>
+                        <elseif condition="$vo.tk_status eq 2"/>
+                        退课成功
+                    </if>
+                </div></th>
+            </tr>
+        </volist>
+        </tbody>
+    </table>
+    <ul class="pagination">{$page|default=''}</ul>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/common.js"></script>
+</body>
+</html>

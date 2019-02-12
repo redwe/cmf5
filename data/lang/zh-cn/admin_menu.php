@@ -137,6 +137,8 @@ return array (
   'PORTAL_ORDERS_INDEX' => '开课列表',
   'PORTAL_ORDERS_LOGS' => '开课日志',
   'PORTAL_ORDERS_PREVIEWS' => '报单预览',
+  'PORTAL_ORDERS_TKLIST' => '退课列表',
+  'PORTAL_ORDERS_XIULIST' => '休学列表',
   'USER_ADMINASSET_DELETE' => '删除文件',
   'USER_ADMINASSET_INDEX' => '资源管理',
   'USER_ADMININDEX_ADD' => '添加用户',

@@ -1,0 +1,111 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li class="active"><a href="javascript:;">休学列表</a></li>
+        <li><a href="{:url('orders/add')}">添加订单</a></li>
+    </ul>
+    <form class="form-inline margin-top-20">
+        <div class="form-group">
+            <label class="sr-only">用户名</label>
+            <input type="text" class="form-control" id="username" placeholder="请输入用户名" name="username" value="{$username}">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form>
+    <table id="sample-table-1" class="table table-striped table-bordered table-hover margin-top-20">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>申请人</th>
+            <th>申请日期</th>
+            <th>申请类型</th>
+            <th>申请原因</th>
+            <th>培训课程</th>
+            <th>学员姓名</th>
+            <th>手机号</th>
+            <th>审批时间</th>
+            <th>审批意见</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="order" id="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.applicant}</td>
+                <td>{$vo.xiu_time}</td>
+                <td>
+
+                    <if condition="$vo.xiu_status lt 3">
+                        休学
+                        <else/>
+                        复学
+                    </if>
+                </td>
+                <th>
+                    <if condition="$vo.xiu_status lt 3">
+                        {$vo.xiu_node}
+                        <else/>
+                        {$vo.xiu_node2}
+                    </if>
+                </th>
+                <td><a href="{:url('Orders/look',['cid'=>$vo['orderid']])}"> {$vo.post_title} </a></td>
+                <td>{$vo.username}</td>
+                <td>{$vo.phone}</td>
+                <td>{$vo.check_time}</td>
+                <td>
+                    <if condition="$vo.xiu_status lt 3">
+                        {$vo.remark}
+                        <else/>
+                        {$vo.remark2}
+                    </if>
+                </td>
+                <td>
+                    <if condition="$vo.xiu_status eq 1">
+                        休学待审核
+                        <elseif condition="$vo.xiu_status eq 2 "/>
+                        休学审核通过
+                        <elseif condition="$vo.xiu_status eq 3 "/>
+                        复学审核中
+                        <elseif condition="$vo.xiu_status eq 4 "/>
+                        复学审核通过
+                        <else/>
+                        审核失败
+                    </if>
+                </td>
+                <td><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                    <if condition="$vo.xiu_status eq 1 && $vo.status eq 1">
+                    <a href="{:url('Orders/xiustatus',array('id'=>$vo['id'],'cid'=>$vo['orderid'],'check'=>$vo['xiu_status']))}" title="审核">
+                        休学审核
+                    </a>
+                    <elseif condition="$vo.xiu_status eq 3 && $vo.status eq 0" />
+                    <a href="{:url('Orders/xiustatus',array('id'=>$vo['id'],'cid'=>$vo['orderid'],'check'=>$vo['xiu_status']))}"  title="审核">
+                        复学审核
+                    </a>
+                    <elseif condition="$vo.xiu_status eq 2 && $vo.status eq 0" />
+                        <a href="{:url('Orders/xiuxue',array('id'=>$vo['id'],'cid'=>$vo['orderid'],'xiu'=>$vo['xiu_status']))}"  title="审核">
+                         复学申请
+                        </a>
+                    <elseif condition="$vo.xiu_status eq 4 && $vo.status eq 0" />
+                        <a  href="#" title="审核"> 复学成功 </a>
+                    <else />
+                        <a href="#" style="color: #aaa" title="审核"> 休学结束 </a>
+                    </if>
+                </div>
+                </td>
+            </tr>
+        </volist>
+        </tbody>
+    </table>
+    <ul class="pagination">{$page|default=''}</ul>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/common.js"></script>
+</body>
+</html>

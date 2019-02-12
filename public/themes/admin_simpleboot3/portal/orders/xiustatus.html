@@ -1,0 +1,65 @@
+<include file="public@header"/>
+<style>
+    .red{ color: #FF0000}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('portal/orders/index')}">开课列表</a></li>
+        <li class="active"><a href="javascript:;">休学/复学审核</a></li>
+        <li><a href="{:url('orders/add')}">添加订单</a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer" enctype="multipart/form-data">
+        <div class="space-4"></div>
+        <div class="form-group">
+            <input name="id" type="hidden" value="{$id}">
+            <input name="cid" type="hidden" value="{$cid}">
+            <input name="xiu_status" type="hidden" value="{$check}">
+            <php>
+                if($check>2){
+                $checkstr = "复学";
+                }
+                else
+                {
+                $checkstr = "休学";
+                }
+            </php>
+            <label class="col-sm-3 control-label no-padding-right">{$checkstr}审核</label>
+            <div class="col-sm-9">
+                <input type="radio" name="check_id" checked id="radio1" value="2" />通过
+                <input type="radio" name="check_id" id="radio2" value="0" />不通过
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label no-padding-right">审核说明</label>
+            <div class="col-sm-6">
+                <textarea class="form-control" rows="5" name="xiuxue_note" id="content" ></textarea>
+            </div>
+        </div>
+        <div class="form-group ">
+            <label class="col-sm-3 control-label no-padding-right"></label>
+            <div class="col-sm-6">
+                <span>审核通过后课程会暂时关闭，复学需要再次申请。</span>
+            </div>
+        </div>
+        <div class="clearfix form-actions">
+            <div class="col-md-offset-3 col-md-9">
+                <button class="btn btn-info" type="submit">
+                    <i class="icon-ok bigger-110"></i>
+                    确认
+                </button>
+                &nbsp; &nbsp; &nbsp;
+                <button class="btn" type="reset">
+                    <i class="icon-undo bigger-110"></i>
+                    取消
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/common.js"></script>
+</body>
+</html>
