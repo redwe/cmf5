@@ -1,0 +1,51 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('Exam/index')}">题库分类管理</a></li>
+        <li><a href="{:url('Exam/addtype')}">添加题库分类</a></li>
+        <li><a href="{:url('Exam/examlist')}">题库试题列表</a></li>
+        <li><a href="{:url('Exam/addexam')}">添加题库试题</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <form class="form-horizontal"  role="form" method="POST" action="{:url('exam/edit')}" >
+            <input type="hidden" name="id" value="{$data.id}">
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="classname">名称</label>
+                <div class="col-sm-6">
+                    <input type="text"  name="classname" value="{$data.name}" id="classname" placeholder="请输入分类名称" class="form-control" />
+                </div>
+                <input type="hidden" name="id" value="{$data.id}">
+             </div>
+            <?php if($data['timelength']>0){   ?>
+                <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="classname">时长</label>
+                <div class="col-sm-6">
+                    <input type="text"  name="timelength" value="{$data.timelength}"  placeholder="时长" class="form-control" />
+                </div>
+                </div>
+            <?php } ?>
+
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    <button class="btn" type="reset">
+                        <i class="icon-undo bigger-110"></i>
+                        重置
+                    </button>
+                    <button class="btn" type="button" onclick="window.history.back()">
+                        <i class="icon-reply bigger-110"></i>
+                        返回
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

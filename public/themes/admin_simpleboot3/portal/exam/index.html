@@ -1,0 +1,55 @@
+<include file="public@header"/>
+<link rel="stylesheet" href="__PUBLIC__/assets/css/jquery.treetable.css" />
+<link rel="stylesheet" href="__STATIC__/css/treeimg.css" />
+<!--<link rel="stylesheet" href="__PUBLIC__/assets/css/jquery.treetable.theme.default.css" />-->
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#">题库分类管理</a></li>
+        <li><a href="{:url('Exam/addtype')}">添加题库分类</a></li>
+        <li><a href="{:url('Exam/examlist')}">题库试题列表</a></li>
+        <li><a href="{:url('Exam/addexam')}">添加题库试题</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <table id="example-advanced" class="table table-striped table-bordered table-hover" style="width: 98%; margin: auto">
+            <thead>
+            <tr>
+                <th>分类名称</th>
+                <th>分类别名</th>
+                <th>主讲老师</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {$html}
+            <!--<tr data-tt-id='1'><td>1</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='1-2' data-tt-parent-id='1'><td class="folder">1-2</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='1-2-1' data-tt-parent-id='1-2'><td class="file">1-2-1</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='1-3' data-tt-parent-id='1'><td class="file">1-3</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='2'><td class="folder">2</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='2-1' data-tt-parent-id='2'><td>2-1</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='2-1-1' data-tt-parent-id='2-1'><td>2-1-1</td><td>测试</td><td>2018</td><td></td></tr>
+            <tr data-tt-id='2-2' data-tt-parent-id='2'><td>2-2</td><td>测试</td><td>2018</td><td></td></tr>-->
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/jquery.treetable.js"></script>
+<script type="text/javascript">
+    $("#example-advanced").treetable({
+        indent: 20,
+        expandable: true,
+        isPadding:true,
+        clickableNodeNames:true,
+        onInitialized:function () {
+            $('#example-advanced').treetable('expandAll');
+            //$(this).css('display','inline-table');
+            //$(this).find("tr:first").find("td span a").click(); //.trigger('click');
+        }
+    });
+    //$('#example-advanced').treetable('expandAll');         //collapsed、expandAll
+</script>
+</body>
+</html>

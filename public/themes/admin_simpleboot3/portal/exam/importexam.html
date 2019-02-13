@@ -1,0 +1,44 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('Exam/index')}">题库分类管理</a></li>
+        <li><a href="{:url('Exam/addtype')}">添加题库分类</a></li>
+        <li><a href="{:url('Exam/examlist')}">题库试题列表</a></li>
+        <li><a href="{:url('Exam/addexam')}">添加题库试题</a></li>
+        <li class="active"><a href="#">导入题库试题</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <form class="form-horizontal"  role="form" method="POST" id="add_customer" enctype="multipart/form-data">
+
+            <div class="panel panel-default">
+                <div class="panel-body" style="color: red">
+                    请按照指定的格式进行上传，每次上传不操过100行 <a href="/upload/template.xlsx">下载模版</a>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">试题文件</label>
+                <div class="col-sm-6">
+                    <input type="file" name="exl" id="exl" />
+                </div>
+            </div>
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-info" type="button">
+                        <a href="javascript:history.go(-1);" style="color:#fff;text-decoration:none">返回上一页</a>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
