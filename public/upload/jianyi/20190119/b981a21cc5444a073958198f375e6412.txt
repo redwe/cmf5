@@ -1,0 +1,49 @@
+::检查USB连通性，通过端口转发监听是否存在
+
+netstat -ano | findstr 127.0.0.1  | findstr 50000
+
+IF ERRORLEVEL 1 (
+
+	echo usb is not connect > debug.txt
+
+	adb forward tcp:50000 tcp:8888
+
+	adb start-server
+
+	exit
+
+)
+
+
+::检查app是否已经安装
+
+adb shell pm list packages telhelper | findstr "com.example.admin.telhelper"
+
+IF ERRORLEVEL 1 (
+
+	echo install and start > debug.txt
+
+	::安装并启动
+
+	adb install -f c:\android\app20170920.apk
+
+	adb shell am start -n com.example.admin.telhelper/com.example.admin.telhelper.MainActivity
+
+) else (
+
+	::如果已经安装 检查是否运行
+
+	adb shell "ps | grep u0_" | findstr "com.example.admin.telhelper"
+
+	IF ERRORLEVEL 1 (
+
+		echo install but not run > debug.txt
+
+		adb shell am start -n com.example.admin.telhelper/com.example.admin.telhelper.MainActivity
+
+	)
+)
+
+exit;
+
+::-----------------------------------------
