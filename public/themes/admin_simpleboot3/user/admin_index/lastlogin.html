@@ -1,0 +1,65 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a>会员列表</a></li>
+        <li><a href="{:url('user/adminIndex/add')}">添加用户</a></li>
+    </ul>
+    <form class="form-inline margin-top-20">
+        <div class="form-group">
+            <select class="form-control" name="checkinfo">
+                <option value="0">----是否购课----</option>
+                <option <eq name="Think.request.checkinfo" value="1">selected</eq> value="1">已购课</option>
+                <option <eq name="Think.request.checkinfo" value="2">selected</eq> value="2">未购课</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+        <!--<button type="submit" name="export" value="yes" class="btn btn-default">导出</button>-->
+    </form>
+    <table id="sample-table-1" class="table table-striped table-bordered table-hover margin-top-20">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>用户名</th>
+            <th>是否购课</th>
+            <th>登入时间</th>
+            <th>登录次数</th>
+            <th>电话</th>
+            <th>注册时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="data" id="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.username}</td>
+                <td>
+                   <if condition="$vo.gouke eq 1">
+                       已购课
+                    <else />
+                       <span style="color: blue;font-weight: bold">未购课</span>
+                   </if>
+                </td>
+                <td>{$vo.logintime|date="Y-m-d H:i:s",###}</td>
+                <td><php>echo $vo['expval']/10</php></td>
+                <td>{$vo.email}</td>
+                <td>{$vo.regtime|date="Y-m-d H:i:s",###}</td>
+                <td>
+                     <a class="green" href="{:url('user/adminIndex/edit',array('id'=>$vo['id']))}" title="编辑">
+                           编辑
+                        </a>
+                        <a class="red" href="{:url('user/adminIndex/del',array('id'=>$vo['id']))}" title="删除">
+                           删除
+                        </a>
+                </td>
+            </tr>
+        </volist>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

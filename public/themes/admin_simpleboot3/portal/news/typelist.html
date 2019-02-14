@@ -1,0 +1,38 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('News/typelist')}">分类管理</a></li>
+        <li><a href="{:url('News/addtype')}">添加分类</a></li>
+        <li><a href="{:url('News/index')}">新闻列表</a></li>
+        <li><a href="{:url('News/addNews')}">添加新闻</a></li>
+    </ul>
+    <div class="row margin-top-20" >
+        <table id="sample-table-1" class="table table-striped table-bordered table-hover"  style="width: 98%; margin: auto">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>分类名称</th>
+                <th>描述</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <volist name="data" id="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.typename}</td>
+                    <th>{$vo.description}</th>
+                    <th><a href="{:url('News/edittype',array('id'=>$vo['id']))}">编辑</a> &nbsp;
+                        <a href="{:url('News//deltype/id',array('id'=>$vo['id']))}">删除</a></th>
+
+                </tr>
+            </volist>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

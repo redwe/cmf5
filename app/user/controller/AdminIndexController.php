@@ -12,6 +12,7 @@
 namespace app\user\controller;
 
 use cmf\controller\AdminBaseController;
+use Dompdf\FrameDecorator\NullFrameDecorator;
 use think\Db;
 use app\user\model\UserModel;
 use app\admin\model\Upload;
@@ -313,4 +314,39 @@ class AdminIndexController extends AdminBaseController
             $this->error('数据传入失败！');
         }
     }
+
+    public function lastlogin(){
+        $gouke = $this->request->param('checkinfo');
+        if(!empty($gouke)){
+            if($gouke == 2){
+                $gouke = 0;
+            }
+            $data = Db::name('member')->where(array("gouke"=>$gouke))->order('logintime desc')->paginate(20);
+        }
+        else
+        {
+            $data = Db::name('member')->order('logintime desc')->paginate(20);
+        }
+
+        $this->setGouke($data);     //检查所有会员是否购课，并设置购课状态。
+
+        $this->assign('data',$data);
+        $this->assign('page',$data->render());
+        return $this->fetch();
+    }
+
+    public function setGouke($data){
+        foreach($data as $vo){
+            $id = $vo["id"];
+            $res = Db::name('orders')->where(array("member_id"=>$id))->find();
+            if($res){
+                Db::name('member')->where(array("id"=>$id))->update(array("gouke"=>1));
+            }
+            else
+            {
+                Db::name('member')->where(array("id"=>$id))->update(array("gouke"=>0));
+            }
+        }
+    }
+
 }

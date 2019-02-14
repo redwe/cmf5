@@ -1,0 +1,50 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('News/typelist')}">分类管理</a></li>
+        <li class="active"><a href="{:url('News/addtype')}">编辑分类</a></li>
+        <li><a href="{:url('News/index')}">新闻列表</a></li>
+        <li><a href="{:url('News/addNews')}">添加新闻</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <form class="form-horizontal" role="form" method="POST" id="add_role">
+            <input type="hidden" value="{$result.id}" name="id">
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">新闻分类名称</label>
+
+                <div class="col-sm-6">
+                    <input type="text" name="newstype" id="newstype" placeholder="请输入新闻分类名称" class="form-control" value="{$result.typename}" />
+                </div>
+            </div>
+
+            <div class="space-4"></div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">描述</label>
+
+                <div class="col-sm-6">
+                    <textarea class="form-control" rows="5" name="description" id="description" >{$result.description}</textarea>
+                </div>
+            </div>
+
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                     &nbsp; &nbsp;
+                    <button class="btn" type="reset">
+                        <i class="icon-undo bigger-110"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

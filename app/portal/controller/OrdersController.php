@@ -177,6 +177,7 @@ class OrdersController extends AdminBaseController
                 $user['province'] = $_POST['province'];
                 $user['address'] = $_POST['address'];
                 $user['email'] = $_POST['email'];
+                $user['gouke'] = 1;
 
                 if(request()->file('card_face')){
                     $uploads = $updata->uploadpic('card_face');
@@ -207,6 +208,7 @@ class OrdersController extends AdminBaseController
                 $user['province'] = $_POST['province'];
                 $user['address'] = $_POST['address'];
                 $user['email'] = $_POST['email'];
+                $user['gouke'] = 1;
 
                 if(request()->file('card_face')){
                     $uploads = $updata->uploadpic('card_face');
