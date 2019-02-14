@@ -481,6 +481,34 @@ tpl;
         return $this->fetch();
     }
 
+
+    public function select2()
+    {
+        $ids                 = $this->request->param('ids');
+        $selectedIds         = explode(',', $ids);
+        $portalCategoryModel = new PortalCategoryModel();
+        //<td>\$spacer <a href='\$url' target='_blank'>\$name</a></td>
+        $tpl = <<<tpl
+<tr id='node-\$id' \$parent_id_node style='\$style' data-parent_id='\$parent_id' data-id='\$id'>
+    <td style='padding-left:20px;'>\$spacer <span>\$name</span>(\$id)</td>
+    <td><span>\$year</span></td>
+    <td><span>\$description</span></td>
+     <td>
+        <input type='checkbox' class='js-check' data-yid='js-check-y' data-xid='js-check-x' name='ids[]'
+               value='\$id' data-name='\$name' \$checked>
+    </td>
+</tr>
+tpl;
+        $categoryTree = $portalCategoryModel->adminCategoryTableTree($selectedIds, $tpl);
+        $where      = ['delete_time' => 0];
+        $categories = $portalCategoryModel->where($where)->select();
+
+        $this->assign('categories', $categories);
+        $this->assign('selectedIds', $selectedIds);
+        $this->assign('categories_tree', $categoryTree);
+        return $this->fetch();
+    }
+
     /**
      * 文章分类排序
      * @adminMenu(

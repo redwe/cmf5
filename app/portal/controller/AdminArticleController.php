@@ -145,8 +145,9 @@ class AdminArticleController extends AdminBaseController
 //goods数据表导入portal_post
     public function savePostData(){
         $loopData = Db::name("goods")->select();
-/*
+
         foreach($loopData as $key=>$vo){
+/*
             $datas = [
                 "id" => $vo['id'],
                 "parent_id"=>0,
@@ -183,6 +184,7 @@ class AdminArticleController extends AdminBaseController
             $lids = $vo["lids"];
             $ids = explode(",",$lids);
             foreach($ids as $k1=>$v1){
+                Db::name("portal_category_post")->insert($data1);
                 $data1 = [
                   "post_id" => $v1,
                   "category_id" => $vo['id'],
@@ -192,9 +194,9 @@ class AdminArticleController extends AdminBaseController
                 Db::name("portal_category_post")->insert($data1);
             }
             Db::name("portal_post")->insert($datas);
-        }
 */
-        dump($loopData);
+        }
+        //dump($loopData);
         dump("OK!");
     }
 

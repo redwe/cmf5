@@ -258,7 +258,7 @@
 
     function doSelectCategory() {
         var selectedCategoriesId = $('#js-categories-id-input').val();
-        openIframeLayer("{:url('AdminCategory/select')}?ids=" + selectedCategoriesId, '请选择分类', {
+        openIframeLayer("{:url('AdminCategory/select2')}?ids=" + selectedCategoriesId, '请选择分类', {
             area: ['80%', '80%'],
             btn: ['确定', '取消'],
             move: true,
