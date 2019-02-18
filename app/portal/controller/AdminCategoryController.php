@@ -462,7 +462,7 @@ class AdminCategoryController extends AdminBaseController
         //<td>\$spacer <a href='\$url' target='_blank'>\$name</a></td>
         $tpl = <<<tpl
 <tr id='node-\$id' \$parent_id_node style='\$style' data-parent_id='\$parent_id' data-id='\$id'>
-    <td style='padding-left:20px;'>\$spacer \$name(\$id)</td>
+    <td style='padding-left:20px;'>\$spacer <span class='\$class'>\$name(\$id)</span></td>
     <td>\$year</td>
     <td>\$description</td>
      <td>
@@ -490,7 +490,7 @@ tpl;
         //<td>\$spacer <a href='\$url' target='_blank'>\$name</a></td>
         $tpl = <<<tpl
 <tr id='node-\$id' \$parent_id_node style='\$style' data-parent_id='\$parent_id' data-id='\$id'>
-    <td style='padding-left:20px;'>\$spacer <span>\$name</span>(\$id)</td>
+    <td style='padding-left:20px;'>\$spacer <span class='\$class'>\$name(\$id)</span></td>
     <td><span>\$year</span></td>
     <td><span>\$description</span></td>
      <td>

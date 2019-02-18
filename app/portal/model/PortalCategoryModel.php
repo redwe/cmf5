@@ -89,6 +89,16 @@ class PortalCategoryModel extends Model
             $pathNum = count($pathsArray);
             $item['parent_id_node'] = ($item['parent_id']) ? ' class="child-of-node-' . $item['parent_id'] . '"' : '';
             $item['style']          = empty($item['parent_id']) ? '' : 'display:none;';
+            if($pathNum==2){
+                $item['class']          = 'red';
+            }
+            elseif($pathNum==3){
+                $item['class']          = 'blue';
+            }
+            else
+            {
+                $item['class']          = 'green';
+            }
             $item['status_text']    = empty($item['status'])?'隐藏':'显示';
             $item['checked']        = in_array($item['id'], $currentIds) ? "checked" : "";
             $item['url']            = cmf_url('portal/List/index', ['id' => $item['id']]);
@@ -124,10 +134,11 @@ class PortalCategoryModel extends Model
         $tree->init($newCategories);
 
         if (empty($tpl)) {
-            $tpl = " <tr id='node-\$id' \$parent_id_node style='\$style' data-parent_id='\$parent_id' data-id='\$id'>";
-                    //"<td style='padding-left:20px;'><input type='checkbox' class='js-check' data-yid='js-check-y' data-xid='js-check-x' name='ids[]' value='\$id' data-parent_id='\$parent_id' data-id='\$id'></td>";
-                        //<td><input name='list_orders[\$id]' type='text' size='3' value='\$list_order' class='input-order'></td>
-            $tpl = $tpl."<td style='padding-left:20px;'>\$spacer \$name(\$id)</td>
+            $tpl = " <tr id='node-\$id' \$parent_id_node style='\$style' data-parent_id='\$parent_id' data-id='\$id'>
+                    <td style='padding-left:20px;'><input type='checkbox' class='js-check' data-yid='js-check-y' data-xid='js-check-x' name='ids[]' value='\$id' data-parent_id='\$parent_id' data-id='\$id'></td>
+                       <td><input name='list_orders[\$id]' type='text' size='3' value='\$list_order' class='input-order'></td>
+                        <td style='padding-left:20px;'>\$id</td>
+                        <td style='padding-left:20px;'><span class='\$class'>\$spacer\$name </span></td>
                         <td>\$pinyin</td>
                         <td>\$year</td>
                         <td>\$description</td>

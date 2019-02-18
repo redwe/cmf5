@@ -2,7 +2,7 @@
 <style>
     a{ text-decoration: none}
     .blue{ color: #336699}
-    .red{ color: #996633}
+    .red{ color: #663300}
     .green{ color: #339966}
 </style>
 </head>
@@ -22,7 +22,7 @@
 
     <form method="post" class="js-ajax-form" action="{:url('AdminCategory/listOrder')}">
         <div class="table-actions">
-            <!---
+
             <button type="submit" class="btn btn-primary btn-sm js-ajax-submit">{:lang('SORT')}</button>
             <button class="btn btn-primary btn-sm js-ajax-submit" type="submit"
                     data-action="{:url('AdminCategory/toggle',array('display'=>'1'))}" data-subcheck="true">
@@ -31,17 +31,17 @@
             <button class="btn btn-primary btn-sm js-ajax-submit" type="submit"
                     data-action="{:url('AdminCategory/toggle',array('hide'=>1))}" data-subcheck="true">{:lang('HIDE')}
             </button>
-            -->
+
         </div>
         <empty name="keyword">
             <table class="table table-hover table-bordered table-list" id="menus-table">
                 <thead>
                 <tr>
-                    <!--<th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
+                    <th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
                                                                             data-direction="x"
                                                                             data-checklist="js-check-x"></label></th>
-                    <!--<th width="50">排序</th>-->
-                    <!--<th width="50">ID</th>-->
+                    <th width="50">排序</th>
+                    <th width="50">ID</th>
                     <th><span style="padding-left: 20px" class="expander"></span>分类名称</th>
                     <th>别名</th>
                     <th>年份</th>
@@ -56,11 +56,11 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <!--<th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
+                    <th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
                                                                             data-direction="x"
                                                                             data-checklist="js-check-x"></label></th>
-                    <!--<th width="50">排序</th>-->
-                   <!-- <th width="50">ID</th>-->
+                    <th width="50">排序</th>
+                    <th width="50">ID</th>
                     <th>分类名称</th>
                     <th>别名</th>
                     <th>年份</th>
@@ -75,11 +75,10 @@
             <table class="table table-hover table-bordered table-list">
                 <thead>
                 <tr>
-                    <!--<th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
-                                                                            data-direction="x"
-                                                                            data-checklist="js-check-x"></label></th>
-                    <!--<th width="50">排序</th>-->
-                    <!--<th width="50">ID</th>-->
+                    <th width="16" style="padding-left:20px;"><label>
+                        <input type="checkbox" class="js-check-all" data-direction="x" data-checklist="js-check-x"></label></th>
+                    <th width="50">排序</th>
+                    <th width="50">ID</th>
                     <th>分类名称</th>
                     <th>年份</th>
                     <th>描述</th>
@@ -91,7 +90,9 @@
                 <tbody>
                 <foreach name="categories" item="vo">
                     <tr>
-                        <td>{$vo.name}({$vo.id})</td>
+                        <td>{$vo.list_order}</td>
+                        <td>{$vo.id}</td>
+                        <td>{$vo.name}</td>
                         <td>{$vo.year}</td>
                         <td>{$vo.description}</td>
                         <td>{$vo.teacher}</td>
@@ -113,11 +114,11 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <!--<th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
+                    <th width="16" style="padding-left:20px;"><label><input type="checkbox" class="js-check-all"
                                                                             data-direction="x"
                                                                             data-checklist="js-check-x"></label></th>
-                    <!--<th width="50">排序</th>-->
-                    <!--<th width="50">ID</th>-->
+                    <th width="50">排序</th>
+                    <th width="50">ID</th>
                     <th><span style="padding-left: 20px" class="expander"></span>分类名称</th>
                     <th>年份</th>
                     <th>描述</th>
@@ -129,7 +130,7 @@
             </table>
         </empty>
         <div class="table-actions">
-           <!---- <button type="submit" class="btn btn-primary btn-sm js-ajax-submit">{:lang('SORT')}</button>-->
+           <button type="submit" class="btn btn-primary btn-sm js-ajax-submit">{:lang('SORT')}</button>
         </div>
     </form>
 </div>
@@ -140,7 +141,7 @@
         Wind.use('treeTable', function () {
             $("#menus-table").treeTable({
                 indent: 20,
-                initialState: 'expanded'
+                initialState: 'collapsed'
             });
         });
     });

@@ -29,17 +29,20 @@ class Upload extends Model
                 $ret['res'] = "0";
                 $ret['msg'] = "格式不正确，请重新上传!";
                 $ret['data'] = '';
+                $ret['fileurl'] = '';
                 //return json_encode($ret);
                 return $ret;
             }
 
             //取数组最后一个元素，得到文件类型
-            $uploaddir0 = $url . date("Ymd") . '/';//设置文件保存目录 注意包含
+            $uploaddir1 = date("Ymd") . '/';//设置文件保存目录 注意包含
+            $uploaddir0 = $url . $uploaddir1;//设置文件保存目录 注意包含
             if (!file_exists($rootUrl.$uploaddir0)) {
                 mkdir($rootUrl.$uploaddir0, 0777, true);
             }
             $savename = md5(uniqid(rand())) . '.' . $type;
             $uploaddir = $uploaddir0. $savename;
+            $fileurl = $uploaddir1. $savename;
             $path = $rootUrl.$uploaddir; //产生随机文件名
             //$path = "images/".$fileName; //客户端上传的文件名；
             //下面必须是tmp_name 因为是从临时文件夹中移动
@@ -53,6 +56,7 @@ class Upload extends Model
                 $ret['res'] = "0";
                 $ret['msg'] = "上传文件丢失!" . $file['error'];
                 $ret['data'] = '';
+                $ret['fileurl'] = '';
             }
             //$file_path = $path;
 
@@ -67,12 +71,14 @@ class Upload extends Model
                 $ret['res'] = "0";
                 $ret['msg'] = "上传文件丢失!" . $file['error'];
                 $ret['data'] = '';
+                $ret['fileurl'] = '';
             }
             else
             {
                 $ret['res'] = "1";
                 $ret['msg'] = "上传文件成功!";
                 $ret['data'] = $uploaddir;
+                $ret['fileurl'] = $fileurl;
             }
             return $ret;
         }

@@ -1,0 +1,44 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('Exam/timelist')}">考试列表</a></li>
+        <li  class="active"><a href="{:url('Exam/addtime')}">编辑考试</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <form class="form-horizontal"  role="form" method="POST" id="add_customer"  enctype="multipart/form-data">
+            <input type="hidden" name="id" value="{$data.id}">
+            <div class="space-4"></div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">考试名称</label>
+                <div class="col-sm-6">
+                    <input type="text" name="title" id="course_name" placeholder="请输入考试名称 时间摸版[time]" class="form-control" value="{$data.title}" />
+                    <br><p>例如：距离二建考试还剩[time]</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">考试时间</label>
+                <div class="col-sm-6">
+                    <input type="text" name="ks_time" autocomplete="off"  placeholder="请输入考试时间" class="form-control js-bootstrap-datetime" value="{$data.ks_time|date='Y-m-d H:i:s',###}" />
+                </div>
+            </div>
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    &nbsp;
+                    <button class="btn" type="reset">
+                        <i class="icon-undo bigger-110"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

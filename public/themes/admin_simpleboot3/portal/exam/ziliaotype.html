@@ -1,0 +1,45 @@
+<include file="public@header"/>
+<link rel="stylesheet" href="__PUBLIC__/assets/css/jquery.treetable.css" />
+<link rel="stylesheet" href="__STATIC__/css/treeimg.css" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('Exam/ziliaolist')}">资料列表</a></li>
+        <li><a href="{:url('Exam/addziliao')}">添加资料</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <table id="example-advanced" class="table table-striped table-bordered table-hover">
+            <thead>
+            <tr>
+                <th width="80"> &nbsp; </th>
+                <th width="80">分类ID</th>
+                <th>分类名称</th>
+                <th>分类别名</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {$html}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/jquery.treetable.js"></script>
+<script type="text/javascript">
+    $("#example-advanced").treetable({
+        indent: 20,
+        expandable: true,
+        isPadding:true,
+        clickableNodeNames:true,
+        onInitialized:function () {
+            $('#example-advanced').treetable('expandAll');
+            //$(this).css('display','inline-table');
+            //$(this).find("tr:first").find("td span a").click(); //.trigger('click');
+        }
+    });
+    //$('#example-advanced').treetable('expandAll');         //collapsed、expandAll
+</script>
+</body>
+</html>

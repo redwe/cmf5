@@ -1,6 +1,7 @@
 <include file="public@header"/>
 <style>
     .red{ color: #FF0000}
+    .addimg{ margin: 5px;}
 </style>
 </head>
 <body>
@@ -60,7 +61,7 @@
                 <php>
                     $cartimg = '__STATIC__/images/default.png';
                     if(!empty($data['card_face'])){
-                    $cartimg = $data['card_face'];
+                        $cartimg = '/upload/images/'.$data['card_face'];
                     }
                 </php>
                 <div class="col-sm-5 text-center">
@@ -70,7 +71,7 @@
                 <php>
                     $cartimg2 = '__STATIC__/images/default.png';
                     if(!empty($data['card_back'])){
-                    $cartimg2 = $data['card_back'];
+                        $cartimg2 = '/upload/images/'.$data['card_back'];
                     }
                 </php>
                 <div class="col-sm-5">
@@ -130,15 +131,14 @@
                 <div class="col-sm-6">
                     <php>
                         $pay_pic = unserialize($data['pay_pic']);
-                        $count = count($pay_pic);
-                        $count2 = 4-$count;
-                        for($i=0;$i<$count2;$i++){
-                        array_push($pay_pic,"__STATIC__/images/default.png");
-                        }
                     </php>
                     <volist name="pay_pic" key="key" id="vo">
-                        <div class="col-sm-3 text-center">
-                            <img width="120" src="{$vo}">
+                        <div class="col-sm-2 text-center">
+                            <Empty name="$vo">
+                                <img class="addimg" width="120" src="__STATIC__/images/default.png">
+                                <else/>
+                                <img class="addimg" width="120" src="/upload/images/{$vo}">
+                            </Empty>
                         </div>
                     </volist>
                 </div>
@@ -149,15 +149,14 @@
                 <div class="col-sm-6">
                     <php>
                         $agreement = unserialize($data['agreement']);
-                        $count = count($agreement);
-                        $count2 = 4-$count;
-                        for($i=0;$i<$count2;$i++){
-                            array_push($agreement,"__STATIC__/images/default.png");
-                        }
                     </php>
                     <volist name="agreement" key="key" id="vo2">
                         <div class="col-sm-3 text-center">
-                            <img width="120" src="{$vo2}">
+                            <Empty name="$vo2">
+                                <img class="addimg" width="120" src="__STATIC__/images/default.png">
+                                <else/>
+                                <img class="addimg" width="120" src="/upload/images/{$vo2}">
+                             </Empty>
                         </div>
                     </volist>
                 </div>

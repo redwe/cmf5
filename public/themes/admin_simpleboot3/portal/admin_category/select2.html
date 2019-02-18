@@ -1,4 +1,9 @@
 <include file="public@header"/>
+<style>
+    .blue{ color: #336699}
+    .red{ color: #663300}
+    .green{ color: #339966}
+</style>
 </head>
 <body>
 <div class="wrap js-check-wrap">
@@ -81,7 +86,7 @@
 
         var objp = $(this).parent().parent();
         var objs = objp.parent().find('.child-of-node-'+dataid).find(".js-check");
-        
+
         objs.each(function(){
             if($(this).prop('checked')){
                 $(this).prop("checked",false);

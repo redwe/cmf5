@@ -1,0 +1,61 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('Exam/facelist')}">课程列表</a></li>
+        <li><a href="{:url('Exam/addface')}">添加课程</a></li>
+    </ul>
+    <div class="row margin-top-20">
+        <form class="form-inline width-98">
+            <div class="form-group">
+                <input type="text" class="form-control" id="name" placeholder="课堂名称" name="name" value="{$Think.request.name}">
+                <input type="text" class="form-control" id="type" placeholder="课堂名称" name="type" value="{$Think.request.type}">
+            </div>
+            <button type="submit" class="btn btn-default">搜索</button>
+        </form>
+        <table id="sample-table-1" class="table table-striped table-bordered table-hover width-98 margin-top-20">
+             <thead>
+                <tr>
+                    <th>id</th>
+                    <th>课程名称</th>
+                    <th>开课时间</th>
+                    <th>开课地址</th>
+                    <th>主讲老师</th>
+                    <th>课程阶段</th>
+                    <th>创建时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <volist name="data" id="vo">
+                    <tr>
+                        <td>{$vo.id}</td>
+                        <td>{$vo.name}</td>
+                        <td>{$vo.time}</td>
+                        <td>{$vo.address}</td>
+                        <td>{$vo.teacher}</td>
+                        <td>{$vo.type}</td>
+                        <td>{$vo.create_time}</td>
+                        <td><eq name="vo.is_show" value="1">显示<else/>隐藏</eq></td>
+                        <td>
+                            <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                                <a class="green" href="{:url('Exam/editface',array('id'=>$vo['id']))}" title="编辑">
+                                    编辑
+                                </a>
+                                <a class="red" href="{:url('Exam/delface',array('id'=>$vo['id']))}" title="删除">
+                                    删除
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </volist>
+                </tbody>
+            </table>
+        <ul class="pagination">{$page|default=''}</ul>
+    </div>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

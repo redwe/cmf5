@@ -40,8 +40,10 @@
                 <th width="50">ID</th>
                 <th>课程名称</th>
                 <!--<th>班次</th>-->
-                <th width="100">市场价</th>
-                <th width="100">售价</th>
+                <th width="100">1天价格</th>
+                <th width="100">1年价格</th>
+                <th width="100">2年价格</th>
+                <th width="100">3年价格</th>
                 <!--<th width="160">关键字/来源<br>摘要/缩略图</th>-->
                 <!--<th>课程类型</th>
                 <th>年份</th>-->
@@ -81,8 +83,10 @@
                             </span>&nbsp;
                         </foreach>
                     </td>-->
-                    <td>{$vo.market_price}</td>
-                    <td>{$vo.selling_price}</td>
+                    <td>{$vo.year_price0}</td>
+                    <td>{$vo.year_price1}</td>
+                    <td>{$vo.year_price2}</td>
+                    <td>{$vo.year_price3}</td>
 
                     <td>
                         <notempty name="vo.post_status">
@@ -115,8 +119,8 @@
                 <th width="50">ID</th>
                 <th>课程名称</th>
                 <!--<th>班次</th>-->
-                <th width="100">市场价</th>
-                <th width="100">售价</th>
+                <!--<th width="100">市场价</th>-->
+                <!--<th width="100">售价</th>-->
                 <!--<th width="160">关键字/来源<br>摘要/缩略图</th>-->
                 <!--<th>课程类型</th>
                 <th>年份</th>-->

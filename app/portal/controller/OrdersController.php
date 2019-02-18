@@ -12,6 +12,121 @@ use phpmailerException;
 
 class OrdersController extends AdminBaseController
 {
+    //转移订单数据
+    public function moveDatas(){
+        $loopData = Db::name("course_order")->select();
+/*
+        foreach($loopData as $key=>$vo){
+
+                        $order_id = getOrderCode();
+
+                        $pay_pics = [
+                            $vo["pay_pic"],
+                            $vo["pay_pic1"],
+                            $vo["pay_pic2"],
+                            $vo["pay_pic3"],
+                            $vo["pay_pic4"],
+                        ];
+
+                        $member_id = $vo['member_id'];
+                        $admin_id = $vo['admin_id'];
+
+                        $cards = [];
+                        if(!empty($vo["card_positive"])){
+                            $cards["card_face"] = $vo["card_positive"];
+                        }
+                        if(!empty($vo["card_positive1"])) {
+                            $cards["card_back"] = $vo["card_positive1"];
+                        }
+                        if(!empty($vo["cardno"])) {
+                            $cards["cardnum"] = $vo["cardno"];
+                        }
+                        if(!empty($vo["student_email"])) {
+                            $cards["email"] = $vo["student_email"];
+                        }
+                        if(!empty($vo["name"])) {
+                            $cards["cnname"] = $vo["name"];
+                        }
+                        if(!empty($vo["name"])) {
+                            $cards["admin_id"] = $admin_id;
+                        }
+
+                        if($cards){
+                            //Db::name("member")->where(array("id"=>$member_id))->update($cards);
+                        }
+
+                        $agreement = [
+                            $vo["agreement1"],
+                            $vo["agreement2"],
+                        ];
+
+                        $pay_pics = serialize($pay_pics);
+                        $agreement = serialize($agreement);
+
+                        $order_data = [
+                            "order_id" => $order_id,
+                            "admin_id" => $admin_id,
+                            "member_id" => $member_id,
+                            "payment" => $vo['pay_way'],
+                            "pay_pic" => $pay_pics,
+                            "agreement" => $agreement,
+                            "upload_file" => $vo['agreement'],
+                            "applicant" => $vo['applicant'],
+                            "group_id" => $vo['group_id'],
+                            "teacher" => $vo['zhaosheng_teacher'],
+                            "update_time" => $vo['time'],
+                            "remarks" => $vo['remarks']
+                        ];
+
+                        $res = Db::name("orders")->insert($order_data);
+                        $oid = Db::name("orders")->getLastInsID();
+
+                        $cart_data = [
+                            "id" => $vo['id'],
+                            "order_id"=>$order_id,
+                            "goods_id"=>$vo['goods_id'],
+                            "member_id"=>$member_id,
+                            "kc_year"=>$vo['kc_type'],
+                            "kc_price"=>$vo['kc_price'],
+                            "course_money"=>$vo['course_money'],
+                            "pay_money"=>$vo['pay_money'],
+                            "ck_type"=>$vo['type'],
+                            "is_owe"=>$vo['type'],
+                            "owe_time"=>$vo['owe_time'],
+                            "status"=>$vo['status'],
+                            "course_time"=>$vo['course_time'],
+                            "check" => $vo["check"],
+                            "check_name" => $vo["check_name"],
+                            "check_note" => $vo['check_note'],
+                            "check_time" => $vo["check_time"],
+                            "isexam" => $vo['isexam'],
+                            "result" => $vo['result'],
+                            "isprint" => $vo['isprint'],
+                            "xiu_status" => $vo["xiu_status"],
+                            "tk_status" => $vo["tk_status"],
+                            "isdel" => 0,
+                            "create_time" => $vo["time"]
+                        ];
+
+                        $carts = Db::name("carts")->insert($cart_data);
+                        $cartid = Db::name("carts")->getLastInsID();
+
+                        if(!empty($vo['tk_note'])){
+                            $tuikes = [
+                                "order_id" => $order_id,
+                                "cid" => $cartid,
+                                "tk_note" => $vo['tk_note'],
+                                "tk_status" => $vo['tk_status'],
+                                "tkstatus_note" => $vo['tkstatus_note'],
+                                "datetime" => time(),
+                                "checktime" => time(),
+                            ];
+                           $result = Db::name("tuikes")->insert($tuikes);
+                        }
+        }
+*/
+        dump("OK!");
+    }
 
     public function index(){
 
@@ -137,14 +252,24 @@ class OrdersController extends AdminBaseController
         $adminname = Session::get('name');
         $check_name = Session::get('check_name');
 
+        //$info= Db::name('portal_category')->field('id,parent_id as parentid,path as parentstr,name as classname,year,description')->select();
+        $info= Db::name('kecheng_cate')->field('id,parentid,parentstr,classname,level')->select();
+        $info = json_decode($info,true);
+        $info = unlimitedForLevel($info);
+        //dump($info);
+        $this->assign('info',$info);
+
         if($request->isAjax()){
+            $keyword = $this->request->param("title");
             $page = $this->request->param("page");
+            $goods_type = $this->request->param("kcid");
+
             $orderObject = new OrdersModel();
-            $goods_data = $orderObject->getGoodslist(20,$page);
+            $goods_data = $orderObject->getGoodslist(20,$page,$keyword,$goods_type);
             $pages = $goods_data->render();
             $tempstr = '';
             foreach($goods_data as $vo){
-                $tempstr = $tempstr.'<tr><td>'.$vo["id"].'</td><td>'.$vo["post_title"].'</td><td>'.date("Y-m-d H:i:s",$vo["create_time"]).'</td><td><input name="goods_id" class="goods_id" type="checkbox" value="'.$vo['id'].'" data-name="'.$vo['post_title'].'" /></td></tr>';
+                $tempstr = $tempstr.'<tr><td>'.$vo["id"].'</td><td><span>'.$vo["post_title"].'</span></td><td>'.date("Y-m-d H:i:s",$vo["create_time"]).'</td><td><input name="goods_id" class="goods_id" type="checkbox" value="'.$vo['id'].'" data-name="'.$vo['post_title'].'" /></td></tr>';
             }
             //dump($goods_data);
             $gogdslist['pages'] = $pages;
@@ -182,14 +307,14 @@ class OrdersController extends AdminBaseController
                 if(request()->file('card_face')){
                     $uploads = $updata->uploadpic('card_face');
                     if ($uploads['res']) {
-                        $user['card_face'] = $uploads['data'];
+                        $user['card_face'] = $uploads['fileurl'];
                     }
                 }
                 //上传文件身份证反面
                 if(request()->file('card_back')) {
                     $uploads = $updata->uploadpic('card_back');
                     if ($uploads['res']) {
-                        $user['card_back'] = $uploads['data'];
+                        $user['card_back'] = $uploads['fileurl'];
                     }
                 }
                 $userinfo = Db::name('member')->insert($user);
@@ -213,14 +338,14 @@ class OrdersController extends AdminBaseController
                 if(request()->file('card_face')){
                     $uploads = $updata->uploadpic('card_face');
                     if ($uploads['res']) {
-                        $user['card_face'] = $uploads['data'];
+                        $user['card_face'] = $uploads['fileurl'];
                     }
                 }
                 //上传文件身份证反面
                 if(request()->file('card_back')) {
                     $uploads = $updata->uploadpic('card_back');
                     if ($uploads['res']) {
-                        $user['card_back'] = $uploads['data'];
+                        $user['card_back'] = $uploads['fileurl'];
                     }
                 }
                 Db::name('member')->where(array('phone' => $_POST['phone']))->update($user);
@@ -329,8 +454,8 @@ class OrdersController extends AdminBaseController
                     if (request()->file('pay_pic' . $i)) {
                         $uploads = $updata->uploadpic('pay_pic' . $i);
                         if ($uploads['res']) {
-                            //$datas['pay_pic'] = $uploads['data'];
-                            array_push($pay_pics, $uploads['data']);
+                            //$datas['pay_pic'] = $uploads['fileurl'];
+                            array_push($pay_pics, $uploads['fileurl']);
                         } else {
                             array_push($pay_pics, '');
                         }
@@ -342,7 +467,7 @@ class OrdersController extends AdminBaseController
                 if (request()->file('agreement')) {
                     $uploads = $updata->uploadpic('agreement', $file_path, $file_array);
                     if ($uploads['res']) {
-                        $datas['upload_file'] = $uploads['data'];
+                        $datas['upload_file'] = $uploads['fileurl'];
                     }
                 }
 
@@ -352,8 +477,8 @@ class OrdersController extends AdminBaseController
                     if (request()->file('agreement' . $i)) {
                         $uploads = $updata->uploadpic('agreement' . $i);
                         if ($uploads['res']) {
-                            //$datas['pay_pic'] = $uploads['data'];
-                            array_push($agreements, $uploads['data']);
+                            //$datas['pay_pic'] = $uploads['fileurl'];
+                            array_push($agreements, $uploads['fileurl']);
                         } else {
                             array_push($agreements, '');
                         }
@@ -431,11 +556,18 @@ class OrdersController extends AdminBaseController
 
         $request = Request::instance();
 
+        $info= Db::name('kecheng_cate')->field('id,parentid,parentstr,classname,level')->select();
+        $info = json_decode($info,true);
+        $info = unlimitedForLevel($info);
+        //dump($info);
+        $this->assign('info',$info);
+
         if($request->isAjax()){
             $page = $this->request->param("page");
-
+            $keyword = $this->request->param("title");
+            $goods_type = $this->request->param("kcid");
             $orderObject = new OrdersModel();
-            $goods_data = $orderObject->getGoodslist(20,$page);
+            $goods_data = $orderObject->getGoodslist(20,$page,$keyword,$goods_type);
             $pages = $goods_data->render();
             $tempstr = '';
             foreach($goods_data as $vo){
@@ -468,8 +600,8 @@ class OrdersController extends AdminBaseController
                 if (request()->file('pay_pic'.$i)) {
                     $uploads = $updata->uploadpic('pay_pic'.$i);
                     if ($uploads['res']) {
-                        //$datas['pay_pic'] = $uploads['data'];
-                        array_push($pay_pics, $uploads['data']);
+                        //$datas['pay_pic'] = $uploads['fileurl'];
+                        array_push($pay_pics, $uploads['fileurl']);
                     }
                 }
                 else
@@ -483,7 +615,7 @@ class OrdersController extends AdminBaseController
             if(request()->file('agreement')) {
                 $uploads = $updata->uploadpic('agreement', $file_path, $file_array);
                 if ($uploads['res']) {
-                    $datas['upload_file'] = $uploads['data'];
+                    $datas['upload_file'] = $uploads['fileurl'];
                 }
             }
 
@@ -493,8 +625,8 @@ class OrdersController extends AdminBaseController
                 if (request()->file('agreement'.$i)) {
                     $uploads = $updata->uploadpic('agreement'.$i);
                     if ($uploads['res']) {
-                        //$datas['pay_pic'] = $uploads['data'];
-                        array_push($agreements, $uploads['data']);
+                        //$datas['pay_pic'] = $uploads['fileurl'];
+                        array_push($agreements, $uploads['fileurl']);
                     }
                 }
                 else
@@ -873,7 +1005,7 @@ class OrdersController extends AdminBaseController
             if(request()->file('thumb')){
                 $uploads = $updata->uploadpic('thumb');
                 if ($uploads['res']) {
-                    $data['thumb'] = $uploads['data'];
+                    $data['thumb'] = $uploads['fileurl'];
                 }
             }
             $file_path = '/upload/files/';
@@ -882,7 +1014,7 @@ class OrdersController extends AdminBaseController
             if(request()->file('agreement')){
                 $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
                 if ($uploads['res']) {
-                    $data['agreement'] = $uploads['data'];
+                    $data['agreement'] = $uploads['fileurl'];
                 }
             }
 
@@ -1074,7 +1206,7 @@ class OrdersController extends AdminBaseController
         if(request()->file('agreement')){
             $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
             if ($uploads['res']) {
-                $Attachment = $uploads['data'];
+                $Attachment = $uploads['fileurl'];
             }
         }
 
@@ -1109,7 +1241,7 @@ class OrdersController extends AdminBaseController
             if(request()->file('agreement')){
                 $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
                 if ($uploads['res']) {
-                    $file_name = $uploads['data'];
+                    $file_name = $uploads['fileurl'];
                 }
             }
             $orderObject = new OrdersModel();
@@ -1581,14 +1713,14 @@ class OrdersController extends AdminBaseController
             if(request()->file('pay_pic1')){
                 $uploads = $updata->uploadpic('pay_pic1');
                 if ($uploads['res']) {
-                    $save_data['picurl1'] = $uploads['data'];
+                    $save_data['picurl1'] = $uploads['fileurl'];
                 }
             }
 
             if(request()->file('pay_pic2')){
                 $uploads = $updata->uploadpic('pay_pic2');
                 if ($uploads['res']) {
-                    $save_data['picurl2'] = $uploads['data'];
+                    $save_data['picurl2'] = $uploads['fileurl'];
                 }
             }
 
@@ -1813,8 +1945,10 @@ class OrdersController extends AdminBaseController
 
         if ($this->request->isAjax()) {
             $page = $this->request->param("page");
+            $keyword = $this->request->param("keyword");
             $orderObject = new OrdersModel();
-            $goods_data = $orderObject->getGoodslist(20, $page);
+            $goods_type = $this->request->param("kcid");
+            $goods_data = $orderObject->getGoodslist(20, $page,$keyword,$goods_type);
             $pages = $goods_data->render();
             $tempstr = '';
             foreach ($goods_data as $vo) {
@@ -1880,7 +2014,7 @@ class OrdersController extends AdminBaseController
             if (request()->file('result') && $do == 'xuxue') {
                 $uploads = $updata->uploadpic('result');
                 if ($uploads['res']) {
-                    $result_data['result'] = $uploads['data'];
+                    $result_data['result'] = $uploads['fileurl'];
                     $result_data['isexam'] = 1;
                 }
             }
@@ -1973,6 +2107,13 @@ class OrdersController extends AdminBaseController
                 $data['qf'] = 0;
                 $data['qfje'] = '未欠费';
             }
+
+        $info= Db::name('kecheng_cate')->field('id,parentid,parentstr,classname,level')->select();
+        $info = json_decode($info,true);
+        $info = unlimitedForLevel($info);
+        //dump($info);
+        $this->assign('info',$info);
+
             $do = $this->request->param('do');      //续学xuxue/转课zhuan
             $tempstr = getTempstr($do);
             $this->assign("tempstr", $tempstr);

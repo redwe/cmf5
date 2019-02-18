@@ -174,8 +174,6 @@ class AdminArticleController extends AdminBaseController
                 "post_content" => $vo["content"],
                 "post_content_filtered" => '',
                 "more" => '',
-                "market_price" => $vo["marketprice"],
-                "selling_price" => $vo["salesprice"],
                 "year_price1"=>$vo["kc1_price"],
                 "year_price2"=>$vo["kc2_price"],
                 "year_price3"=>$vo["kc3_price"],

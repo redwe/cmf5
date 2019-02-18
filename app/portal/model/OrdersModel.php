@@ -123,23 +123,30 @@ class OrdersModel extends Model
     }
 
     //获取所有课程列表
-    public function getGoodslist($limit=20,$page=1,$title='',$goods_type=''){
-        $where["p.post_status"] = 1;
+    public function getGoodslist($limit=20,$page='',$title='',$goods_type=''){
+        $where["g.post_status"] = 1;
 
         if(!empty($title)){
-            $where['p.post_title'] = array('like','%'.$title.'%');
+            $where['g.post_title'] = array('like','%'.$title.'%');
+        }
+        if(empty($page)){
+            $page = 1;
         }
         $join = [
-            ["portal_category_post c","c.post_id=p.id"]
+            ["portal_category_post c","c.post_id=g.id","inner"],
+            ["portal_category p","p.id=c.category_id"]
         ];
-        $field = 'p.*,c.category_id';
+        $field = 'g.*,c.category_id';
         if(!empty($goods_type)){
-            $where["c.category_id"] = $goods_type;
+            $where["c.category_id"] = array("in",$goods_type);
         }
         $param['page'] = $page;
+        $param['keyword'] = $title;
         $param['path'] = 'javascript:AjaxPage([PAGE]);';
         $goods_data = Db::name("portal_post")
-            //->alias("p")->join($join)->field($field)->where($where)->order('p.id desc')
+            ->alias("g")->join($join)->field($field)
+            ->where($where)
+            ->order('g.id desc')
             ->paginate($limit,false,$param);
         //$page = $goods_data->render();
         return $goods_data;
