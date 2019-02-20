@@ -12,11 +12,13 @@ namespace app\admin\controller;
 
 use cmf\controller\AdminBaseController;
 use think\Db;
+use think\Route;
 
 class PublicController extends AdminBaseController
 {
     public function _initialize()
     {
+
     }
 
     /**

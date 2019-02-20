@@ -47,7 +47,7 @@ class NewsController extends AdminBaseController
             $updata = new Upload();// 实例化上传类
             $file_name = '';
             //$rootUrl = $_SERVER['DOCUMENT_ROOT'];
-            $file_path = '/uploads/newspic/';
+            $file_path = '/upload/newspic/';
             $file_array = ['jpg','jpeg','gif','png'];
 
             if(request()->file('file')){
@@ -87,7 +87,7 @@ class NewsController extends AdminBaseController
             }else{
                 $updata = new Upload();// 实例化上传类
                 //$rootUrl = $_SERVER['DOCUMENT_ROOT'];
-                $file_path = '/uploads/newspic/';
+                $file_path = '/upload/newspic/';
                 $file_array = ['jpg','jpeg','gif','png'];
 
                 if(request()->file('file')){

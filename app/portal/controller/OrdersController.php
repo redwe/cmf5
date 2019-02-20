@@ -1241,7 +1241,7 @@ class OrdersController extends AdminBaseController
             if(request()->file('agreement')){
                 $uploads = $updata->uploadpic('agreement',$file_path,$file_array);
                 if ($uploads['res']) {
-                    $file_name = $uploads['fileurl'];
+                    $file_name = $uploads['data'];
                 }
             }
             $orderObject = new OrdersModel();
@@ -1282,8 +1282,8 @@ class OrdersController extends AdminBaseController
                         $user[$i]['regtime'] = time();
                         $user[$i]['status'] = 1;
                         $user[$i]['regip']   = get_client_ip(0, true);
-                        Db::name("members")->insert($user[$i]);
-                        $userid = Db::name("members")->getLastInsID();
+                        Db::name("member")->insert($user[$i]);
+                        $userid = Db::name("member")->getLastInsID();
                     }
                     else
                     {

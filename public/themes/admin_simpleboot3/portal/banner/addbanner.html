@@ -1,0 +1,52 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('Banner/index')}">Banner列表</a></li>
+        <li class="active"><a href="{:url('Banner/addbanner')}">添加Banner</a></li>
+        <li><a href="{:url('Banner/glist')}">首页广告位</a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20" role="form" method="POST"  enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" >banner名称</label>
+                <div class="col-sm-6">
+                    <input type="text" name="name"  placeholder="请输入banner名称" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" >链接地址</label>
+                <div class="col-sm-6">
+                    <input type="text" name="url"  placeholder="请输入链接地址" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" >图片</label>
+                <div class="col-sm-6">
+                    <input type="file" name="file"  class="col-xs-10 col-sm-5" />
+
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right">排序</label>
+                  <div class="col-sm-6">
+                        <input type="text" name="sort"  placeholder="值越小越靠前" class="form-control" />
+                 </div>
+            </div>
+
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        保存
+                    </button>
+                    &nbsp; &nbsp; &nbsp;
+                    <button class="btn" type="reset">
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

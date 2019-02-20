@@ -41,8 +41,8 @@
         <tbody>
         <volist name="order" id="vo">
             <php>
-                $pay_pics = unserialize($vo['pay_pic']);
-                $agreements = unserialize($vo['agreement']);
+                //$pay_pics = unserialize($vo['pay_pic']);
+                //$agreements = unserialize($vo['agreement']);
                 $cid = $vo['cid'];
                 $cktype = $vo['ck_type'];
             </php>
@@ -64,24 +64,12 @@
                         未欠费
                     </if>
                 </td>
-                <td>
-                    <volist name="pay_pics" id="vo2">
-                        <a href="{$vo2}" target="_blank">
-                            <img width="40" src="{$vo2}">
-                        </a>
-                    </volist>
-                </td>
+                <td>{$vo.pay_pic|show_img}</td>
                 <td>{$vo.username}</td>
                 <td>{$vo.phone}</td>
-                <td>
-                    <volist name="agreements" id="vo2">
-                        <a href="{$vo2}" target="_blank">
-                            <img width="40" src="{$vo2}">
-                        </a>
-                    </volist>
-                </td>
-                <td><a href="{$vo.card_face}" target="_blank"><img width="40" src="{$vo.card_face}"></a></td>
-                <td><a href="{$vo.card_back}" target="_blank"><img width="40" src="{$vo.card_back}"></a></td>
+                <td>{$vo.agreement|show_img}</td>
+                <td><a href="{$vo.card_face|getImageUrl}" target="_blank"><img width="40" src="{$vo.card_face|getImageUrl}"></a></td>
+                <td><a href="{$vo.card_back|getImageUrl}" target="_blank"><img width="40" src="{$vo.card_back|getImageUrl}"></a></td>
                 <td>{$vo.course_time|date="Y-m-d H:i",###}</td>
                 <td>
                     <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">

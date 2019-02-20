@@ -1,0 +1,86 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('Zhibo/index')}">直播列表</a></li>
+        <li><a href="{:url('Zhibo/addzhibo')}">添加直播</a></li>
+        <li class="active"><a href="{:url('Zhibo/lubo')}">录播列表</a></li>
+        <li><a href="{:url('Zhibo/addlubo')}">添加录播</a></li>
+        <li><a href="{:url('Zhibo/yuyue')}">预约列表</a></li>
+        <li><a href="{:url('Zhibo/zhibotype')}">直播分类</a></li>
+        <li><a href="{:url('Zhibo/addtype')}">添加分类</a></li>
+    </ul>
+        <form class="form-inline margin-top-20">
+            <div class="form-group">
+                <input type="text" class="form-control" id="username" placeholder="直播名称" name="course_name" value="{$Think.request.course_name}">
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="type">
+                    <option value="">--请选择－－</option>
+                    <option <eq name="type" value="1">selected</eq> value="1">开播中</option>
+                    <option <eq name="type" value="2">selected</eq> value="2">已结束</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-default">搜索</button>
+        </form>
+        <table id="sample-table-1" class="table table-striped table-bordered table-hover margin-top-20">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>排序</th>
+                <th>直播图片</th>
+                <th>直播名称</th>
+                <th>直播间ID</th>
+                <th>直播分类</th>
+                <th>开播时间</th>
+                <th>主讲老师</th>
+                <th>讲师密码</th>
+                <th>助教密码</th>
+                <th>观看密码</th>
+                <th>SDKID</th>
+                <!--
+                <th>直播状态</th>
+                -->
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <volist name="data" id="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.orderby}</td>
+                    <td><img width="120" height="80" src="{$vo.course_img}"></td>
+                    <td>{$vo.course_name}</td>
+                    <td>{$vo.live_room}</td>
+                    <td>{$vo.live_cate}</td>
+                    <td>{$vo.kb_time}</td>
+                    <td>{$vo.teacher_name}</td>
+                    <td>{$vo.teacher_token}</td>
+                    <td>{$vo.assistant_token}</td>
+                    <td>{$vo.student_token}</td>
+                    <td>{$vo.sdk_id}</td>
+                    <!--<td><eq name="vo['type']" value="1">开播中<else/>已结束</eq></td>-->
+                    <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                            <a class="green" href="{:url('Zhibo/editzhibo',array('id'=>$vo['id']))}" title="编辑">
+                                编辑
+                            </a>
+                            <a class="red" href="{:url('Zhibo/delzhibo',array('id'=>$vo['id']))}" title="删除">
+                                删除
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </volist>
+            </tbody>
+        </table>
+        <ul class="pagination">{$page|default=''}</ul>
+</div>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

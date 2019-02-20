@@ -36,10 +36,10 @@
                     <td>{$vo.price}</td>
                     <td>{$vo.payment}</td>
                     <td>
-                        <a target="_blank" href="{$vo.picurl1}">
-                            <img style="height: 30px;" src="{$vo.picurl1}"></a>
-                        <a target="_blank" href="{$vo.picurl1}">
-                            <img style="height: 30px;" src="{$vo.picurl2}"></a>
+                        <a target="_blank" href="{$vo.picurl1|getImageUrl}">
+                            <img style="height: 30px;" src="{$vo.picurl1|getImageUrl}"></a>
+                        <a target="_blank" href="{$vo.picurl2|getImageUrl}">
+                            <img style="height: 30px;" src="{$vo.picurl2|getImageUrl}"></a>
                     </td>
                     <td>{$vo.applicant}</td>
                     <td>{$vo.check_name}</td>

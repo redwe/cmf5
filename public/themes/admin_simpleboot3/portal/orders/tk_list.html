@@ -48,8 +48,8 @@
                 <td>{$vo.pay_pic|show_img}</td>
                 <td>{$vo.username}</td>
                 <td>{$vo.phone}</td>
-                <td><a href="{$vo.card_face}" target="_blank">
-                    <img height="40" src="{$vo.card_face}">
+                <td><a href="{$vo.card_face|getImageUrl}" target="_blank">
+                    <img height="40" src="{$vo.card_face|getImageUrl}">
                 </a></td>
                 <td>{$vo.course_time|date="Y-m-d H:i",###}</td>
                 <td>

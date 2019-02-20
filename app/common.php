@@ -319,8 +319,12 @@ function getTempstr($do){
 function show_img($imgs){
     $datas = unserialize($imgs);
     $tempstr = '';
+    $i=0;
     foreach($datas as $vo){
-        $tempstr = $tempstr."<a href='".$vo."' target='_blank'><img height='40' src='".$vo."'>";
+        if($vo || $i==0){
+            $tempstr = $tempstr."<a href='".getImageUrl($vo)."' target='_blank'><img height='40' src='".getImageUrl($vo)."'>";
+        }
+        $i++;
     }
     return $tempstr;
 }
@@ -343,5 +347,15 @@ function unlimitedForLevel($arr){
         }
     }
     return $tree;
+}
+
+function getImageUrl($url){
+    if(empty($url)){
+        return "/static/images/default.png";
+    }
+    else
+    {
+        return "/upload/images/".$url;
+    }
 }
 
