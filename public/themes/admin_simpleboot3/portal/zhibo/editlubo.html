@@ -12,21 +12,21 @@
         <li><a href="{:url('Zhibo/index')}">直播列表</a></li>
         <li><a href="{:url('Zhibo/addzhibo')}">添加直播</a></li>
         <li><a href="{:url('Zhibo/lubo')}">录播列表</a></li>
-        <li class="active"><a href="{:url('Zhibo/addlubo')}">添加录播</a></li>
+        <li class="active"><a href="{:url('Zhibo/addlubo')}">编辑录播</a></li>
         <li><a href="{:url('Zhibo/yuyue')}">预约列表</a></li>
         <li><a href="{:url('Zhibo/zhibotype')}">直播分类</a></li>
         <li><a href="{:url('Zhibo/addtype')}">添加分类</a></li>
     </ul>
     <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer"  enctype="multipart/form-data">
 
-        <div class="space-4"></div>
+        <input type="hidden" name="id" value="{$data.id}">
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">所属直播</label>
             <div class="col-sm-6">
                 <select name="cid"  class="form-control">
                     <option value="0">选择所属直播</option>
                     <foreach name="course_data" item="ld">
-                        <option value="{$ld.id}">{$ld.course_name}</option>
+                        <option <eq name="data['cid']" value="$ld['id']">selected</eq> value="{$ld.id}">{$ld.course_name}</option>
                     </foreach>
                 </select>
             </div>
@@ -35,7 +35,7 @@
             <label class="col-sm-3 control-label no-padding-right">课堂名称</label>
 
             <div class="col-sm-6">
-                <input type="text" name="course_name" id="course_name" placeholder="请输入课堂名称" class="form-control course_name" />
+                <input type="text" name="course_name" id="course_name" placeholder="请输入课堂名称" class="form-control course_name" value="{$data.course_name}" />
             </div>
         </div>
 
@@ -43,7 +43,8 @@
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">开播时间</label>
             <div class="col-sm-6">
-                <input type="text" name="kb_time" autocomplete="off" placeholder="请输入开播时间" class="form-control kb_time js-bootstrap-datetime" />
+                <input type="text" name="kb_time" autocomplete="off" placeholder="请输入开播时间" class="form-control kb_time js-bootstrap-datetime"
+                       value="{$data.kb_time|date='Y-m-d H:i:s',###}" />
             </div>
         </div>
         <div class="space-4"></div>
@@ -54,7 +55,7 @@
                 <select name="course_cate_level1"  class="form-control levels course_cate_level1">
                     <option value="0">请选择分类</option>
                     <foreach name="l1_type_data" item="ld">
-                        <option value="{$ld.id}">{$ld.name}</option>
+                        <option <eq name="data['course_cate_level1']" value="$ld['id']">selected</eq> value="{$ld.id}">{$ld.name}</option>
                     </foreach>
                 </select>
             </div>
@@ -66,22 +67,27 @@
             <div class="col-sm-6">
                 <select name="course_cate_level2"  class="form-control level1 course_cate_level2">
                     <option value="0">请先选择课程分类</option>
+                    <foreach name="l2_type_data" item="ld2">
+                        <option <eq name="data['course_cate_level2']" value="$ld2['id']">selected</eq> value="{$ld2.id}">{$ld2.name}</option>
+                    </foreach>
                 </select>
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">视频地址</label>
             <div class="col-sm-6">
-                <input type="text" name="video_url" placeholder="请输入视频地址" class="form-control" />
+                <input type="text" name="video_url" placeholder="请输入视频地址" class="form-control" value="{$data.video_url}" />
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right">课堂照片</label>
 
             <div class="col-sm-6">
-                <div class="course_img"></div>
+                <div class="course_img">
+                    <img width="160" src="{$data.course_img}">
+                </div>
                 <input type="file" name="course_img" id="course_img" />
-                <input type="hidden" class="course_img_old" name="course_img_old" value="">
+                <input type="hidden" class="course_img_old" name="course_img_old" value="{$data.course_img}" >
             </div>
         </div>
 
@@ -89,7 +95,7 @@
             <label class="col-sm-3 control-label no-padding-right">主讲老师</label>
 
             <div class="col-sm-6">
-                <input type="text" name="teacher_name" id="teacher_name" placeholder="请输入主讲老师名称"  class="form-control teacher_name" />
+                <input type="text" name="teacher_name" id="teacher_name" placeholder="请输入主讲老师名称" value="{$data.teacher_name}" class="form-control teacher_name" />
             </div>
         </div>
         <div class="clearfix form-actions">

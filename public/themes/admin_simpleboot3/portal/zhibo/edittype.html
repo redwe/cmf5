@@ -15,7 +15,7 @@
         <li><a href="{:url('Zhibo/addlubo')}">添加录播</a></li>
         <li><a href="{:url('Zhibo/yuyue')}">预约列表</a></li>
         <li><a href="{:url('Zhibo/zhibotype')}">直播分类</a></li>
-        <li  class="active"><a href="{:url('Zhibo/addtype')}">添加分类</a></li>
+        <li  class="active"><a href="{:url('Zhibo/addtype')}">编辑分类</a></li>
     </ul>
     <form class="form-horizontal margin-top-20"  role="form" method="POST" id="add_customer">
         <input type="hidden" name="id" value="{$data.id}">
@@ -30,14 +30,14 @@
             <label class="col-sm-3 control-label no-padding-right" for="classname">分类名称</label>
 
             <div class="col-sm-6">
-                <input type="text"  name="classname" id="classname" placeholder="请输入分类名称" class="form-control" />
+                <input type="text"  name="classname" id="classname" placeholder="请输入分类名称" class="form-control" value="{$data.classname}"  />
             </div>
         </div>
 
         <div class="form-group">
             <label class="col-sm-3 control-label no-padding-right" for="classname">排序</label>
             <div class="col-sm-6">
-                <input type="text"  name="sort" id="pinyin"  class="form-control" />
+                <input type="text"  name="sort" id="pinyin"  class="form-control" value="{$data.sort}"  />
             </div>
         </div>
 
